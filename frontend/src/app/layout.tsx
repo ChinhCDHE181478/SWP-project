@@ -4,6 +4,7 @@ import "./globals.css";
 import { NextProviders } from "./NextProvider";
 import SWRProvider from "@/components/SWRProvider";
 import { Toaster } from "@/components/ui/toaster";
+import AuthProvider from "./AuthProvider";
 
 const be = Be_Vietnam_Pro({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -21,8 +22,10 @@ export default function RootLayout({
       <body className={`${be.className} antialiased`}>
       <NextProviders>
           <SWRProvider>
+            <AuthProvider>
               <main>{children}</main>
               <Toaster />
+            </AuthProvider>
           </SWRProvider>
         </NextProviders>
       </body>
