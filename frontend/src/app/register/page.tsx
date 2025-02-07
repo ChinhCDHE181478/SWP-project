@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import LoginForm from "@/components/LoginForm";
 import LogoIcon from "@/components/LogoIcon";
 import {
   Card,
@@ -9,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
+import RegisterForm from '../../components/RegisterForm';
 
 export const metadata: Metadata = {
   title: "Register",
@@ -26,7 +26,7 @@ const RegisterPage = () => {
             <CardTitle className="font-bold text-3xl">Đăng ký</CardTitle>
           </CardHeader>
           <CardContent>
-            <LoginForm />
+            <RegisterForm/>
           </CardContent>
           <CardFooter className="justify-center">
             <p>

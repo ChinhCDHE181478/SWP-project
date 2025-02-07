@@ -6,7 +6,7 @@ interface LogoIconProps {
 }
 
 const LogoIcon: React.FC<LogoIconProps> = ({ className }) => (
-  <Link href={"/home"}>
+  <Link href={"/"}>
     <Image
       src="/logo.png"
       alt="Logo"

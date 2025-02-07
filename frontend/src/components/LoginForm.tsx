@@ -65,7 +65,7 @@ const LoginForm = () => {
                   type="text"
                   placeholder="username"
                   autoComplete="username"
-                  errorMessage={error?.message}
+                  errorMessage={<span className="text-red-500">{error?.message}</span>}
                   isInvalid={!!error?.message}
                   radius="sm"
                   className={`p-2 border ${
@@ -91,7 +91,7 @@ const LoginForm = () => {
                   type="password"
                   placeholder="password"
                   autoComplete="password"
-                  errorMessage={error?.message}
+                  errorMessage={<span className="text-red-500">{error?.message}</span>}
                   isInvalid={!!error?.message}
                   radius="sm"
                   className={`p-2 border ${
@@ -109,17 +109,18 @@ const LoginForm = () => {
               color="primary"
               onChange={() => setRememberMe(!rememberMe)}
               className="mt-5"
-            >
-            </Checkbox>
+            ></Checkbox>
             <label htmlFor="Remember me">Ghi nhớ</label>
           </div>
           <span>
-            <Link className="text-blue-500" href={"/forgot"}>Quên mật khẩu</Link>
+            <Link className="text-blue-500" href={"/forgot"}>
+              Quên mật khẩu
+            </Link>
           </span>
         </div>
         <div className="flex justify-center w-full">
           {formError && (
-            <p className="text-pink-700 mb-2 text-center">{formError}</p>
+            <p className="text-red-500 mb-2 text-center">{formError}</p>
           )}
         </div>
         <Button
