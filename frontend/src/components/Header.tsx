@@ -8,7 +8,7 @@ const Header = () => {
         className="h-[120px] px-96 flex justify-between shadow-lg border-spacing-1"
         style={{ backgroundColor: "#F8AD2D" }}
       ></div>
-      <div className="absolute left-1/2 w-[57.14%] transform -translate-x-1/2">
+      <div className="absolute left-1/2 w-[57.14%] transform -translate-x-1/2 z-[9999]">
         <div className="flex justify-between">
           <LogoIcon/>
           <div className="nav-link-top mt-10 mr-5">
