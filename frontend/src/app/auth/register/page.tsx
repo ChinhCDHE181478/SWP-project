@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import RegisterForm from '../../components/RegisterForm';
+import RegisterForm from "@/components/RegisterForm";
 
 export const metadata: Metadata = {
   title: "Register",
@@ -32,7 +32,7 @@ const RegisterPage = () => {
             <p>
               Bạn đã có tài khoản?{" "}
               <span>
-                <Link className="text-blue-500" href={"/login"}>Đăng nhập ngay</Link>
+                <Link className="text-blue-500" href={"/auth/login"}>Đăng nhập ngay</Link>
               </span>
             </p>
           </CardFooter>

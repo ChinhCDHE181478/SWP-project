@@ -32,7 +32,7 @@ const LoginPage = () => {
             <p>
               Bạn chưa có tài khoản?{" "}
               <span>
-                <Link className="text-blue-500" href={"/register"}>Đăng ký ngay</Link>
+                <Link className="text-blue-500" href={"/auth/register"}>Đăng ký ngay</Link>
               </span>
             </p>
           </CardFooter>
