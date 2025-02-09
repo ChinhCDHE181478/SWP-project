@@ -1,6 +1,6 @@
 "use client";
 import { LOGIN } from "@/helper/urlPath";
-import { getToken } from "@/lib/actions/getToken";
+import { getRefreshToken } from "@/lib/actions/getRefreshToken";
 import { storeToken } from "@/lib/actions/storeToken";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -39,8 +39,8 @@ const AuthProvider: React.FC<IAuthProviderProps> = ({ children }) => {
   const router = useRouter();
 
   const checkAuthStatus = useCallback(async () => {
-    const { token } = await getToken();
-    if (token === undefined) {
+    const { refreshToken } = await getRefreshToken();
+    if (refreshToken === undefined) {
       setIsAuthenticated(false);
     } else {
       setIsAuthenticated(true);
@@ -81,7 +81,7 @@ const AuthProvider: React.FC<IAuthProviderProps> = ({ children }) => {
     });
     if (!res.ok) {
       setIsAuthenticated(false);
-      router.push("/login");
+      router.push("/auth/login");
     }
     setIsAuthenticated(false);
     router.replace("/");
