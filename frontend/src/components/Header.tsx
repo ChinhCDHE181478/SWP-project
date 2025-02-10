@@ -45,9 +45,16 @@ const Header = () => {
             )}
           </div>
         </div>
-        <div className="flex justify-center pt-2 nav-link-top top-[120px] h-[40px] bg-slate-50 text-black p-4 shadow-lg z-50 rounded-lg border-spacing-1 border-gray-300">
-          <Link href={"/"}>Link 1</Link>
-          <Link href={"/"}>Link 2</Link>
+        <div className="flex justify-center gap-10 pt-2 top-[120px] h-[40px] bg-slate-50 text-black p-4 shadow-lg z-50 rounded-lg border-spacing-1 border-gray-300 z-[9999]">
+          {!isLoading && isAuthenticated &&  (
+            <>
+              <Link href={"/"}>Học sinh</Link>
+            </>
+          )}
+          <Link href={"/"}>Hướng dẫn thi</Link>
+          <Link href={"/"}>Kết quả thi</Link>
+          <Link href={"/about-us"}>Về EduTest</Link>
+          <Link href={"/"}>Tin tức & Sự kiện</Link>
         </div>
       </div>
     </>
