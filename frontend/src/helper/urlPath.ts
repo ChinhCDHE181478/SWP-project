@@ -1,7 +1,7 @@
 export const LOGIN = "/auth/login";
-export const REFRESH = "/identity/auth/refresh";
-export const REGISTER = "/identity/auth/register";
-export const LOGOUT = "/identity/auth/logout";
-export const VERIFY_TOKEN = "/identity/auth/verify_token";
+export const REFRESH = "/auth/refresh";
+export const REGISTER = "/auth/register";
+export const LOGOUT = "/auth/logout";
+export const VERIFY_TOKEN = "/auth/verify_token";
 
 

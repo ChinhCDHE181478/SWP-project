@@ -58,6 +58,8 @@ public class AuthService implements IAuthService {
 
     @Override
     public void logout(LogoutRequest request) {
-
+        if (!refreshTokenService.isValidRefreshToken(request.refreshToken()))
+            throw new ServiceException(ErrorCode.INVALID_REFRESH_TOKEN);
+        refreshTokenService.deleteToken(request.refreshToken());
     }
 }
