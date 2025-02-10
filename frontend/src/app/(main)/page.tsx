@@ -5,9 +5,9 @@ import Course from '@/components/duclm/Course';
 const Main = () => {
   return (
     <div>
-        <HomeInformation />
-        <News />
-        <Course />
+      <HomeInformation />
+      <News />
+      <Course />
     </div>
   );
 }

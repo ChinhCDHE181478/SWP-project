@@ -1,7 +1,6 @@
 import React from "react";
 
 const Course: React.FC = () => {
-  // Data for the course packages with the added "link" field
   const courseData = [
     {
       title: "FREE COURSE",
@@ -10,7 +9,7 @@ const Course: React.FC = () => {
         "Tham gia 5 vòng thi đầu tiên",
         "Truy cập một phần kỳ thi",
       ],
-      link: "#", // Added link
+      link: "#",
     },
     {
       title: "FULL COURSE",
@@ -20,7 +19,7 @@ const Course: React.FC = () => {
         "Thi thử 3 lần",
         "Ôn luyện và đánh giá hiệu quả toàn diện",
       ],
-      link: "#", // Added link
+      link: "#",
     },
     {
       title: "COMBO COURSE",
@@ -30,19 +29,20 @@ const Course: React.FC = () => {
         "Thi thử không giới hạn số lần",
         "Tối ưu hóa lộ trình học tập và thi",
       ],
-      link: "#", // Added link
+      link: "#",
     },
   ];
 
   return (
     <div className="w-full py-8 bg-[#F5BA3A]">
-      <h2 className="text-center font-bold text-2xl mb-8 text-white">CÁC KHÓA HỌC EDUTEST</h2>
-      <div className="flex justify-center mt-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
+      <div className="max-w-screen-xl mx-auto px-4">
+        <h2 className="text-center font-bold text-2xl mb-8 text-white">CÁC KHÓA HỌC EDUTEST</h2>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 ">
           {courseData.map((course, index) => (
             <div
               key={index}
-              className="bg-black bg-opacity-60 p-6 rounded-lg shadow-md w-full h-full mx-auto flex flex-col justify-between backdrop-blur-lg"
+              className="bg-black bg-opacity-60 p-6 rounded-lg shadow-md w-full h-full flex flex-col justify-between backdrop-blur-lg"
             >
               {/* Title Row */}
               <div className="flex justify-center mb-2">
@@ -69,7 +69,7 @@ const Course: React.FC = () => {
               {/* Button Row */}
               <div className="flex justify-center">
                 <a
-                  href={course.link} // Use the link from courseData
+                  href={course.link}
                   className="w-full mt-4 py-2 bg-white text-orange-600 rounded-full hover:bg-orange-600 hover:text-white transition-all duration-300 text-center"
                 >
                   MUA GÓI NGAY
