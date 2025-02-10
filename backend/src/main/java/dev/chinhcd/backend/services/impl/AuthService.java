@@ -13,6 +13,7 @@ import dev.chinhcd.backend.repository.IUserRepository;
 import dev.chinhcd.backend.services.IAuthService;
 import dev.chinhcd.backend.services.IJwtService;
 import dev.chinhcd.backend.services.IRefreshTokenService;
+import dev.chinhcd.backend.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,10 +26,11 @@ public class AuthService implements IAuthService {
     private final PasswordEncoder passwordEncoder;
     private final IJwtService jwtService;
     private final IRefreshTokenService refreshTokenService;
+    private final IUserService userService;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
-        return null;
+        return  userService.createRegisterUser(request);
     }
 
     @Override
@@ -48,12 +50,25 @@ public class AuthService implements IAuthService {
 
     @Override
     public RefreshTokenResponse refreshToken(RefreshTokenRequest request) {
-        return null;
+        if (!refreshTokenService.isValidRefreshToken(request.refreshToken()))
+            throw new ServiceException(ErrorCode.INVALID_REFRESH_TOKEN);
+        var username = refreshTokenService.extractUserName(request.refreshToken());
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
+        String accessToken = jwtService.generateAccessToken(user);
+        return new RefreshTokenResponse(accessToken, request.refreshToken());
     }
 
     @Override
     public boolean verifyToken(String token) {
-        return false;
+        try {
+            String username = jwtService.extractUserName(token);
+            var user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
+            return jwtService.isValidAcessToken(token, user);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
