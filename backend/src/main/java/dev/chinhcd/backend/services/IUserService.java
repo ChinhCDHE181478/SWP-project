@@ -6,7 +6,7 @@ import dev.chinhcd.backend.dtos.response.*;
 import java.util.List;
 
 public interface IUserService {
-    RegisterResponse createUser(RegisterRequest request);
+    RegisterResponse createRegisterUser(RegisterRequest request);
 
     List<UserResponse> getAllUsers();
 

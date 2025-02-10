@@ -81,7 +81,7 @@ const AuthProvider: React.FC<IAuthProviderProps> = ({ children }) => {
     });
     if (!res.ok) {
       setIsAuthenticated(false);
-      router.push("/auth/login");
+      router.push("/");
     }
     setIsAuthenticated(false);
     router.replace("/");

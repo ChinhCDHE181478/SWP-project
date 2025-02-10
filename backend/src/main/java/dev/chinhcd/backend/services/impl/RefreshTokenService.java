@@ -45,7 +45,7 @@ public class RefreshTokenService implements IRefreshTokenService {
         var jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .issuer("flexnet.com")
+                .issuer("caodoanhchinh")
                 .subject(user.getUsername())
                 .issueTime(new Date())
                 .jwtID(UUID.randomUUID().toString())

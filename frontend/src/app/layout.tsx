@@ -1,4 +1,3 @@
-
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import { NextProviders } from "./NextProvider";
@@ -20,10 +19,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${be.className} antialiased`}>
-      <NextProviders>
+        <NextProviders>
           <SWRProvider>
             <AuthProvider>
-              <main>{children}</main>
+              <main className="w-full">
+                <div>{children}</div>
+              </main>
               <Toaster />
             </AuthProvider>
           </SWRProvider>
