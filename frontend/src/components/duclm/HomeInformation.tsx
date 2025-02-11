@@ -6,6 +6,7 @@ import Chatbot from "./ChatBox";
 const HomeInformation: React.FC = () => {
   const images = ["/home/banner.avif"];
   const [maxLevel, setMaxLevel] = useState<number | null>(null);
+  
 
   useEffect(() => {
     fetch("http://localhost:8080/api/v1/exams/max-level")
