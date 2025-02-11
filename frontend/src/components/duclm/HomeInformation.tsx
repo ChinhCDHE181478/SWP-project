@@ -47,29 +47,20 @@ const HomeInformation: React.FC = () => {
             </div>
             
             {/* Button với hiệu ứng hover */}
-            <div className="flex flex-col space-y-4 w-full max-w-[250px]">
-              <a 
-                href="/practice" 
-                className="relative bg-black bg-opacity-50 text-white font-bold py-2 px-4 text-center shadow-md border-l-4 border-pink-500 overflow-hidden group"
-              >
-                <span className="absolute inset-0 bg-orange-400 opacity-0 group-hover:opacity-50 transition-all duration-300 ease-in-out translate-x-[-100%] group-hover:translate-x-0"></span>
-                <span className="relative">Vào tự luyện ngay</span>
+             {/* Buttons */}
+             <div className="flex flex-col space-y-4 w-full max-w-[200px]">
+              <a href="#" className="bg-black bg-opacity-50 text-white font-bold py-2 px-4 text-center shadow-md border-l-4 border-pink-500 relative overflow-hidden group">
+                <span className="relative z-10">Vào tự luyện ngay</span>
+                <span className="absolute inset-0 bg-[#f1a839] transform -translate-x-full group-hover:translate-x-0 transition-all duration-500"></span>
               </a>
-              
-              <a 
-                href="/exam-schedule" 
-                className="relative bg-black bg-opacity-50 text-white font-bold py-2 px-4 text-center shadow-md border-l-4 border-pink-500 overflow-hidden group"
-              >
-                <span className="absolute inset-0 bg-orange-400 opacity-0 group-hover:opacity-50 transition-all duration-300 ease-in-out translate-x-[-100%] group-hover:translate-x-0"></span>
-                <span className="relative">Lịch thi EduTest</span>
+              <a href="#" className="bg-black bg-opacity-50 text-white font-bold py-2 px-4 text-center shadow-md border-l-4 border-pink-500 relative overflow-hidden group">
+                <span className="relative z-10">Lịch thi EduTest</span>
+                <span className="absolute inset-0 bg-[#f1a839] transform -translate-x-full group-hover:translate-x-0 transition-all duration-500"></span>
               </a>
-              
-              <a 
-                href="/news" 
-                className="relative bg-black bg-opacity-50 text-white font-bold py-2 px-4 text-center shadow-md border-l-4 border-pink-500 overflow-hidden group"
-              >
-                <span className="absolute inset-0 bg-orange-400 opacity-0 group-hover:opacity-50 transition-all duration-300 ease-in-out translate-x-[-100%] group-hover:translate-x-0"></span>
-                <span className="relative">Sự kiện</span>
+              <a href="#" className="bg-black bg-opacity-50 text-white font-bold py-2 px-4 text-center shadow-md flex items-center justify-center border-l-4 border-pink-500 relative overflow-hidden group">
+                <span className="relative z-10">Sự kiện</span>
+                <span className="ml-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="absolute inset-0 bg-[#f1a839] transform -translate-x-full group-hover:translate-x-0 transition-all duration-500"></span>
               </a>
             </div>
           </div>
