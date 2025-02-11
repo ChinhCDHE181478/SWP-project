@@ -29,7 +29,7 @@ const LoginForm = () => {
       });
       toast({
         title: "Đăng nhập thành công!",
-        className: "text-green-500 bg-neutral-800",
+        className: "text-white bg-green-500",
       });
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
