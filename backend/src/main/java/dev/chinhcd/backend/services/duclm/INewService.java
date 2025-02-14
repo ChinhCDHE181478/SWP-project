@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface INewService {
     List<New> getThreeNews();
+
+    List<New> getAllNews();
 }

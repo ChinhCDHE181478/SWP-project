@@ -46,7 +46,7 @@ const Header = () => {
           </div>
         </div>
         <div className="flex justify-center gap-10 pt-2 top-[120px] h-[40px] bg-slate-50 text-black p-4 shadow-lg z-50 rounded-lg border-spacing-1 border-gray-300 z-[9999]">
-          {!isLoading && isAuthenticated &&  (
+          {!isLoading && isAuthenticated && (
             <>
               <Link href={"/"}>Học sinh</Link>
             </>

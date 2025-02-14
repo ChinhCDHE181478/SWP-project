@@ -6,6 +6,18 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* for link under tiltle page */
+.custom-links a:not(:last-child)::after {
+  content: '/'; 
+  color: #000000; 
+  margin: 0 8px; 
+  font-size: small;
+}
+
+.custom-links a:hover {
+  color: #ff771c;
+}
+
 .nav-link-top a:not(:last-child)::after {
   content: "|";
   color: black;
