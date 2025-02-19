@@ -11,12 +11,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useAuth } from "@/app/AuthProvider";
 import { useToast } from "./ui/use-toast";
+import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 const LoginForm = () => {
   const { login } = useAuth();
   const { toast } = useToast();
   const [formError, setFormError] = useState<string>("");
   const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const router = useRouter();
+
+  const routes: Record<string, string> = {
+    USER: "/",
+    ADMIN: "/controller/admin",
+    QUIZ_MANAGER: "/controller/quiz-manager",
+    SUPPORT_MANAGER: "/controller/support-manager",
+    CONTENT_MANAGER: "/controller/content-manager",
+  };
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     setFormError("");
@@ -27,6 +39,30 @@ const LoginForm = () => {
         password: data.password,
         rememberMe: rememberMe,
       });
+
+      const { data: isNewUser } = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/user/is-new-user`,
+        {
+          params: { username: data.username }, 
+          headers: { 
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+
+      const res = await fetch("/api/auth/token");
+      const { accessToken } = await res.json();
+      const decoded = jwtDecode<{ scope?: string }>(accessToken);
+      const scope = decoded?.scope;
+      if (isNewUser === true && scope === "USER") {
+        router.push("/update-profile");
+        return toast({
+          title: "Đăng nhập thành công!",
+          className: "text-white bg-green-500",
+        });
+      }
+      router.push(routes[scope ?? ""] || "/");
       toast({
         title: "Đăng nhập thành công!",
         className: "text-white bg-green-500",
@@ -65,7 +101,9 @@ const LoginForm = () => {
                   type="text"
                   placeholder="username"
                   autoComplete="username"
-                  errorMessage={<span className="text-red-500">{error?.message}</span>}
+                  errorMessage={
+                    <span className="text-red-500">{error?.message}</span>
+                  }
                   isInvalid={!!error?.message}
                   radius="sm"
                   className={`p-2 border ${
@@ -91,7 +129,9 @@ const LoginForm = () => {
                   type="password"
                   placeholder="password"
                   autoComplete="password"
-                  errorMessage={<span className="text-red-500">{error?.message}</span>}
+                  errorMessage={
+                    <span className="text-red-500">{error?.message}</span>
+                  }
                   isInvalid={!!error?.message}
                   radius="sm"
                   className={`p-2 border ${
@@ -108,7 +148,7 @@ const LoginForm = () => {
             <Checkbox
               color="primary"
               onChange={() => setRememberMe(!rememberMe)}
-              className="mt-5"
+              className=""
             ></Checkbox>
             <label htmlFor="Remember me">Ghi nhớ</label>
           </div>

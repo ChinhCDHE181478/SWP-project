@@ -32,7 +32,7 @@ const HomeInformation: React.FC = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30 backdrop-blur-md"></div>
 
         {/* Giới hạn nội dung */}
-        <div className="relative z-10 flex flex-col lg:flex-row gap-8 px-8 lg:px-16 py-8 max-w-screen-xl mx-auto">
+        <div className="relative z-10 flex flex-col lg:flex-row gap-8 px-8 lg:px-16 py-8 max-w-[1270px] mx-auto">
           {/* Cột 1: Tiêu đề và Button */}
           <div className="flex flex-col justify-start items-center lg:items-start space-y-4 mt-[20px] w-full lg:w-1/3">
             <div className="bg-black bg-opacity-50 p-4 text-left text-white border-l-4 border-yellow-500 pl-5">

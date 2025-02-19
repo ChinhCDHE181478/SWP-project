@@ -4,4 +4,6 @@ export const REGISTER = "/auth/register";
 export const LOGOUT = "/auth/logout";
 export const VERIFY_TOKEN = "/auth/verify";
 
+export const UPDATE_PROFILE = "/user/update";
+
 

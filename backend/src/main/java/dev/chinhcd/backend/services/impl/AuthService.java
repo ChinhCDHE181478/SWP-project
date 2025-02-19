@@ -38,6 +38,8 @@ public class AuthService implements IAuthService {
         var user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
 
+        boolean isNewUser = user.getName() == null || user.getName().isBlank();
+
         boolean isAuthenticated = passwordEncoder.matches(request.password(), user.getPassword());
         if(!isAuthenticated)
             throw new BadCredentialsException("Wrong username or password");
@@ -45,7 +47,7 @@ public class AuthService implements IAuthService {
         var accessToken = jwtService.generateAccessToken(user);
         var refreshToken = refreshTokenService.generateRefreshToken(user);
         refreshTokenService.saveRefreshToken(user, refreshToken, request.rememberMe());
-        return new LoginResponse(accessToken, refreshToken);
+        return new LoginResponse(accessToken, refreshToken, isNewUser);
     }
 
     @Override
