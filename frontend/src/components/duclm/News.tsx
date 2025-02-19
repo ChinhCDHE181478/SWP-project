@@ -70,7 +70,7 @@ const News: React.FC = () => {
             events.map((item) => (
               <a
                 key={item.id}
-                href={`/news/latest/${item.id}`}
+                href={`/news/${item.id}`}
                 className="block border-b-2 border-gray-200 py-4 mb-4 hover:bg-gray-100"
               >
                 <div className="text-sm text-blue-500">
@@ -97,7 +97,7 @@ const News: React.FC = () => {
             tips.map((item) => (
               <a
                 key={item.id}
-                href={`/tips/latest/${item.id}`}
+                href={`/tips/${item.id}`}
                 className="block border-b-2 border-gray-200 py-4 mb-4 hover:bg-gray-100"
               >
                 <div className="text-sm text-blue-500">
