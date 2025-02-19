@@ -4,6 +4,13 @@ import LogoIcon from "@/components/LogoIcon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaUser } from "react-icons/fa";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import ArrowDownIcon from "./ArrowDownIcon";
 
 const Header = () => {
   const { isLoading, isAuthenticated, logout } = useAuth();
@@ -15,7 +22,7 @@ const Header = () => {
         className="h-[120px] px-96 flex justify-between shadow-lg border-spacing-1"
         style={{ backgroundColor: "#F8AD2D" }}
       ></div>
-      <div className="absolute left-1/2 w-[57.14%] transform -translate-x-1/2 z-[9999]">
+      <div className="absolute left-1/2 min-w-[1000px] transform -translate-x-1/2 z-[9999]">
         <div className="flex justify-between">
           <LogoIcon />
           <div className="flex nav-link-top mt-10 mr-5">
@@ -46,7 +53,7 @@ const Header = () => {
           </div>
         </div>
         <div className="flex justify-center gap-10 pt-2 top-[120px] h-[40px] bg-slate-50 text-black p-4 shadow-lg z-50 rounded-lg border-spacing-1 border-gray-300 z-[9999]">
-          {!isLoading && isAuthenticated &&  (
+          {!isLoading && isAuthenticated && (
             <>
               <Link href={"/"}>Học sinh</Link>
             </>
@@ -54,7 +61,14 @@ const Header = () => {
           <Link href={"/"}>Hướng dẫn thi</Link>
           <Link href={"/"}>Kết quả thi</Link>
           <Link href={"/about-us"}>Về EduTest</Link>
-          <Link href={"/"}>Tin tức & Sự kiện</Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="pt-2 flex flex-row items-center">Tin tức & Sự kiện <ArrowDownIcon/></DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-white pt-5">
+              <DropdownMenuItem><Link href={"/news"}>Tin từ ban tổ chức</Link></DropdownMenuItem>
+              <DropdownMenuItem><Link href={"/news"}>Sự kiện</Link></DropdownMenuItem>
+              <DropdownMenuItem><Link href={"/news"}>Lịch thi</Link></DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </>

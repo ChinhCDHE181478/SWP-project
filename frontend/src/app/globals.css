@@ -6,11 +6,30 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* for header */
 .nav-link-top a:not(:last-child)::after {
   content: "|";
   color: black;
   margin-left: 10px;
   margin-right: 10px;
+}
+
+/* for link under tiltle page */
+.custom-links a:not(:last-child)::after {
+  content: '/'; 
+  color: #000000; 
+  margin: 0 8px; 
+  font-size: small;
+}
+
+.custom-links a:hover {
+  color: #ff771c;
+}
+
+/* custom svg card of select form */
+.select-form svg{
+  position: absolute;
+  right: 10px;
 }
 
 @layer utilities {

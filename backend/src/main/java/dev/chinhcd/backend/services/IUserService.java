@@ -11,4 +11,10 @@ public interface IUserService {
     List<UserResponse> getAllUsers();
 
     UserResponse getUserById(Long id);
+
+    UserResponse getMe();
+
+    UserResponse updateUser(UpdateUserRequest request);
+
+    Boolean isNewUser(String username);
 }

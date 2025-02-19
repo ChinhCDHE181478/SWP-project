@@ -22,10 +22,10 @@ export default function RootLayout({
         <NextProviders>
           <SWRProvider>
             <AuthProvider>
-              <main className="w-full">
-                <div>{children}</div>
-              </main>
-              <Toaster />
+                <main className="w-full">
+                  <div>{children}</div>
+                </main>
+                <Toaster />
             </AuthProvider>
           </SWRProvider>
         </NextProviders>
