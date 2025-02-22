@@ -9,7 +9,7 @@ const HomeInformation: React.FC = () => {
   
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/exams/max-level")
+    fetch("http://localhost:8080/api/v1/practice/max-level")
       .then((response) => response.json())
       .then((data) => {
         setMaxLevel(data);
@@ -49,7 +49,7 @@ const HomeInformation: React.FC = () => {
             {/* Button với hiệu ứng hover */}
              {/* Buttons */}
              <div className="flex flex-col space-y-4 w-full max-w-[200px]">
-              <a href="#" className="bg-black bg-opacity-50 text-white font-bold py-2 px-4 text-center shadow-md border-l-4 border-pink-500 relative overflow-hidden group">
+              <a href="/practice" className="bg-black bg-opacity-50 text-white font-bold py-2 px-4 text-center shadow-md border-l-4 border-pink-500 relative overflow-hidden group">
                 <span className="relative z-10">Vào tự luyện ngay</span>
                 <span className="absolute inset-0 bg-[#f1a839] transform -translate-x-full group-hover:translate-x-0 transition-all duration-500"></span>
               </a>

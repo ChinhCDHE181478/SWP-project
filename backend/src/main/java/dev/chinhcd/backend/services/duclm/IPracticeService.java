@@ -1,5 +1,5 @@
 package dev.chinhcd.backend.services.duclm;
 
-public interface IExamService {
+public interface IPracticeService {
     Integer getMaxLevel();
 }

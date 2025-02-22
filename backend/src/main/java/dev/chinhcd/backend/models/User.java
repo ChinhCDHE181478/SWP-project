@@ -61,4 +61,5 @@ public class User  {
 
     @OneToMany(mappedBy = "user")
     private List<RefreshToken> refreshToken;
+
 }

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface ITipRespository extends JpaRepository<New, Long> {
+public interface ITipRepository extends JpaRepository<New, Long> {
 
     @Query("SELECT n FROM Tip n ORDER BY n.id DESC LIMIT 3")
     List<Tip> findThreeTips();

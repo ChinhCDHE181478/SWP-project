@@ -34,6 +34,7 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/refresh",
     "/api/auth/token",
     "api/chat",
+    "/practice"
   ],
   ADMIN: [
     "/controller/admin",
