@@ -8,22 +8,12 @@ const SideBarProfile = ({ user, setContent }: any) => {
       <div>
         <LogoIcon />
       </div>
-      <div className="text-xl font-bold">
-        {user.data?.name}
-      </div>
+      <div className="text-xl font-bold">{user.data?.name}</div>
       <div>Tài khoản: {user.data?.username}</div>
-      <div>Lớp: {user.data?.grade}</div>
+      <div>Khối: {user.data?.grade}</div>
 
       <div className="mt-10">
         <ToggleGroup className="flex flex-col w-52 items-start" type="single">
-          <ToggleGroupItem
-            onClick={() => setContent("CommonInfo")}
-            value="CommonInfo"
-            aria-label="CommonInfo"
-            className="group px-2 rounded transition-all duration-200 hover:bg-gray-100"
-          >
-            Thông tin chung
-          </ToggleGroupItem>
           <ToggleGroupItem
             onClick={() => setContent("UserInfo")}
             value="UserInfo"

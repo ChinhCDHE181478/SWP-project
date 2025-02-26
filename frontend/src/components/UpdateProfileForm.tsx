@@ -13,6 +13,7 @@ import useCurrentUser from "@/hooks/useCurrentUser";
 import { Button, Input } from "@nextui-org/react";
 import { Select, SelectItem } from "@nextui-org/react";
 import "react-datepicker/dist/react-datepicker.css";
+import { normalizeName } from "@/helper/CommonUtils";
 
 type Pair = {
   code: string;
@@ -59,7 +60,7 @@ const UpdateProfileForm = () => {
         `${process.env.NEXT_PUBLIC_API_URL}${UPDATE_PROFILE}`,
         {
           id: user.data?.id,
-          name: data.name,
+          name: normalizeName(data.name),
           gender: data.gender,
           grade: data.grade,
           province: data.province,
@@ -124,11 +125,6 @@ const UpdateProfileForm = () => {
       );
       const data = await res.json();
       setDistricts(data.districts);
-      const res2 = await fetch(
-        `https://provinces.open-api.vn/api/d/${districts[0].code}?depth=2`
-      );
-      const data2 = await res2.json();
-      setWards(data2.wards);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu quận huyện:", error);
     }

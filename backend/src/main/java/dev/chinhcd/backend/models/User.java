@@ -4,12 +4,14 @@ import dev.chinhcd.backend.enums.AccountType;
 import dev.chinhcd.backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.util.List;
 
+@Builder
 @Entity
 @Table(name = "users")
 @Data
@@ -32,7 +34,7 @@ public class User  {
     @Column(nullable = true, name = "birth_date", columnDefinition = "DATE")
     private Date birthDate;
 
-    @Column(nullable = true, columnDefinition = "NVARCHAR(100)")
+    @Column(nullable = true, unique = true, columnDefinition = "NVARCHAR(100)")
     private String email;
 
     @Column(nullable = false)

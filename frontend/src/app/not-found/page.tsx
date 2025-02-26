@@ -1,6 +1,12 @@
 import { IoIosWarning } from "react-icons/io";
 import RouterBackButton from "@/components/RouterBackButton";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Page Not Found",
+};
+
 const AccessDenied = () => {
 
   return (

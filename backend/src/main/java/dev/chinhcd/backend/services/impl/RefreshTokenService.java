@@ -82,6 +82,11 @@ public class RefreshTokenService implements IRefreshTokenService {
         refreshTokenRepository.deleteById(tokenId);
     }
 
+    @Override
+    public void deleteByUserId(Long userId) {
+        refreshTokenRepository.deleteByUserId(userId);
+    }
+
     private JWTClaimsSet extractAllClams(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
