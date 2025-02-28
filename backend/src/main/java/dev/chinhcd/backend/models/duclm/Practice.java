@@ -16,7 +16,13 @@ public class Practice {
     private int practiceId;
 
     @Column
+    private int practiceLevel;
+
+    @Column
     private Date practiceDate;
+
+    @Column
+    private int grade;
 
 
 }

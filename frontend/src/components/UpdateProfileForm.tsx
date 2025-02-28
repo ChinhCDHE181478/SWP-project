@@ -124,11 +124,6 @@ const UpdateProfileForm = () => {
       );
       const data = await res.json();
       setDistricts(data.districts);
-      const res2 = await fetch(
-        `https://provinces.open-api.vn/api/d/${districts[0].code}?depth=2`
-      );
-      const data2 = await res2.json();
-      setWards(data2.wards);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu quận huyện:", error);
     }

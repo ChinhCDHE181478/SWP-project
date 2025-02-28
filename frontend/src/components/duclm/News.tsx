@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 interface NewsItem {
   id: number;
@@ -18,13 +19,13 @@ const News: React.FC = () => {
 
   // Fetch dữ liệu sự kiện
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/news/latest")
+    axios.get("http://localhost:8080/api/v1/articles/news/latest", {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
       .then((res) => {
-        if (!res.ok) throw new Error("Lỗi khi lấy tin tức!");
-        return res.json();
-      })
-      .then((data: NewsItem[]) => {
-        setEvents(data.length > 0 ? data : []);
+        setEvents(res.data.length > 0 ? res.data : []);
         setLoadingEvents(false);
       })
       .catch((err) => {
@@ -36,13 +37,13 @@ const News: React.FC = () => {
 
   // Fetch dữ liệu tips học tiếng Anh
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/tips/latest")
+    axios.get("http://localhost:8080/api/v1/articles/tips/latest", {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
       .then((res) => {
-        if (!res.ok) throw new Error("Lỗi khi lấy tips!");
-        return res.json();
-      })
-      .then((data: NewsItem[]) => {
-        setTips(data.length > 0 ? data : []);
+        setTips(res.data.length > 0 ? res.data : []);
         setLoadingTips(false);
       })
       .catch((err) => {

@@ -4,6 +4,8 @@ import dev.chinhcd.backend.models.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Time;
+
 @Entity
 @Table(name = "user_practice")
 @Data
@@ -21,5 +23,11 @@ public class UserPractice {
     @ManyToOne
     @JoinColumn(name = "practice_id")
     private Practice practice;
+
+    @Column
+    private int totalScore;
+
+    @Column
+    private Time totalTime;
 }
 

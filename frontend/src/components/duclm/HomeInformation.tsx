@@ -1,4 +1,5 @@
 "use client";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Slideshow from "../ui/SlideShow";
 import Chatbot from "./ChatBox";
@@ -7,12 +8,14 @@ const HomeInformation: React.FC = () => {
   const images = ["/home/banner.avif"];
   const [maxLevel, setMaxLevel] = useState<number | null>(null);
   
-
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/practice/max-level")
-      .then((response) => response.json())
-      .then((data) => {
-        setMaxLevel(data);
+    axios.get("http://localhost:8080/api/v1/practice/max-level", {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then((response) => {
+        setMaxLevel(response.data);
       })
       .catch((error) => {
         console.error("Error fetching max level:", error);
@@ -41,14 +44,13 @@ const HomeInformation: React.FC = () => {
               </div>
             </div>
             <div className="bg-black bg-opacity-50 p-4 text-left text-white border-l-4 border-yellow-500 pl-5">
-              <div className="text-3xl lg:text-4xl font-bold mt-2">
+              <div className="text-xl lg:text-2xl font-bold uppercase tracking-wide">
                 TỰ LUYỆN EDUTEST VÒNG {maxLevel !== null ? maxLevel : "..."}
               </div>
             </div>
             
-            {/* Button với hiệu ứng hover */}
-             {/* Buttons */}
-             <div className="flex flex-col space-y-4 w-full max-w-[200px]">
+            {/* Buttons */}
+            <div className="flex flex-col space-y-4 w-full max-w-[200px]">
               <a href="/practice" className="bg-black bg-opacity-50 text-white font-bold py-2 px-4 text-center shadow-md border-l-4 border-pink-500 relative overflow-hidden group">
                 <span className="relative z-10">Vào tự luyện ngay</span>
                 <span className="absolute inset-0 bg-[#f1a839] transform -translate-x-full group-hover:translate-x-0 transition-all duration-500"></span>

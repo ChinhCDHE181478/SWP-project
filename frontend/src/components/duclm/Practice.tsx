@@ -1,4 +1,5 @@
 "use client";
+import axios from "axios";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import React, { useEffect, useState } from "react";
 import { useToast } from "../ui/use-toast";
@@ -46,11 +47,12 @@ const Practice: React.FC = () => {
 
         const fetchCurrentLevel = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/v1/practice/get-practice-info/${user.data?.id}`);
-                if (!response.ok) throw new Error("Lỗi lấy dữ liệu current level");
-
-                const data = await response.json();
-                setCurrentLevel(data);
+                const response = await axios.get(`http://localhost:8080/api/v1/practice/get-practice-info/${user.data?.id}`, {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+                setCurrentLevel(response.data);
             } catch (error) {
                 console.error("Lỗi fetch current level:", error);
             }
@@ -63,10 +65,12 @@ const Practice: React.FC = () => {
     useEffect(() => {
         const fetchMaxLevel = async () => {
             try {
-                const response = await fetch("http://localhost:8080/api/v1/practice/max-level");
-                if (!response.ok) throw new Error("Lỗi khi lấy dữ liệu max level");
-                const data = await response.json();
-                setMaxLevel(data);
+                const response = await axios.get("http://localhost:8080/api/v1/practice/max-level", {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+                setMaxLevel(response.data);
             } catch (error) {
                 console.error("Error fetching max level:", error);
             }
@@ -103,7 +107,7 @@ const Practice: React.FC = () => {
     if (!user.data?.name) return null;
 
     return (
-        <div>
+        <div className="bg-gray-50">
             {/* Header */}
             <div className="bg-slate-200 h-28 w-full flex items-center justify-center">
                 <div className="w-full max-w-7xl px-6">

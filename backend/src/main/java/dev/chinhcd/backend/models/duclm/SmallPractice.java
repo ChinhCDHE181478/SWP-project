@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "small_practice")
@@ -20,7 +19,7 @@ public class SmallPractice {
     @Column(nullable = false)
     private String testName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(100)")
     private Date testDate;
 
     @ManyToOne

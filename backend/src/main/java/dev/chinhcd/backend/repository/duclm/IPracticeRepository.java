@@ -9,6 +9,8 @@ import java.util.Optional;
 
 public interface IPracticeRepository extends JpaRepository<Practice, Long>  {
 
-    @Query("SELECT MAX(e.practiceId) FROM Practice e")
+    @Query("SELECT MAX(e.practiceLevel) FROM Practice e")
     Optional<Integer> findMaxLevel();
+
+    Optional<Practice> findByPracticeLevelAndGrade(int practiceLevel, int grade);
 }

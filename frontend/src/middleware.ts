@@ -15,6 +15,7 @@ const guestPath = [
   "/api/auth/refresh",
   "/api/auth/token",
   "api/chat",
+  "/test"
 ];
 
 // Các route chỉ dành cho khách (người chưa đăng nhập)
@@ -34,7 +35,8 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/refresh",
     "/api/auth/token",
     "api/chat",
-    "/practice"
+    "/practice",
+    "/mockexam"
   ],
   ADMIN: [
     "/controller/admin",
