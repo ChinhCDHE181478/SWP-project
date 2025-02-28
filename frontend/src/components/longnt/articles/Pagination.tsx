@@ -7,7 +7,11 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
   const renderPageButtons = () => {
     let buttons = [];
     let startPage = Math.max(currentPage - 2, 1); // Display 2 pages before current page
@@ -48,7 +52,9 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
         <button
           key={i}
           onClick={() => onPageChange(i)}
-          className={`px-3 py-1 border rounded ${currentPage === i ? "bg-gray-300" : "hover:bg-gray-200"}`}
+          className={`px-3 py-1 border rounded ${
+            currentPage === i ? "bg-gray-300" : "hover:bg-gray-200"
+          }`}
         >
           {i}
         </button>

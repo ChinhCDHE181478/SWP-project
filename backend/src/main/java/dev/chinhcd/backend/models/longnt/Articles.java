@@ -1,5 +1,6 @@
 package dev.chinhcd.backend.models.longnt;
 
+import dev.chinhcd.backend.enums.ArticlesType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,11 +9,11 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name = "news")
+@Table(name = "articles")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class News {
+public class Articles {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,12 +21,18 @@ public class News {
     @Column
     private Date date;
 
-    @Column
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String title;
 
-    @Column
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String content;
 
-    @Column
+    @Column(columnDefinition = "NVARCHAR(MAX)", name = "summary_content")
+    private String summaryContent;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)", name = "image_url")
     private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    private ArticlesType articlesType;
 }

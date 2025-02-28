@@ -1,15 +1,16 @@
 package dev.chinhcd.backend.dtos.response.longnt;
 
-import dev.chinhcd.backend.models.longnt.News;
+import dev.chinhcd.backend.models.longnt.Articles;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
 @Data
 @AllArgsConstructor
-public class PaginatedNewsResponse {
-    private List<News> data;
+public class PaginateArticlesResponse {
+    private List<Articles> articles;
     private int totalPages;
     private long totalItems;
     private int currentPage;
+    private int pageSize;
 }
