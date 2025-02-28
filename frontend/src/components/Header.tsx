@@ -62,11 +62,20 @@ const Header = () => {
           <Link href={"/"}>Kết quả thi</Link>
           <Link href={"/about-us"}>Về EduTest</Link>
           <DropdownMenu>
-            <DropdownMenuTrigger className="pt-2 flex flex-row items-center">Tin tức<ArrowDownIcon/></DropdownMenuTrigger>
+            <DropdownMenuTrigger className="pt-2 flex flex-row items-center">
+              Tin tức
+              <ArrowDownIcon />
+            </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-white pt-5 z-20">
-              <DropdownMenuItem><Link href={"/news"}>Tin từ ban tổ chức</Link></DropdownMenuItem>
-              <DropdownMenuItem><Link href={"/news"}>Sự kiện</Link></DropdownMenuItem>
-              <DropdownMenuItem><Link href={"/news"}>Lịch thi</Link></DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href={"/articles"}>Tin từ ban tổ chức</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href={"/articles?type=tips&page=1"}>English Tips</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href={"/news"}>Lịch thi</Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
