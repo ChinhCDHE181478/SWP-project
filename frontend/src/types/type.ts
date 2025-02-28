@@ -20,3 +20,20 @@ export interface LoginResponse {
   refreshToken: string;
   isNewUser: string;
 }
+
+export interface Articles {
+  id: number;
+  date: string;
+  title: string;
+  content: string;
+  summaryContent: string;
+  imageUrl: string;
+  articlesType: string;
+}
+
+export interface Schedule {
+  id: number;
+  roundName: string;
+  examDate: string;
+}
+

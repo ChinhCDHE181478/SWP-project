@@ -21,3 +21,5 @@ export async function getManager(params: string) {
   const data = await res.data;
   return data as User[];
 }
+
+
