@@ -9,10 +9,9 @@ interface Props {
   type: string; // news hoặc tips
 }
 
-const API_URL = "http://localhost:8080/api/v1/articles/suggestions";
-
 // Hàm lấy dữ liệu gợi ý bài viết theo type
 async function getSuggestedArticles(type: string): Promise<Articles[]> {
+  const API_URL = `http://localhost:8080/api/v1/articles/suggestions`;
   const res = await axios.get(API_URL, {
     headers: { "Content-Type": "application/json" },
     params: { type: type.toUpperCase() },
