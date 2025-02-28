@@ -1,7 +1,7 @@
-package dev.chinhcd.backend.repository.longnt;
+package dev.chinhcd.backend.repository;
 
 import dev.chinhcd.backend.enums.ArticlesType;
-import dev.chinhcd.backend.models.longnt.Articles;
+import dev.chinhcd.backend.models.Articles;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;

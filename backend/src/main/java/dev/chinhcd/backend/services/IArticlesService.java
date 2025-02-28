@@ -1,8 +1,8 @@
-package dev.chinhcd.backend.services.longnt;
+package dev.chinhcd.backend.services;
 
 import dev.chinhcd.backend.dtos.response.longnt.PaginateArticlesResponse;
 import dev.chinhcd.backend.enums.ArticlesType;
-import dev.chinhcd.backend.models.longnt.Articles;
+import dev.chinhcd.backend.models.Articles;
 
 import java.util.List;
 import java.util.Optional;

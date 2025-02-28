@@ -1,4 +1,4 @@
-package dev.chinhcd.backend.models.longnt;
+package dev.chinhcd.backend.models;
 
 import dev.chinhcd.backend.enums.ArticlesType;
 import jakarta.persistence.*;

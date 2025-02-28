@@ -1,9 +1,9 @@
-package dev.chinhcd.backend.controllers.longnt;
+package dev.chinhcd.backend.controllers;
 
 import dev.chinhcd.backend.dtos.response.longnt.PaginateArticlesResponse;
 import dev.chinhcd.backend.enums.ArticlesType;
-import dev.chinhcd.backend.models.longnt.Articles;
-import dev.chinhcd.backend.services.longnt.IArticlesService;
+import dev.chinhcd.backend.models.Articles;
+import dev.chinhcd.backend.services.IArticlesService;
 import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

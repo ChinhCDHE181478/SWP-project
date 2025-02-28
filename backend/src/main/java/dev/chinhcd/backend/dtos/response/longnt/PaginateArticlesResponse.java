@@ -1,6 +1,6 @@
 package dev.chinhcd.backend.dtos.response.longnt;
 
-import dev.chinhcd.backend.models.longnt.Articles;
+import dev.chinhcd.backend.models.Articles;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
