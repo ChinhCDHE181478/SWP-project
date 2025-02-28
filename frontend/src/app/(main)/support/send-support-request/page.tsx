@@ -20,7 +20,7 @@ const SendSupportRequest = () => {
       </div>
       <div className="w-screen flex justify-center items-center">
         <div className="w-[1050px] flex my-10">
-          <div className="w-[70%] bg-slate-200">
+          <div className="w-[70%] bg-slate-200 rounded-sm shadow-sm">
             <SendSupportRequestForm/>
           </div>
           <div className="w-[30%]"></div>

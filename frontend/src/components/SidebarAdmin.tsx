@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/app/AuthProvider";
-import useCurrentUser from "@/hooks/useCurrentUser";
 import { User, FileText, HelpCircle, LifeBuoy, LogOut } from "lucide-react";
 
 const items = [
@@ -28,16 +27,11 @@ const items = [
 ];
 
 export function SidebarAdmin() {
-  const user = useCurrentUser();
   const { logout } = useAuth();
-  const { isLoading } = useAuth();
 
   return (
     <div className="flex flex-col px-5 pt-10">
-      <div className="text-xl px-2">Quản lý tài khoản</div>
-      <div className="mb-10 p-2">
-        {!isLoading && <div>Tài khoản: {user.data?.username}</div>}
-      </div>
+      <div className="mb-10 text-xl px-2">Quản lý tài khoản</div>
       {items.map((item, index) => {
         const Icon = item.icon; // Lấy icon từ item
         return (
