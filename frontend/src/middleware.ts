@@ -8,17 +8,19 @@ const guestPath = [
   "/auth/register",
   "/about-us",
   "/access-denied",
-  "/forgot",
+  "/email-service/forgot",
   "/news",
   "/",
   "/not-found",
   "/api/auth/refresh",
   "/api/auth/token",
-  "api/chat",
+  "/api/chat",
+  "/support",
+  "/support/account-support",
 ];
 
 // Các route chỉ dành cho khách (người chưa đăng nhập)
-const onlyGuestPath = ["/auth/login", "/auth/register", "/forgot"];
+const onlyGuestPath = ["/auth/login", "/auth/register", "/email-service/forgot"];
 
 // Phân quyền theo role
 const rolePaths: Record<string, string[]> = {
@@ -33,19 +35,23 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/logout",
     "/api/auth/refresh",
     "/api/auth/token",
-    "api/chat",
+    "/api/chat",
+    "/email-service/add-email",
+    "/email-service/delete-email",
+    "/support",
+    "/support/account-support",
+    "/support/send-support-request",
   ],
   ADMIN: [
-    "/controller/admin",
+    "/manager/account-manager",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
     "/api/auth/refresh",
-    "/api/auth/token",
-    "/",
+    "/api/auth/token"
   ],
   QUIZ_MANAGER: [
-    "/controller/quiz-manager",
+    "/manager/quiz-manager",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -53,7 +59,7 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
   ],
   SUPPORT_MANAGER: [
-    "/controller/support-manager",
+    "/manager/support-manager",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -61,7 +67,7 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
   ],
   CONTENT_MANAGER: [
-    "/controller/content-manager",
+    "/manager/content-manager",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -126,7 +132,7 @@ export async function middleware(request: NextRequest) {
 
       if (
         !scope ||
-        !rolePaths[scope]?.includes(pathname) // Use 'includes' for exact match
+        !rolePaths[scope]?.includes(pathname) 
       ) {
         return NextResponse.redirect(new URL("/access-denied", request.url));
       }

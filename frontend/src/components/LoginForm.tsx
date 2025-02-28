@@ -24,10 +24,10 @@ const LoginForm = () => {
 
   const routes: Record<string, string> = {
     USER: "/",
-    ADMIN: "/controller/admin",
-    QUIZ_MANAGER: "/controller/quiz-manager",
-    SUPPORT_MANAGER: "/controller/support-manager",
-    CONTENT_MANAGER: "/controller/content-manager",
+    ADMIN: "/manager/account-manager",
+    QUIZ_MANAGER: "/manager/quiz-manager",
+    SUPPORT_MANAGER: "/manager/support-manager",
+    CONTENT_MANAGER: "/manager/content-manager",
   };
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
@@ -50,7 +50,6 @@ const LoginForm = () => {
         }
       );
       
-
       const res = await fetch("/api/auth/token");
       const { accessToken } = await res.json();
       const decoded = jwtDecode<{ scope?: string }>(accessToken);
@@ -153,7 +152,7 @@ const LoginForm = () => {
             <label htmlFor="Remember me">Ghi nhớ</label>
           </div>
           <span>
-            <Link className="text-blue-500" href={"/forgot"}>
+            <Link className="text-blue-500" href={"/email-service/forgot"}>
               Quên mật khẩu
             </Link>
           </span>
