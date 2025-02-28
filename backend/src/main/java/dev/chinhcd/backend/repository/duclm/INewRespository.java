@@ -12,4 +12,8 @@ public interface INewRespository extends JpaRepository<New, Long> {
     @Query("SELECT n FROM New n ORDER BY n.id DESC LIMIT 3")
     List<New> findThreeNews();
 
+
+    @Query("SELECT n FROM New n ORDER BY n.id DESC")
+    List<New> getAllNews();
+
 }

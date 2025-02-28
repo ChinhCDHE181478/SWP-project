@@ -17,10 +17,16 @@ const guestPath = [
   "/api/chat",
   "/support",
   "/support/account-support",
+  "/articles",
+  "/articles/number",
 ];
 
 // Các route chỉ dành cho khách (người chưa đăng nhập)
-const onlyGuestPath = ["/auth/login", "/auth/register", "/email-service/forgot"];
+const onlyGuestPath = [
+  "/auth/login",
+  "/auth/register",
+  "/email-service/forgot",
+];
 
 // Phân quyền theo role
 const rolePaths: Record<string, string[]> = {
@@ -41,6 +47,8 @@ const rolePaths: Record<string, string[]> = {
     "/support",
     "/support/account-support",
     "/support/send-support-request",
+    "/articles",
+    "/articles/number",
   ],
   ADMIN: [
     "/manager/account-manager",
@@ -48,7 +56,7 @@ const rolePaths: Record<string, string[]> = {
     "/not-found",
     "/api/auth/logout",
     "/api/auth/refresh",
-    "/api/auth/token"
+    "/api/auth/token",
   ],
   QUIZ_MANAGER: [
     "/manager/quiz-manager",
@@ -84,42 +92,52 @@ const allPath = [
   ]),
 ];
 
+const normalizeArticlePath = (pathname: string): string => {
+  // Kiểm tra nếu pathname có dạng "/articles/{id}" với {id} là số tự nhiên
+  if (/^\/articles\/\d+$/.test(pathname)) {
+    return "/articles/number";
+  }
+  return pathname; // Giữ nguyên nếu không phải "/articles/{id}"
+};
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/_next/")) {
+  const currentPath = normalizeArticlePath(pathname);
+
+  if (currentPath.startsWith("/_next/")) {
     return NextResponse.next();
   }
 
   if (
-    pathname.match(
+    currentPath.match(
       /\.(png|jpg|jpeg|gif|svg|webp|ico|mp4|mp3|woff2?|ttf|otf|eot)$/
     )
   ) {
     return NextResponse.next();
   }
 
-  if (pathname.match(/^\/(login|home)\/.+/)) {
+  if (currentPath.match(/^\/(login|home)\/.+/)) {
     return NextResponse.next();
   }
 
-  if (!allPath.includes(pathname)) {
+  if (!allPath.includes(currentPath)) {
     return NextResponse.redirect(new URL("/not-found", request.url));
   }
 
   const cookieStore = cookies();
   const refreshToken = (await cookieStore).get("refresh_token")?.value;
   const accessToken = (await cookieStore).get("access_token")?.value;
-  console.log(pathname);
+  console.log(currentPath);
 
   if (!refreshToken) {
-    if (!guestPath.includes(pathname)) {
+    if (!guestPath.includes(currentPath)) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
     return NextResponse.next();
   }
 
-  if (refreshToken && onlyGuestPath.includes(pathname)) {
+  if (refreshToken && onlyGuestPath.includes(currentPath)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
@@ -130,10 +148,7 @@ export async function middleware(request: NextRequest) {
 
       console.log("scope:", scope);
 
-      if (
-        !scope ||
-        !rolePaths[scope]?.includes(pathname) 
-      ) {
+      if (!scope || !rolePaths[scope]?.includes(currentPath)) {
         return NextResponse.redirect(new URL("/access-denied", request.url));
       }
 

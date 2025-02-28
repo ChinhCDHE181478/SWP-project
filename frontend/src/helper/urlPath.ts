@@ -19,3 +19,6 @@ export const ADD_MANAGER = "/user/add-manager";
 export const ADMIN_CHANGE_PASS_USER = "/user/admin-change-pass";
 export const ADMIN_CHANGE_ACCOUNT_TYPE = "/user/change-account-type";
 
+//path cua longnt
+
+
