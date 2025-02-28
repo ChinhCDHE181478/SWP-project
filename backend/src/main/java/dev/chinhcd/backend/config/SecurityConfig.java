@@ -27,13 +27,20 @@ public class SecurityConfig {
     private final JwtDecoder jwtDecoder;
     private final AuthenticationEntryPoint authenticationEntryPoint;
 
-    private static final String[] PUBLIC_ENDPOINTS = {"/auth/register", "/auth/login", "/auth/refresh", "/auth/reset", "auth/verify", "/auth/logout"};
+    private static final String[] PUBLIC_ENDPOINTS = {"/auth/register"
+            , "/auth/refresh", "/auth/login", "/auth/reset", "auth/verify"
+            , "/auth/logout", "/user/update", "/user/is-new-user", "/mail/send"
+            , "/user/add-email", "/user/request-add-email", "/user/request-delete-email"
+            , "/user/delete-email", "/user/change-password", "/user/request-forgot-password"
+            , "/user/reset-password"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request ->
                         request.anyRequest().permitAll()
+//                                .requestMatchers("/private").hasAnyAuthority("USER", "ADMIN")
+//                                .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->

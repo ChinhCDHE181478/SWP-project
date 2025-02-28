@@ -1,24 +1,22 @@
 export interface User {
-  id: number;
+  id?: number;
   username: string;
-  name: string;
-  email: string;
-  password?: string;
+  name?: string;
+  gender?: string;
+  birthDate?: Date;
+  email?: string;
+  password: string;
   role: string;
+  province?: string;
+  district?: string;
+  ward?: string;
+  grade?: number;
+  educationLevel?: string;
+  accountType: string;
 }
 
-export interface Articles {
-  id: number;
-  date: string;
-  title: string;
-  content: string;
-  summaryContent: string;
-  imageUrl: string;
-  articlesType: string;
-}
-
-export interface Schedule {
-  id: number;
-  roundName: string;
-  examDate: string;
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  isNewUser: string;
 }
