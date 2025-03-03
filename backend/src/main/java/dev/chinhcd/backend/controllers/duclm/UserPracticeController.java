@@ -6,7 +6,6 @@ import dev.chinhcd.backend.models.duclm.UserPractice;
 import dev.chinhcd.backend.repository.IUserRepository;
 import dev.chinhcd.backend.repository.duclm.IPracticeRepository;
 import dev.chinhcd.backend.repository.duclm.IUserPracticeRepository;
-import dev.chinhcd.backend.services.duclm.impl.PracticeService;
 import dev.chinhcd.backend.services.duclm.impl.UserPracticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -3,6 +3,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Slideshow from "../ui/SlideShow";
 import Chatbot from "./ChatBox";
+import CountdownTimer from "./CountdownTimer";
 
 const HomeInformation: React.FC = () => {
   const images = ["/home/banner.avif"];
@@ -72,9 +73,9 @@ const HomeInformation: React.FC = () => {
             <Slideshow images={images} autoSlide={true} autoSlideInterval={5000}></Slideshow>
           </div>
 
-          {/* Cột 3: Chatbox */}
+          {/* Cột 3: */}
           <div className="mt-[20px] w-full lg:w-1/3">
-            <Chatbot />
+          <CountdownTimer />
           </div>
         </div>
       </div>

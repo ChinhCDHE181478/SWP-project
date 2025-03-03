@@ -133,6 +133,33 @@ const MockExam: React.FC = () => {
                             </a>
                         </div>
 
+                        {/* Exam Completion Notice */}
+                        <div className="bg-yellow-100 p-4 rounded-lg mb-8">
+                            <h4 className="text-lg font-semibold mb-4">Lưu ý:</h4>
+                            <ul className="list-disc pl-6 space-y-2 text-sm text-gray-700">
+                                <li>Bạn sẽ hoàn thành bài thi thử khi:</li>
+                                <ul className="list-inside list-disc pl-4">
+                                    <li>Trả lời tất cả câu hỏi trong đề thi.</li>
+                                    <li>Hết thời gian làm bài.</li>
+                                    <li>Bấm nút "Submit" để nộp bài.</li>
+                                </ul>
+                            </ul>
+                        </div>
+
+                        {/* Rules on Violations */}
+                        <div className="bg-red-100 p-4 rounded-lg mb-8">
+                            <h4 className="text-lg font-semibold mb-4">Các trường hợp thi sai luật:</h4>
+                            <ul className="list-disc pl-6 space-y-2 text-sm text-gray-700">
+                                <li>Đăng nhập một tài khoản trên hai máy hoặc hai trình duyệt khác nhau và thi cùng một thời điểm.</li>
+                                <li>Đang làm bài thi mà tải lại trang đề thi hoặc thoát ra không nộp bài.</li>
+                                <li>Mở nhiều cửa sổ vào thi một lúc.</li>
+                            </ul>
+                            <p className="text-sm text-gray-700 mt-2">
+                                Các tài khoản vi phạm sẽ bị hệ thống tự động thoát ra ngoài và tính một lần trượt vòng thi (trừ lượt thi và không ghi nhận kết quả).
+                            </p>
+                        </div>
+
+
                         {/* Test Results */}
                         <div className="bg-white p-4 rounded-lg mb-8">
                             <h5 className="text-lg font-semibold mb-4">Kết quả thi mới nhất của bạn</h5>

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Time;
+
 @Entity
 @Table(name = "user_exam")
 @Data
@@ -24,7 +26,7 @@ public class UserExam {
     private Double score;
 
     @Column(name = "total_time")
-    private Integer totalTime;
+    private Time totalTime;
 
     @ManyToOne
     @JoinColumn(name = "exam_id", nullable = false)
