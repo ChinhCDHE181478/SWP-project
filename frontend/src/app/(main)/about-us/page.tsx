@@ -2,12 +2,12 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About us",
+  title: "About Us",
 };
 
 const AboutUsPage = () => {
   return (
-    <div className="w-screen flex flex-col items-center">
+    <div className="w-screen flex flex-col mb-20 items-center">
       <div className="bg-slate-200 h-28 w-[100%] flex flex-col items-center drop-shadow-sm">
         <div className="w-[1050px] mt-10">
           <div className="">
@@ -108,7 +108,7 @@ const AboutUsPage = () => {
           Mọi thông tin liên quan quý vị và các em học sinh liên hệ BTC qua các
           kênh hỗ trợ sau:
         </p>
-        <p>Web hỗ trợ: <a className="text-blue-700 underline" href="https://localhost:3000/">EduTest</a></p>
+        <p>Web hỗ trợ: <a className="text-blue-700 underline" href="http://localhost:3000/support">EduTest</a></p>
         <div>Tổng đài: <span className="font-bold">0123.456.789</span>  (hoạt động: 08h30-21h00 T2-T6)</div>
       </div>
     </div>

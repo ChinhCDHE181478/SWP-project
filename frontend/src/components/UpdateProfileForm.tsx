@@ -6,13 +6,14 @@ import { z } from "zod";
 import { updateProfileSchema } from "@/helper/schema";
 import { useToast } from "./ui/use-toast";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { UPDATE_PROFILE } from "@/helper/urlPath";
 import { useRouter } from "next/navigation";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { Button, Input } from "@nextui-org/react";
 import { Select, SelectItem } from "@nextui-org/react";
 import "react-datepicker/dist/react-datepicker.css";
+import { normalizeName } from "@/helper/CommonUtils";
+import { API } from "@/helper/axios";
 
 type Pair = {
   code: string;
@@ -55,11 +56,11 @@ const UpdateProfileForm = () => {
     setFormError("");
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const response = await axios.put(
+      const response = await API.put(
         `${process.env.NEXT_PUBLIC_API_URL}${UPDATE_PROFILE}`,
         {
           id: user.data?.id,
-          name: data.name,
+          name: normalizeName(data.name),
           gender: data.gender,
           grade: data.grade,
           province: data.province,

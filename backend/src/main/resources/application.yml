@@ -14,6 +14,18 @@ spring:
     hibernate:
       ddl-auto: update
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "${MAIL}"
+    password: "${MAILPASS}"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 server:
   port: 8080
   servlet:
@@ -24,3 +36,10 @@ jwt:
   refreshSignerKey: "${REFRESH_SIGNER_KEY}"
   validTime: 300 #second
   refreshTime: 2628000 #second (1 month)
+<<<<<<< HEAD
+=======
+
+frontend:
+  url: "${FRONTEND_URL}"
+
+>>>>>>> main

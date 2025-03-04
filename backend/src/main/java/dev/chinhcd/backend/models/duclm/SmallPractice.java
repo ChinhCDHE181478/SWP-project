@@ -19,7 +19,11 @@ public class SmallPractice {
     @Column(nullable = false)
     private String testName;
 
+<<<<<<< HEAD
     @Column(nullable = false, columnDefinition = "NVARCHAR(100)")
+=======
+    @Column(nullable = false, columnDefinition = "Date")
+>>>>>>> main
     private Date testDate;
 
     @ManyToOne

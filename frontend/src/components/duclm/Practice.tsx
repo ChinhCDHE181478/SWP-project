@@ -4,13 +4,21 @@ import useCurrentUser from "@/hooks/useCurrentUser";
 import React, { useEffect, useState } from "react";
 import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
+<<<<<<< HEAD
+=======
+import { API } from "@/helper/axios";
+>>>>>>> main
 
 // Định nghĩa kiểu dữ liệu cho các kết quả thi
 interface TestResult {
     testName: string;
     attempts: number;
     score: number;
+<<<<<<< HEAD
     timeSpent: string; // timeSpent sẽ là kiểu string với định dạng HH:mm:ss
+=======
+    timeSpent: string; 
+>>>>>>> main
     status: string;
 }
 
@@ -47,11 +55,15 @@ const Practice: React.FC = () => {
 
         const fetchCurrentLevel = async () => {
             try {
+<<<<<<< HEAD
                 const response = await axios.get(`http://localhost:8080/api/v1/practice/get-practice-info/${user.data?.id}`, {
                     headers: {
                         "Content-Type": "application/json"
                     }
                 });
+=======
+                const response = await API.get(`http://localhost:8080/api/v1/practice/get-practice-info/${user.data?.id}`,);
+>>>>>>> main
                 setCurrentLevel(response.data);
             } catch (error) {
                 console.error("Lỗi fetch current level:", error);
@@ -85,12 +97,21 @@ const Practice: React.FC = () => {
 
         const fetchTestResults = async () => {
             try {
+<<<<<<< HEAD
                 const response = await fetch(
                     `http://localhost:8080/api/v1/test-results/get-test-results/${user.data?.id}/${currentLevel}`
                 );
                 if (!response.ok) throw new Error("Lỗi khi lấy kết quả thi");
 
                 const data = await response.json();
+=======
+                const response = await API.get(
+                    `http://localhost:8080/api/v1/test-results/get-test-results/${user.data?.id}/${currentLevel}`
+                );
+                if (!response) throw new Error("Lỗi khi lấy kết quả thi");
+
+                const data = await response.data;
+>>>>>>> main
                 setTestResults(data);
             } catch (error) {
                 console.error("Error fetching test results:", error);

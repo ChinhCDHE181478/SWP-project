@@ -8,18 +8,28 @@ const guestPath = [
   "/auth/register",
   "/about-us",
   "/access-denied",
-  "/forgot",
-  "/news",
+  "/email-service/forgot",
   "/",
   "/not-found",
   "/api/auth/refresh",
   "/api/auth/token",
+<<<<<<< HEAD
   "api/chat",
   "/test"
+=======
+  "/support",
+  "/support/account-support",
+  "/articles",
+  "/articles/number",
+>>>>>>> main
 ];
 
 // Các route chỉ dành cho khách (người chưa đăng nhập)
-const onlyGuestPath = ["/auth/login", "/auth/register", "/forgot"];
+const onlyGuestPath = [
+  "/auth/login",
+  "/auth/register",
+  "/email-service/forgot",
+];
 
 // Phân quyền theo role
 const rolePaths: Record<string, string[]> = {
@@ -28,28 +38,39 @@ const rolePaths: Record<string, string[]> = {
     "/update-profile",
     "/about-us",
     "/access-denied",
-    "/news",
     "/",
     "/not-found",
     "/api/auth/logout",
     "/api/auth/refresh",
     "/api/auth/token",
+<<<<<<< HEAD
     "api/chat",
     "/practice",
     "/mockexam",
     "/exam"
+=======
+    "/email-service/add-email",
+    "/email-service/delete-email",
+    "/support",
+    "/support/account-support",
+    "/support/send-support-request",
+    "/articles",
+    "/articles/number",
+    "/exam",
+    "/practice",
+    "/mockexam"
+>>>>>>> main
   ],
   ADMIN: [
-    "/controller/admin",
+    "/manager/account-manager",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
     "/api/auth/refresh",
     "/api/auth/token",
-    "/",
   ],
   QUIZ_MANAGER: [
-    "/controller/quiz-manager",
+    "/manager/quiz-manager",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -57,7 +78,7 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
   ],
   SUPPORT_MANAGER: [
-    "/controller/support-manager",
+    "/manager/support-manager",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -65,7 +86,7 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
   ],
   CONTENT_MANAGER: [
-    "/controller/content-manager",
+    "/manager/content-manager",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -82,42 +103,53 @@ const allPath = [
   ]),
 ];
 
+const normalizeArticlePath = (pathname: string): string => {
+  // Kiểm tra nếu pathname có dạng "/articles/{id}" với {id} là số tự nhiên
+  if (/^\/articles\/\d+$/.test(pathname)) {
+    return "/articles/number";
+  }
+  return pathname; // Giữ nguyên nếu không phải "/articles/{id}"
+};
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/_next/")) {
+  const currentPath = normalizeArticlePath(pathname);
+
+  if (currentPath.startsWith("/_next/")) {
     return NextResponse.next();
   }
 
   if (
-    pathname.match(
+    currentPath.match(
       /\.(png|jpg|jpeg|gif|svg|webp|ico|mp4|mp3|woff2?|ttf|otf|eot)$/
     )
   ) {
     return NextResponse.next();
   }
 
-  if (pathname.match(/^\/(login|home)\/.+/)) {
+  if (currentPath.match(/^\/(login|home)\/.+/)) {
     return NextResponse.next();
   }
 
-  if (!allPath.includes(pathname)) {
+  if (!allPath.includes(currentPath)) {
     return NextResponse.redirect(new URL("/not-found", request.url));
   }
 
   const cookieStore = cookies();
   const refreshToken = (await cookieStore).get("refresh_token")?.value;
   const accessToken = (await cookieStore).get("access_token")?.value;
-  console.log(pathname);
+  console.log(currentPath);
+  console.log(refreshToken);
 
   if (!refreshToken) {
-    if (!guestPath.includes(pathname)) {
+    if (!guestPath.includes(currentPath)) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
     return NextResponse.next();
   }
 
-  if (refreshToken && onlyGuestPath.includes(pathname)) {
+  if (refreshToken && onlyGuestPath.includes(currentPath)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
@@ -128,10 +160,7 @@ export async function middleware(request: NextRequest) {
 
       console.log("scope:", scope);
 
-      if (
-        !scope ||
-        !rolePaths[scope]?.includes(pathname) // Use 'includes' for exact match
-      ) {
+      if (!scope || !rolePaths[scope]?.includes(currentPath)) {
         return NextResponse.redirect(new URL("/access-denied", request.url));
       }
 

@@ -27,19 +27,26 @@ public class SecurityConfig {
     private final JwtDecoder jwtDecoder;
     private final AuthenticationEntryPoint authenticationEntryPoint;
 
+<<<<<<< HEAD
     private static final String[] PUBLIC_ENDPOINTS = {"/auth/register"
             , "/auth/refresh", "/auth/login", "/auth/reset", "auth/verify"
             , "/auth/logout", "/user/update", "/user/is-new-user", "/user/me"
             , "/articles/**", "/practice/**", "/test-results/**", "/user-mock-exam/**"
             , "/exam/**", "/user-exam/**"};
+=======
+    public static final String[] PUBLIC_ENDPOINTS = {"/auth/register", "/auth/login", "/auth/refresh", "/auth/reset",
+            "auth/verify", "/auth/logout", "/user/request-forgot-password", "/articles/{id}", "/articles",
+            "/articles/suggestions", "/exam/next", "/practice/max-level"};
+>>>>>>> main
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                                .requestMatchers("/private").hasAnyAuthority("USER", "ADMIN")
-                                .anyRequest().authenticated()
+                        request
+                                .anyRequest().permitAll()
+//                                .requestMatchers("/private").hasAnyAuthority("USER", "ADMIN")
+//                                .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
@@ -56,8 +63,6 @@ public class SecurityConfig {
                     source.registerCorsConfiguration("/**", configuration);
                     httpSecurityCorsConfigurer.configurationSource(source);
                 });
-
-        ;
         return http.build();
     }
 

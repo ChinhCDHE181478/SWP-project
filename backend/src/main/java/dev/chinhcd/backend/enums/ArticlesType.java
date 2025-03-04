@@ -10,4 +10,8 @@ public enum ArticlesType {
         this.articles = articles;
     }
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

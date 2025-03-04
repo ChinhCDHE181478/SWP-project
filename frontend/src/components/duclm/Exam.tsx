@@ -4,6 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+<<<<<<< HEAD
+=======
+import { API } from "@/helper/axios";
+>>>>>>> main
 
 interface ExamData {
     examId: number;
@@ -32,7 +36,15 @@ const Exam: React.FC = () => {
     useEffect(() => {
         async function fetchExamData() {
             try {
+<<<<<<< HEAD
                 const response = await axios.get<ExamData>("http://localhost:8080/api/v1/exam/next");
+=======
+                const response = await axios.get<ExamData>("http://localhost:8080/api/v1/exam/next",
+                    {
+                        headers: { "Content-Type": "application/json" },
+                    }
+                );
+>>>>>>> main
                 setExamData(response.data);
             } catch (error) {
                 console.error("Error fetching exam data:", error);
@@ -47,6 +59,22 @@ const Exam: React.FC = () => {
     useEffect(() => {
         if (isLoading) return;
 
+<<<<<<< HEAD
+=======
+        if (!examData) {
+            toast({
+                title: "Hiện tại không có bài thi nào.",
+                className: "text-white bg-orange-500",
+            });
+    
+            setTimeout(() => {
+                router.push("/");
+            }, 300);
+    
+            return;
+        }
+
+>>>>>>> main
         if (user.data?.accountType === "FREE_COURSE") {
             router.push("/");
             setTimeout(() => {
@@ -89,8 +117,15 @@ const Exam: React.FC = () => {
 
     async function fetchExamResult(userId: string, examName: string) {
         try {
+<<<<<<< HEAD
             const response = await axios.get<ExamResult>(`http://localhost:8080/api/v1/user-exam/get-result/${userId}?examName=${examName}`);
             setExamResult(response.data);
+=======
+            const response = await API.get<ExamResult>(`http://localhost:8080/api/v1/user-exam/get-result/${userId}?examName=${examName}`,
+            );
+            setExamResult(response.data);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+>>>>>>> main
         } catch (error) {
             console.error("No previous exam result found.");
         }
@@ -119,13 +154,25 @@ const Exam: React.FC = () => {
         const url = `http://localhost:8080/api/v1/user-exam/get-users/${limit}?examName=${previousExamName}`;
     
         try {
+<<<<<<< HEAD
             const response = await axios.get(url);
+=======
+            const response = await axios.get(url,
+                {
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
+>>>>>>> main
             const userList = response.data;
     
             console.log("User List: ", userList);
             console.log("Current User ID: ", userId);
     
             // Kiểm tra nếu user không nằm trong danh sách đủ điều kiện
+<<<<<<< HEAD
+=======
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+>>>>>>> main
             if (!userList.some((u: any) => u.user.id.toString() === userId.toString())) {
                 toast({
                     title: `Bạn chưa đủ điều kiện để thi vòng ${examName}!`,
@@ -177,7 +224,11 @@ const Exam: React.FC = () => {
                                 <ul className="list-inside list-disc pl-4">
                                     <li>Trả lời tất cả câu hỏi trong đề thi.</li>
                                     <li>Hết thời gian làm bài.</li>
+<<<<<<< HEAD
                                     <li>Bấm nút "Submit" để nộp bài.</li>
+=======
+                                    <li>Bấm nút &quot;Submit&quot; để nộp bài.</li>
+>>>>>>> main
                                 </ul>
                             </ul>
                         </div>

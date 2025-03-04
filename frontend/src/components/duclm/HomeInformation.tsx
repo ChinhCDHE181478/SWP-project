@@ -2,7 +2,10 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Slideshow from "../ui/SlideShow";
+<<<<<<< HEAD
 import Chatbot from "./ChatBox";
+=======
+>>>>>>> main
 import CountdownTimer from "./CountdownTimer";
 
 const HomeInformation: React.FC = () => {

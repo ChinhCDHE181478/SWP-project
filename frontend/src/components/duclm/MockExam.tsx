@@ -4,6 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+<<<<<<< HEAD
+=======
+import { API } from "@/helper/axios";
+>>>>>>> main
 
 // Define the type for the mock exam data
 interface MockExamData {
@@ -26,6 +30,7 @@ const MockExam: React.FC = () => {
         if (user.data?.id && user.data?.grade) {
             const fetchMockExamData = async () => {
                 try {
+<<<<<<< HEAD
                     const response = await axios.get(
                         `http://localhost:8080/api/v1/user-mock-exam/latest/${user.data?.id}`,
                         {
@@ -33,6 +38,10 @@ const MockExam: React.FC = () => {
                                 "Content-Type": "application/json",
                             },
                         }
+=======
+                    const response = await API.get(
+                        `http://localhost:8080/api/v1/user-mock-exam/latest/${user.data?.id}`,
+>>>>>>> main
                     );
 
                     if (response.data) {
@@ -54,6 +63,7 @@ const MockExam: React.FC = () => {
         if (user.data?.id) {
             const fetchAllMockResults = async () => {
                 try {
+<<<<<<< HEAD
                     const response = await axios.get(
                         `http://localhost:8080/api/v1/user-mock-exam/getall/${user.data?.id}`,
                         {
@@ -61,6 +71,10 @@ const MockExam: React.FC = () => {
                                 "Content-Type": "application/json",
                             },
                         }
+=======
+                    const response = await API.get(
+                        `http://localhost:8080/api/v1/user-mock-exam/getall/${user.data?.id}`,
+>>>>>>> main
                     );
 
                     if (response.data && response.data.length > 0) {

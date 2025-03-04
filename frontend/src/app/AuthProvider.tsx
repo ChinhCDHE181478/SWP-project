@@ -71,14 +71,14 @@ const AuthProvider: React.FC<IAuthProviderProps> = ({ children }) => {
       setIsAuthenticated(true);
       return response.data;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       throw new Error(err.message);
     }
   };
 
   const logout = async () => {
-    const res = await fetch("api/auth/logout", {
+    const res = await fetch("/api/auth/logout", {
       method: "POST",
       credentials: "include",
       cache: "no-cache",

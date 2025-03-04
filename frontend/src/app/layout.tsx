@@ -4,6 +4,7 @@ import { NextProviders } from "./NextProvider";
 import SWRProvider from "@/components/SWRProvider";
 import { Toaster } from "@/components/ui/toaster";
 import AuthProvider from "./AuthProvider";
+import { ScrollProvider } from "./ScrollProvider";
 
 const be = Be_Vietnam_Pro({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -22,10 +23,12 @@ export default function RootLayout({
         <NextProviders>
           <SWRProvider>
             <AuthProvider>
+              <ScrollProvider>
                 <main className="w-full">
                   <div>{children}</div>
                 </main>
                 <Toaster />
+              </ScrollProvider>
             </AuthProvider>
           </SWRProvider>
         </NextProviders>

@@ -4,18 +4,20 @@ import dev.chinhcd.backend.enums.AccountType;
 import dev.chinhcd.backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.util.List;
 
+@Builder
 @Entity
 @Table(name = "users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User  {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -62,4 +64,9 @@ public class User  {
     @OneToMany(mappedBy = "user")
     private List<RefreshToken> refreshToken;
 
+<<<<<<< HEAD
+=======
+    @Column(columnDefinition = "BIT DEFAULT 0", nullable = false, name = "is_doing_exam")
+    private Boolean isDoingExam;
+>>>>>>> main
 }

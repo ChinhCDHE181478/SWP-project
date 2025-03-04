@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // pages/index.tsx
+=======
+>>>>>>> main
 import Exam from "@/components/duclm/Exam";
 
 export default function Home() {
@@ -7,4 +10,8 @@ export default function Home() {
       <Exam/>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main
