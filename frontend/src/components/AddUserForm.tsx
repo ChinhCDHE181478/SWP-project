@@ -13,11 +13,11 @@ import {
 import { Form, FormField } from "./ui/form";
 import { Label } from "./ui/label";
 import { Input } from "@nextui-org/react";
-import axios from "axios";
 import { REGISTER } from "@/helper/urlPath";
 import { z } from "zod";
 import { useToast } from "./ui/use-toast";
 import { createUserSchema } from "@/helper/schema";
+import { API } from "@/helper/axios";
 
 const AddUserForm = ({
   role,
@@ -41,7 +41,7 @@ const AddUserForm = ({
   const onSubmit = async (data: z.infer<typeof createUserSchema>) => {
     setFormError("");
     try {
-      const response = await axios.post(
+      const response = await API.post(
         `${process.env.NEXT_PUBLIC_API_URL}` + REGISTER,
         {
           username: data.username,

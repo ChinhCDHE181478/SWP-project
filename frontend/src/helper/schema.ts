@@ -186,3 +186,18 @@ export const createUserSchema = z.object({
       message: "Mật khẩu phải chứa ít nhất 1 chữ số",
     }),
 });
+
+export const createSupportRequestSchema = z.object({
+  name: z.string().min(1, {
+    message: "Không được bỏ trống",
+  }),
+  email: z.string().min(1, {
+    message: "Không được bỏ trống",
+  }),
+  issueCategory: z.string().min(1, {
+    message: "Không được bỏ trống",
+  }),
+  detail: z.string().min(1, {
+    message: "Không được bỏ trống",
+  }),
+});

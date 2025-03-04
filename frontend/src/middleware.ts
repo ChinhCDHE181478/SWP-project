@@ -9,12 +9,10 @@ const guestPath = [
   "/about-us",
   "/access-denied",
   "/email-service/forgot",
-  "/news",
   "/",
   "/not-found",
   "/api/auth/refresh",
   "/api/auth/token",
-  "/api/chat",
   "/support",
   "/support/account-support",
   "/articles",
@@ -35,13 +33,11 @@ const rolePaths: Record<string, string[]> = {
     "/update-profile",
     "/about-us",
     "/access-denied",
-    "/news",
     "/",
     "/not-found",
     "/api/auth/logout",
     "/api/auth/refresh",
     "/api/auth/token",
-    "/api/chat",
     "/email-service/add-email",
     "/email-service/delete-email",
     "/support",
@@ -129,6 +125,7 @@ export async function middleware(request: NextRequest) {
   const refreshToken = (await cookieStore).get("refresh_token")?.value;
   const accessToken = (await cookieStore).get("access_token")?.value;
   console.log(currentPath);
+  console.log(refreshToken);
 
   if (!refreshToken) {
     if (!guestPath.includes(currentPath)) {

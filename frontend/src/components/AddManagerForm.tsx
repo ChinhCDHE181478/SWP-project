@@ -14,10 +14,10 @@ import {
 import { Form, FormField } from "./ui/form";
 import { Label } from "./ui/label";
 import { Input } from "@nextui-org/react";
-import axios from "axios";
 import { ADD_MANAGER } from "@/helper/urlPath";
 import { z } from "zod";
 import { useToast } from "./ui/use-toast";
+import { API } from "@/helper/axios";
 
 const AddManagerForm = ({ role, onSuccess }: { role: string; onSuccess: () => void }) => {
   const [formError, setFormError] = useState<string>("");
@@ -38,7 +38,7 @@ const AddManagerForm = ({ role, onSuccess }: { role: string; onSuccess: () => vo
   ) => {
     setFormError("");
     try {
-      const { data: submited } = await axios.post(
+      const { data: submited } = await API.post(
         `${process.env.NEXT_PUBLIC_API_URL}` + ADD_MANAGER,
         {
           username: data.username,

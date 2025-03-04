@@ -8,6 +8,7 @@ import dev.chinhcd.backend.dtos.response.LoginResponse;
 import dev.chinhcd.backend.dtos.response.RefreshTokenResponse;
 import dev.chinhcd.backend.dtos.response.RegisterResponse;
 import dev.chinhcd.backend.enums.ErrorCode;
+import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.exception.ServiceException;
 import dev.chinhcd.backend.repository.IUserRepository;
 import dev.chinhcd.backend.services.IAuthService;
@@ -30,7 +31,7 @@ public class AuthService implements IAuthService {
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
-        return  userService.createRegisterUser(request);
+        return userService.createRegisterUser(request);
     }
 
     @Override
@@ -41,11 +42,12 @@ public class AuthService implements IAuthService {
         boolean isNewUser = user.getName() == null || user.getName().isBlank();
 
         boolean isAuthenticated = passwordEncoder.matches(request.password(), user.getPassword());
-        if(!isAuthenticated)
+        if (!isAuthenticated)
             throw new BadCredentialsException("Wrong username or password");
 
         var accessToken = jwtService.generateAccessToken(user);
         var refreshToken = refreshTokenService.generateRefreshToken(user);
+        refreshTokenService.deleteByUserId(user.getId());
         refreshTokenService.saveRefreshToken(user, refreshToken, request.rememberMe());
         return new LoginResponse(accessToken, refreshToken, isNewUser);
     }
@@ -77,6 +79,10 @@ public class AuthService implements IAuthService {
     public void logout(LogoutRequest request) {
         if (!refreshTokenService.isValidRefreshToken(request.refreshToken()))
             throw new ServiceException(ErrorCode.INVALID_REFRESH_TOKEN);
-        refreshTokenService.deleteToken(request.refreshToken());
+        String username = refreshTokenService.extractUserName(request.refreshToken());
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
+        refreshTokenService.deleteByUserId(user.getId());
     }
+
 }
