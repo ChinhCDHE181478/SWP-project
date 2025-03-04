@@ -22,4 +22,10 @@ public interface IArticlesRepository extends JpaRepository<Articles, Long> {
     @Query("SELECT a FROM Articles a WHERE a.articlesType = :type ORDER BY a.date DESC")
     List<Articles> findTopSuggestedArticlesByType(@Param("type") ArticlesType type, Pageable pageable);
 
+    @Query("SELECT n FROM Articles n where n.articlesType = 'NEWS' ORDER BY n.id DESC LIMIT 3")
+    List<Articles> findThreeNews();
+
+    @Query("SELECT n FROM Articles n where n.articlesType = 'TIPS' ORDER BY n.id DESC LIMIT 3")
+    List<Articles> findThreeTips();
+
 }

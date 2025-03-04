@@ -35,4 +35,14 @@ public class ArticlesController {
         List<Articles> articles = articlesService.getSuggestedArticlesByType(type, 3);
         return ResponseEntity.ok(articles);
     }
+
+    @GetMapping("/news/latest")
+    public ResponseEntity<List<Articles>> getLatestNews() {
+        return ResponseEntity.ok(articlesService.getThreeNews());
+    }
+
+    @GetMapping("/tips/latest")
+    public ResponseEntity<List<Articles>> getLatestTips() {
+        return ResponseEntity.ok(articlesService.getThreeTips());
+    }
 }

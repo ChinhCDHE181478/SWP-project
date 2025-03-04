@@ -55,4 +55,14 @@ public class ArticlesService implements IArticlesService {
         return articlesRepository.findTopSuggestedArticlesByType(type, topN);
     }
 
+    @Override
+    public List<Articles> getThreeNews() {
+        return articlesRepository.findThreeNews();
+    }
+
+    @Override
+    public List<Articles> getThreeTips() {
+        return articlesRepository.findThreeTips();
+    }
+
 }

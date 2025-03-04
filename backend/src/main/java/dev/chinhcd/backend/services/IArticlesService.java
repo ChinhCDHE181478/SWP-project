@@ -15,4 +15,8 @@ public interface IArticlesService {
 
     List<Articles> getSuggestedArticlesByType(ArticlesType type, int limit);
 
+    List<Articles> getThreeNews();
+
+    List<Articles> getThreeTips();
+
 }

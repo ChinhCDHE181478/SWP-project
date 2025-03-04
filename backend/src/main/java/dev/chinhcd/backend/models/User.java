@@ -34,7 +34,7 @@ public class User {
     @Column(nullable = true, name = "birth_date", columnDefinition = "DATE")
     private Date birthDate;
 
-    @Column(nullable = true, unique = true, columnDefinition = "NVARCHAR(100)")
+    @Column(nullable = true, columnDefinition = "NVARCHAR(100)")
     private String email;
 
     @Column(nullable = false)
@@ -64,6 +64,6 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<RefreshToken> refreshToken;
 
-    @Column(columnDefinition = "BIT DEFAULT 0", nullable = false)
+    @Column(columnDefinition = "BIT DEFAULT 0", nullable = false, name = "is_doing_exam")
     private Boolean isDoingExam;
 }
