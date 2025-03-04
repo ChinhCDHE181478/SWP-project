@@ -53,6 +53,7 @@ const Course: React.FC = () => {
       router.push(link);
     }
   };
+  
 
   return (
     <div className="w-full py-8 bg-[#F5BA3A]">
