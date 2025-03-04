@@ -25,11 +25,11 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { useState } from "react";
-import axios from "axios";
 import { DELETE_USER } from "@/helper/urlPath";
 import { useToast } from "./ui/use-toast";
 import React from "react";
 import { Input } from "@nextui-org/react";
+import { API } from "@/helper/axios";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -65,7 +65,7 @@ export function DataTable<TData, TValue>({
     console.log(id);
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const res = await axios.delete(
+      const res = await API.delete(
         `${process.env.NEXT_PUBLIC_API_URL}${DELETE_USER}/${id}`,
         {
           headers: { "Content-Type": "application/json" },

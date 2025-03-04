@@ -3,6 +3,7 @@ package dev.chinhcd.backend.services;
 import dev.chinhcd.backend.dtos.request.*;
 import dev.chinhcd.backend.dtos.response.*;
 import dev.chinhcd.backend.enums.Role;
+import dev.chinhcd.backend.models.User;
 
 import java.util.List;
 
@@ -11,7 +12,11 @@ public interface IUserService {
 
     List<UserResponse> getAllUsers();
 
-    UserResponse getUserById(Long id);
+    UserResponse getUserResponseById(Long id);
+
+    User getUserById(Long id);
+
+    User getUserByUsername(String username);
 
     UserResponse getMe();
 
@@ -42,4 +47,6 @@ public interface IUserService {
     Boolean adminChangePassUser(ChangePasswordRequest request);
 
     Boolean changeAccountType(ChangeAccountTypeRequest request);
+
+    PaginateUserResponse getPaginatedUsers(int page, int pageSize, String username, String email);
 }

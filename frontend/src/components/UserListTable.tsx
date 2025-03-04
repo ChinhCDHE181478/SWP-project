@@ -1,13 +1,14 @@
 "use client";
 
-import { getManager } from "@/helper/fetchApi";
+import { getUser } from "@/helper/fetchApi";
 import { User } from "@/types/type";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DataTable } from "./UserDataTable";
-import AddManagerForm from "./AddManagerForm";
 import { ColumnDef } from "@tanstack/react-table";
 import React from "react";
 import AddUserForm from "./AddUserForm";
+import Pagination from "./longnt/articles/Pagination";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const userColumns: ColumnDef<User>[] = [
   {
@@ -52,43 +53,77 @@ const userColumns: ColumnDef<User>[] = [
 ];
 
 const UserListTable = ({ role }: { role: string }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const pageSize = 20;
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const page = parseInt(searchParams.get("page") || "1", 10);
+  const username = searchParams.get("username") || "";
+  const email = searchParams.get("email") || "";
+  const [searchParam, setSearchParam] = useState<string[]>([username, email]);
 
-  const fetchManagers = async (param: string) => {
+  useEffect(() => {
+    setSearchParam([username, email]);
+  }, [username, email]);
+
+  const updateSearchParam = (username1: string, email1: string) => {
+    setSearchParam([username1, email1]);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("username", username1);
+    params.set("email", email1);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await getManager(param);
-      setUsers(res);
+      const res = await getUser(page, pageSize, searchParam[0], searchParam[1]);
+      setUsers(res.users);
+      setTotalPages(res.totalPages);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
       setIsLoading(false);
     }
+  }, [page, pageSize, searchParam]);
+
+  const onPageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.set("page", newPage.toString());
+    router.push(`?${newParams.toString()}`);
   };
 
   useEffect(() => {
-    fetchManagers(role);
-  }, [role]);
+    fetchUsers();
+  }, [page, fetchUsers]);
 
   return (
     <div className="py-10">
       <div className="my-5">
-        {role !== "User" && (
-          <AddManagerForm role={role} onSuccess={() => fetchManagers(role)} />
-        )}
         {role === "User" && (
-          <AddUserForm role={role} onSuccess={() => fetchManagers(role)} />
+          <AddUserForm role={role} onSuccess={() => fetchUsers()} />
         )}
       </div>
 
       {isLoading && <div>Loading...</div>}
       {!isLoading && (
-        <DataTable
-          fetchData={() => fetchManagers(role)}
-          columns={userColumns}
-          data={users}
-        />
+        <>
+          <DataTable
+            searchParam={searchParam}
+            fetchData={fetchUsers}
+            setSearchParam={updateSearchParam}
+            data={users}
+            columns={userColumns}
+          />
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </>
       )}
     </div>
   );

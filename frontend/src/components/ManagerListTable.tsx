@@ -46,7 +46,6 @@ const ManagerListTable = ({ role }: { role: string }) => {
     <div className="py-10">
       <div className="my-5">
         {role !== "User" && <AddManagerForm role={role} onSuccess={() => fetchManagers(role)} />}
-        {role === "User" && <AddManagerForm role={role} onSuccess={() => fetchManagers(role)} />}
       </div>
 
       {isLoading && <div>Loading...</div>}

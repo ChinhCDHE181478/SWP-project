@@ -18,12 +18,9 @@ const Header = () => {
 
   return (
     <>
-      <div
-        className="h-[120px] px-96 flex justify-between shadow-lg border-spacing-1"
-        style={{ backgroundColor: "#F8AD2D" }}
-      ></div>
+      <div className="h-[120px] px-96 flex justify-between shadow-lg border-spacing-1" style={{ backgroundColor: "#F8AD2D" }}></div>
       <div className="absolute left-1/2 min-w-[1000px] transform -translate-x-1/2 z-40">
-        <div className="flex justify-between">
+        <div className="flex md:flex-row md:justify-between justify-center">
           <LogoIcon />
           <div className="flex nav-link-top mt-10 mr-5">
             <Link href={"/"}>Tự luyện</Link>
@@ -58,7 +55,7 @@ const Header = () => {
               <Link href={"/"}>Học sinh</Link>
             </>
           )}
-          <Link href={"/"}>Hướng dẫn thi</Link>
+          <Link href={"/support"}>Hướng dẫn thi</Link>
           <Link href={"/"}>Kết quả thi</Link>
           <Link href={"/about-us"}>Về EduTest</Link>
           <DropdownMenu>
@@ -74,7 +71,7 @@ const Header = () => {
                 <Link href={"/articles?type=tips&page=1"}>English Tips</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Link href={"/news"}>Lịch thi</Link>
+                <Link href={"/"}>Lịch thi</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

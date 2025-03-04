@@ -16,6 +16,7 @@ public record UserRequest(
         String ward,
         Integer grade,
         String accountType,
-        String educationLevel
+        String educationLevel,
+        Boolean isDoingExam
 ) {
 }

@@ -11,9 +11,9 @@ import { Label } from "./ui/label";
 import { Input } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import axios from "axios";
 import { REQUEST_ADD_MAIL, REQUEST_DELETE_EMAIL } from "@/helper/urlPath";
 import ChangePasswordForm from "./ChangePasswordForm";
+import { API } from "@/helper/axios";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const UserInformationProfile = ({ user }: any) => {
@@ -35,7 +35,7 @@ const UserInformationProfile = ({ user }: any) => {
     try {
       setNotification("⏳ Đang xử lý yêu cầu của bạn...");
       setErrorMail("");
-      const { data: mailSended } = await axios.post(
+      const { data: mailSended } = await API.post(
         `${process.env.NEXT_PUBLIC_API_URL}${REQUEST_DELETE_EMAIL}`,
         {
           id: user.data?.id,
@@ -67,7 +67,7 @@ const UserInformationProfile = ({ user }: any) => {
     try {
       setNotification("⏳ Đang xử lý yêu cầu của bạn...");
       setErrorMail("");
-      const { data: mailSended } = await axios.post(
+      const { data: mailSended } = await API.post(
         `${process.env.NEXT_PUBLIC_API_URL}${REQUEST_ADD_MAIL}`,
         {
           id: user.data?.id,

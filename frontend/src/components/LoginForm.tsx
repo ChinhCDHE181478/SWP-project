@@ -93,7 +93,7 @@ const LoginForm = () => {
             const error = form.formState.errors?.username;
             return (
               <>
-                <label htmlFor="Username" style={{}}>
+                <label htmlFor="Username">
                   Tài khoản
                 </label>
                 <Input
@@ -121,7 +121,7 @@ const LoginForm = () => {
             const error = form.formState.errors?.password;
             return (
               <>
-                <label htmlFor="Password" style={{}}>
+                <label htmlFor="Password">
                   Mật khẩu
                 </label>
                 <Input
