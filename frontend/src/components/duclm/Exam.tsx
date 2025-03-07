@@ -128,7 +128,7 @@ const Exam: React.FC = () => {
     
         if (examName === "Cấp Quận/Huyện") {
             previousExamName = "Cấp Phường/Xã";
-            limit = 500;
+            limit = 1;
         } else if (examName === "Cấp Tỉnh/Thành Phố") {
             previousExamName = "Cấp Quận/Huyện";
             limit = 200;

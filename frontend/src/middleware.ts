@@ -110,7 +110,7 @@ export async function middleware(request: NextRequest) {
 
   if (
     currentPath.match(
-      /\.(png|jpg|jpeg|gif|svg|webp|ico|mp4|mp3|woff2?|ttf|otf|eot)$/
+      /\.(png|jpg|jpeg|gif|svg|webp|ico|mp4|mp3|woff2?|ttf|otf|eot|json)$/
     )
   ) {
     return NextResponse.next();
