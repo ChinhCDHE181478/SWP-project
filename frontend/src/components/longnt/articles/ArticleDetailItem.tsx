@@ -5,11 +5,14 @@ import { Articles } from "@/types/type";
 
 const ArticleDetailItem: React.FC<{ data: Articles }> = ({ data }) => {
   // Định dạng ngày
-  const formattedDate = new Date(data.date).toLocaleDateString("vi-VN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const formattedDate = new Date(data.date as string).toLocaleDateString(
+    "vi-VN",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }
+  );
 
   return (
     <div className="max-w-screen-xl mx-auto w-[1050px] p-6 mt-4">
@@ -25,8 +28,8 @@ const ArticleDetailItem: React.FC<{ data: Articles }> = ({ data }) => {
           priority
         />
       </div>
-      <div className="mt-4">
-        <p className="text-lg">{data.content}</p>
+      <div className="mt-4 prose max-w-none">
+        <div dangerouslySetInnerHTML={{ __html: data.content }} />
       </div>
     </div>
   );

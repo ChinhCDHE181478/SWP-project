@@ -23,7 +23,7 @@ export interface LoginResponse {
 
 export interface Articles {
   id: number;
-  date: string;
+  date?: string;
   title: string;
   content: string;
   summaryContent: string;
@@ -36,4 +36,3 @@ export interface Schedule {
   roundName: string;
   examDate: string;
 }
-
