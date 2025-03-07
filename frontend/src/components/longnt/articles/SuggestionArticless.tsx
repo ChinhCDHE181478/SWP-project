@@ -29,6 +29,7 @@ const SuggestionArticles: React.FC<Props> = ({ type }) => {
     try {
       const data = await getSuggestedArticles(type);
       setSuggestedArticles(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error fetching suggested articles:", err);
       setError(err.message);
