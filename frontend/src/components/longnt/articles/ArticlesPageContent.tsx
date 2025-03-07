@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Articles } from "@/types/type";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import axios from "axios";
 
 const ArticlesPageContent: React.FC = () => {
   const searchParams = useSearchParams();
@@ -14,33 +15,44 @@ const ArticlesPageContent: React.FC = () => {
   const type = searchParams.get("type") || "news";
   const page = parseInt(searchParams.get("page") || "1", 10);
 
-  const pageSize = 6; // Số bài viết mỗi trang
+  const pageSize = 6;
 
   const [articles, setArticles] = useState<Articles[]>([]);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  // Gọi API để lấy dữ liệu bài viết
+  async function getArticles(
+    type: string,
+    page: number,
+    pageSize: number
+  ): Promise<{ articles: Articles[]; totalPages: number }> {
+    const API_URL = `http://localhost:8080/api/v1/articles`;
+    const res = await axios.get(API_URL, {
+      headers: { "Content-Type": "application/json" },
+      params: { type: type.toUpperCase(), page, pageSize },
+    });
+    return res.data;
+  }
+
   useEffect(() => {
     setLoading(true);
-    fetch(
-      `http://localhost:8080/api/v1/articles?type=${type}&page=${page}&pageSize=${pageSize}`
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error("Lỗi khi lấy dữ liệu bài viết!");
-        return res.json();
-      })
-      .then((data) => {
+
+    const fetchArticles = async () => {
+      try {
+        const data = await getArticles(type, page, pageSize);
         setArticles(data.articles || []);
         setTotalPages(data.totalPages);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err: any) {
+        console.error("Error fetching articles:", err);
         setError(err.message);
+      } finally {
         setLoading(false);
-      });
-  }, [type, page]);
+      }
+    };
+
+    fetchArticles();
+  }, [type, page, pageSize]);
 
   // Xử lý sự kiện chuyển trang
   const onPageChange = (newPage: number) => {
@@ -90,7 +102,9 @@ const ArticlesPageContent: React.FC = () => {
           </div>
         </Link>
       )}
-      <ArticlesList articles={otherArticles} /> {/* Gọi danh sách bài viết */}
+
+      <ArticlesList articles={otherArticles} />
+
       <Pagination
         currentPage={page}
         totalPages={totalPages}

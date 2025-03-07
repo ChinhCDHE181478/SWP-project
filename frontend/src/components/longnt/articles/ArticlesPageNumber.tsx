@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import ArticleDetailItem from "@/components/longnt/articles/ArticleDetailItem";
 import { Articles } from "@/types/type";
 import ArticlesHeader from "./ArticlesHeader";
+import axios from "axios";
 
 const ArticlesPageNumber = () => {
   const { id } = useParams(); // Lấy id từ URL params
@@ -11,29 +12,36 @@ const ArticlesPageNumber = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  // Hàm fetch để lấy dữ liệu bài viết chi tiết từ backend API
+  async function getArticleDetail(id: string): Promise<Articles> {
+    const API_URL = `http://localhost:8080/api/v1/articles/${id}`;
+    const res = await axios.get(API_URL, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return res.data as Articles;
+  }
+
   useEffect(() => {
     if (!id) return;
-    fetch(`http://localhost:8080/api/v1/articles/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Lỗi khi lấy bài viết!");
-        return res.json();
-      })
-      .then((data: Articles) => {
+
+    const fetchArticleDetail = async () => {
+      setLoading(true);
+      try {
+        const data = await getArticleDetail(id);
         setData(data);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err: any) {
+        console.error("Error fetching article detail:", err);
         setError(err.message);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchArticleDetail();
   }, [id]);
 
-  // Nếu đang tải hoặc có lỗi, hiển thị thông báo
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
-  // Hiển thị dữ liệu bài viết chi tiết
   return (
     <div>
       <ArticlesHeader type={data?.articlesType.toLowerCase() || "news"} />
