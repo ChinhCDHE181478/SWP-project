@@ -34,7 +34,7 @@ public class User {
     @Column(nullable = true, name = "birth_date", columnDefinition = "DATE")
     private Date birthDate;
 
-    @Column(nullable = true, columnDefinition = "NVARCHAR(100)")
+    @Column(nullable = true, unique = true, columnDefinition = "NVARCHAR(100)")
     private String email;
 
     @Column(nullable = false)
