@@ -1,19 +1,13 @@
 package dev.chinhcd.backend.controllers;
 
-import dev.chinhcd.backend.dtos.request.longnt.AddArticleDTO;
-import dev.chinhcd.backend.dtos.request.longnt.UpdateArticleRequest;
 import dev.chinhcd.backend.dtos.response.longnt.PaginateArticlesResponse;
 import dev.chinhcd.backend.enums.ArticlesType;
 import dev.chinhcd.backend.models.Articles;
 import dev.chinhcd.backend.services.IArticlesService;
-
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -42,33 +36,13 @@ public class ArticlesController {
         return ResponseEntity.ok(articles);
     }
 
-    @GetMapping("/filtered")
-    public ResponseEntity<PaginateArticlesResponse> getFilteredArticles(
-            @RequestParam(name = "type", required = false) String type,
-            @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
-            @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
-            @RequestParam(name = "page", defaultValue = "1") int page,
-            @RequestParam(name = "pageSize", defaultValue = "7") int pageSize
-    ) {
-        PaginateArticlesResponse response = articlesService.getArticlesByFilters(type, startDate, endDate, page, pageSize);
-        return ResponseEntity.ok(response);
+    @GetMapping("/news/latest")
+    public ResponseEntity<List<Articles>> getLatestNews() {
+        return ResponseEntity.ok(articlesService.getThreeNews());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteArticle(@PathVariable Long id) {
-        articlesService.deleteArticleById(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping
-    public ResponseEntity<Articles> addArticle(@RequestBody AddArticleDTO addArticleDTO) {
-        Articles savedArticle = articlesService.addArticle(addArticleDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedArticle);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Articles> updateArticle(@PathVariable Long id, @RequestBody UpdateArticleRequest request) {
-        Articles updatedArticle = articlesService.updateArticle(id, request);
-        return ResponseEntity.ok(updatedArticle);
+    @GetMapping("/tips/latest")
+    public ResponseEntity<List<Articles>> getLatestTips() {
+        return ResponseEntity.ok(articlesService.getThreeTips());
     }
 }

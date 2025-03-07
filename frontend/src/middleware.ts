@@ -9,12 +9,10 @@ const guestPath = [
   "/about-us",
   "/access-denied",
   "/email-service/forgot",
-  "/news",
   "/",
   "/not-found",
   "/api/auth/refresh",
   "/api/auth/token",
-  "/api/chat",
   "/support",
   "/support/account-support",
   "/articles",
@@ -35,13 +33,11 @@ const rolePaths: Record<string, string[]> = {
     "/update-profile",
     "/about-us",
     "/access-denied",
-    "/news",
     "/",
     "/not-found",
     "/api/auth/logout",
     "/api/auth/refresh",
     "/api/auth/token",
-    "/api/chat",
     "/email-service/add-email",
     "/email-service/delete-email",
     "/support",
@@ -49,6 +45,9 @@ const rolePaths: Record<string, string[]> = {
     "/support/send-support-request",
     "/articles",
     "/articles/number",
+    "/exam",
+    "/practice",
+    "/mockexam"
   ],
   ADMIN: [
     "/manager/account-manager",
@@ -111,7 +110,7 @@ export async function middleware(request: NextRequest) {
 
   if (
     currentPath.match(
-      /\.(png|jpg|jpeg|gif|svg|webp|ico|mp4|mp3|woff2?|ttf|otf|eot)$/
+      /\.(png|jpg|jpeg|gif|svg|webp|ico|mp4|mp3|woff2?|ttf|otf|eot|json)$/
     )
   ) {
     return NextResponse.next();
@@ -129,6 +128,7 @@ export async function middleware(request: NextRequest) {
   const refreshToken = (await cookieStore).get("refresh_token")?.value;
   const accessToken = (await cookieStore).get("access_token")?.value;
   console.log(currentPath);
+  console.log(refreshToken);
 
   if (!refreshToken) {
     if (!guestPath.includes(currentPath)) {

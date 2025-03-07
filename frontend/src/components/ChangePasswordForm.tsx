@@ -15,8 +15,8 @@ import { Label } from "./ui/label";
 import { Input } from "@nextui-org/react";
 import { Form, FormField } from "./ui/form";
 import { useState } from "react";
-import axios from "axios";
 import { CHANGE_PASSWORD } from "@/helper/urlPath";
+import { API } from "@/helper/axios";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ChangePasswordForm = ({ user }: any) => {
@@ -38,7 +38,7 @@ const ChangePasswordForm = ({ user }: any) => {
     setFormError("");
     setNotification("⏳ Đang xử lý yêu cầu của bạn...");
     try {
-      const { data: submited } = await axios.put(
+      const { data: submited } = await API.put(
         `${process.env.NEXT_PUBLIC_API_URL}` + CHANGE_PASSWORD,
         {
           id: user.data.id,

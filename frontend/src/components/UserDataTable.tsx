@@ -2,10 +2,8 @@
 
 import {
   ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -24,8 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { useState } from "react";
-import axios from "axios";
+import { useMemo, useState } from "react";
 import {
   ADMIN_CHANGE_ACCOUNT_TYPE,
   ADMIN_CHANGE_PASS_USER,
@@ -40,47 +37,48 @@ import { Form, FormField } from "./ui/form";
 import { Label } from "./ui/label";
 import { Input } from "@nextui-org/react";
 import React from "react";
+import { API } from "@/helper/axios";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  searchParam: string[];
   fetchData: () => void;
+  setSearchParam: (username: string, email: string) => void;
 }
-
-const accountType: string[] = ["FREE_COURSE", "FULL_COURSE", "COMBO_COURSE"];
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  searchParam,
   fetchData,
+  setSearchParam = () => {},
 }: DataTableProps<TData, TValue>) {
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
   const table = useReactTable({
     data,
     columns,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      columnFilters,
-    },
   });
 
+  const accountType = useMemo(
+    () => ["FREE_COURSE", "FULL_COURSE", "COMBO_COURSE"],
+    []
+  );
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<TData | null>(null);
   const { toast } = useToast();
   const [openPass, setOpenPass] = useState(false);
   const [openChange, setOpenChange] = useState(false);
   const [newAccountType, setNewAccountType] = useState<string>("");
+  const [email, setEmail] = useState<string>(searchParam[1] || "");
+  const [username, setUsername] = useState<string>(searchParam[0] || "");
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDelete = async (id: any) => {
     console.log(id);
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const res = await axios.delete(
+      const res = await API.delete(
         `${process.env.NEXT_PUBLIC_API_URL}${DELETE_USER}/${id}`,
         {
           headers: { "Content-Type": "application/json" },
@@ -111,7 +109,7 @@ export function DataTable<TData, TValue>({
   const changePass = async (data: z.infer<typeof passwordSchema>) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const response = await axios.post(
+      const response = await API.post(
         `${process.env.NEXT_PUBLIC_API_URL}${ADMIN_CHANGE_PASS_USER}`,
         {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -124,7 +122,7 @@ export function DataTable<TData, TValue>({
         }
       );
       toast({
-        title: "Xóa tài khoản thành công!",
+        title: "Đổi mật khẩu thành công!",
         className: "text-white bg-green-500",
       });
       setOpenPass(false);
@@ -140,7 +138,7 @@ export function DataTable<TData, TValue>({
   const changeAccountType = async () => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const response = await axios.put(
+      const response = await API.put(
         `${process.env.NEXT_PUBLIC_API_URL}${ADMIN_CHANGE_ACCOUNT_TYPE}`,
         {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -155,6 +153,7 @@ export function DataTable<TData, TValue>({
         title: "Đổi loại tài khoản thành công!",
         className: "text-white bg-green-500",
       });
+      fetchData();
       setOpenChange(false);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
@@ -188,26 +187,30 @@ export function DataTable<TData, TValue>({
         <Input
           type="text"
           placeholder="Filter username..."
-          value={
-            (table.getColumn("username")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("username")?.setFilterValue(event.target.value)
-          }
+          value={username}
+          onChange={(event) => {
+            setUsername(event.target.value);
+          }}
           className="max-w-sm border border-gray-300 rounded-sm"
         />
 
         <Input
           type="text"
           placeholder="Filter email..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table
-              .getColumn("email")
-              ?.setFilterValue(event.target.value || undefined)
-          }
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+          }}
           className="max-w-sm border border-gray-300 rounded-sm"
         />
+
+        <button
+          type="button"
+          onClick={() => setSearchParam(username, email)}
+          className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
+        >
+          Tìm kiếm
+        </button>
       </div>
       <div className="rounded-md border flex w-full">
         <Table className="w-full">
@@ -291,45 +294,43 @@ export function DataTable<TData, TValue>({
           aria-describedby={undefined}
           className="sm:max-w-[425px] z-[999] bg-white"
         >
-          <form
-            onSubmit={() => (changeAccountType())}
-            className="w-full gap-4"
-          >
-            <DialogHeader>
-              <DialogTitle>
-                Đổi loại tài khoản{" "}
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {selectedRow ? (selectedRow as any).username : "Chưa chọn"}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="password" className="text-right">
-                  Loại tài khoản
-                </Label>
-                <select
-                  id="accountType"
-                  value={newAccountType}
-                  onChange={(e) => setNewAccountType(e.target.value)}
-                  className={`p-2 col-span-3 border border-gray-300$ rounded-sm`}
-                >
-                  {accountType.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <DialogFooter>
-              <button
-                type="submit"
-                className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
+          <DialogHeader>
+            <DialogTitle>
+              Đổi loại tài khoản{" "}
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {selectedRow ? (selectedRow as any).username : "Chưa chọn"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="password" className="text-right">
+                Loại tài khoản
+              </Label>
+              <select
+                aria-label="Chọn loại tài khoản"
+                name="accountType"
+                id="accountType"
+                value={newAccountType}
+                onChange={(e) => setNewAccountType(e.target.value)}
+                className={`p-2 col-span-3 border border-gray-300$ rounded-sm`}
               >
-                Đổi loại tài khoản
-              </button>
-            </DialogFooter>
-          </form>
+                {accountType.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => changeAccountType()}
+              className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
+            >
+              Đổi loại tài khoản
+            </button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

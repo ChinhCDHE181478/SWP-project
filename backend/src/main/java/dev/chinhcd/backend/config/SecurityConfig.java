@@ -27,18 +27,16 @@ public class SecurityConfig {
     private final JwtDecoder jwtDecoder;
     private final AuthenticationEntryPoint authenticationEntryPoint;
 
-    private static final String[] PUBLIC_ENDPOINTS = {"/auth/register"
-            , "/auth/refresh", "/auth/login", "/auth/reset", "auth/verify"
-            , "/auth/logout", "/user/update", "/user/is-new-user", "/mail/send"
-            , "/user/add-email", "/user/request-add-email", "/user/request-delete-email"
-            , "/user/delete-email", "/user/change-password", "/user/request-forgot-password"
-            , "/user/reset-password"};
+    public static final String[] PUBLIC_ENDPOINTS = {"/auth/register", "/auth/login", "/auth/refresh", "/auth/reset",
+            "auth/verify", "/auth/logout", "/user/request-forgot-password", "/articles/{id}", "/articles",
+            "/articles/suggestions", "/exam/next", "/practice/max-level"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request ->
-                        request.anyRequest().permitAll()
+                        request
+                                .anyRequest().permitAll()
 //                                .requestMatchers("/private").hasAnyAuthority("USER", "ADMIN")
 //                                .anyRequest().authenticated()
                 )
@@ -57,8 +55,6 @@ public class SecurityConfig {
                     source.registerCorsConfiguration("/**", configuration);
                     httpSecurityCorsConfigurer.configurationSource(source);
                 });
-
-        ;
         return http.build();
     }
 

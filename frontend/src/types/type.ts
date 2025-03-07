@@ -13,6 +13,7 @@ export interface User {
   grade?: number;
   educationLevel?: string;
   accountType: string;
+  isDoingExam: boolean;
 }
 
 export interface LoginResponse {

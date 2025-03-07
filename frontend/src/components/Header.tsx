@@ -23,11 +23,11 @@ const Header = () => {
         style={{ backgroundColor: "#F8AD2D" }}
       ></div>
       <div className="absolute left-1/2 min-w-[1000px] transform -translate-x-1/2 z-40">
-        <div className="flex justify-between">
+        <div className="flex md:flex-row md:justify-between justify-center">
           <LogoIcon />
           <div className="flex nav-link-top mt-10 mr-5">
-            <Link href={"/"}>Tự luyện</Link>
-            <Link href={"/"}>Thi thử</Link>
+            <Link href={"/practice"}>Tự luyện</Link>
+            <Link href={"/mockexam"}>Thi thử</Link>
             {!isLoading && isAuthenticated && (
               <>
                 <span
@@ -55,12 +55,22 @@ const Header = () => {
         <div className="flex justify-center gap-10 pt-2 top-[120px] h-[40px] bg-slate-50 text-black p-4 shadow-lg rounded-lg border-spacing-1 border-gray-300">
           {!isLoading && isAuthenticated && (
             <>
-              <Link href={"/"}>Học sinh</Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="pt-2 flex flex-row items-center">
+                  Học sinh
+                  <ArrowDownIcon />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white pt-5 z-20">
+                  <DropdownMenuItem>
+                    <Link href={"/mockexam"}>Thi thử</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href={"/practice"}>Tự luyện</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           )}
-          <Link href={"/"}>Hướng dẫn thi</Link>
-          <Link href={"/"}>Kết quả thi</Link>
-          <Link href={"/about-us"}>Về EduTest</Link>
           <DropdownMenu>
             <DropdownMenuTrigger className="pt-2 flex flex-row items-center">
               Tin tức
@@ -74,10 +84,13 @@ const Header = () => {
                 <Link href={"/articles?type=tips&page=1"}>English Tips</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Link href={"/news"}>Lịch thi</Link>
+                <Link href={"/"}>Lịch thi</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <Link href={"/about-us"}>Về EduTest</Link>
+          <Link href={"/"}>Kết quả thi</Link>
+          <Link href={"/support"}>Hỗ trợ</Link>
         </div>
       </div>
     </>

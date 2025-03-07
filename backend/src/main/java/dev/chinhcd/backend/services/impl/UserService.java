@@ -1,12 +1,14 @@
 package dev.chinhcd.backend.services.impl;
 
 import dev.chinhcd.backend.dtos.request.*;
+import dev.chinhcd.backend.dtos.response.PaginateUserResponse;
 import dev.chinhcd.backend.dtos.response.RegisterResponse;
 import dev.chinhcd.backend.dtos.response.UserResponse;
 import dev.chinhcd.backend.enums.AccountType;
 import dev.chinhcd.backend.enums.ErrorCode;
 import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.exception.ServiceException;
+import dev.chinhcd.backend.models.Articles;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.repository.IUserRepository;
 import dev.chinhcd.backend.services.IEmailService;
@@ -15,6 +17,9 @@ import dev.chinhcd.backend.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,6 +46,7 @@ public class UserService implements IUserService {
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRole(Role.USER);
         user.setAccountType(AccountType.FREE_COURSE);
+        user.setIsDoingExam(false);
 
         user = userRepository.save(user);
         return new RegisterResponse(user.getId(), user.getUsername());
@@ -53,10 +59,22 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserResponse getUserById(Long id) {
+    public UserResponse getUserResponseById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
         return mapResponse(user);
+    }
+
+    @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
@@ -207,6 +225,7 @@ public class UserService implements IUserService {
                 .password(passwordEncoder.encode(request.password()))
                 .role(request.role())
                 .accountType(AccountType.FREE_COURSE)
+                .isDoingExam(false)
                 .build();
         userRepository.save(user);
         return true;
@@ -230,6 +249,25 @@ public class UserService implements IUserService {
         return true;
     }
 
+    @Override
+    public PaginateUserResponse getPaginatedUsers(int page, int pageSize, String username, String email) {
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        if (username.isBlank()) {
+            username = null;
+        }
+        if (email.isBlank()) {
+            email = null;
+        }
+        Page<User> usersPage = userRepository.getUsersByRole(Role.USER, pageable, username, email);
+
+        List<UserResponse> users = usersPage.getContent().stream().map(this::mapResponse).collect(Collectors.toList());
+        return new PaginateUserResponse(users,
+                usersPage.getTotalPages(),
+                usersPage.getTotalElements(),
+                usersPage.getNumber() + 1,
+                pageSize);
+    }
+
     public UserResponse mapResponse(User user) {
         return UserResponse.builder()
                 .birthDate(user.getBirthDate())
@@ -245,6 +283,7 @@ public class UserService implements IUserService {
                 .district(user.getDistrict())
                 .ward(user.getWard())
                 .accountType(user.getAccountType() != null ? user.getAccountType().name() : "")
+                .isDoingExam(false)
                 .build();
     }
 }

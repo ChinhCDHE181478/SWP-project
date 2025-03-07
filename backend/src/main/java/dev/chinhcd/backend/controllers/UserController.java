@@ -1,7 +1,9 @@
 package dev.chinhcd.backend.controllers;
 
 import dev.chinhcd.backend.dtos.request.*;
+import dev.chinhcd.backend.dtos.response.PaginateUserResponse;
 import dev.chinhcd.backend.dtos.response.UserResponse;
+import dev.chinhcd.backend.dtos.response.longnt.PaginateArticlesResponse;
 import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.services.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+        return ResponseEntity.ok(userService.getUserResponseById(id));
     }
 
     @GetMapping("/me")
@@ -99,6 +101,14 @@ public class UserController {
     @PutMapping("/change-account-type")
     public ResponseEntity<Boolean> changeAccountType(@RequestBody ChangeAccountTypeRequest request) {
         return ResponseEntity.ok(userService.changeAccountType(request));
+    }
+
+    @GetMapping("/get-user-page")
+    public ResponseEntity<PaginateUserResponse> getPaginatedUsers(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "pageSize", defaultValue = "20") int pageSize,
+            @RequestParam String username, @RequestParam String email) {
+        return ResponseEntity.ok(userService.getPaginatedUsers(page, pageSize, username, email));
     }
 
 }
