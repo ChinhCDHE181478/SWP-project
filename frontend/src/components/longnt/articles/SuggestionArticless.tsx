@@ -24,20 +24,20 @@ const SuggestionArticles: React.FC<Props> = ({ type }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
+  const fetchArticles = async () => {
+    setLoading(true);
+    try {
+      const data = await getSuggestedArticles(type);
+      setSuggestedArticles(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.error("Error fetching suggested articles:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchArticles = async () => {
-      setLoading(true);
-      try {
-        const data = await getSuggestedArticles(type);
-        setSuggestedArticles(data);
-      } catch (err: any) {
-        console.error("Error fetching suggested articles:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchArticles();
   }, [type]);
 

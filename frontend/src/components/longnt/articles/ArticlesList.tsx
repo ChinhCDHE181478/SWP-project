@@ -26,17 +26,20 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ articles }) => {
                   layout="fill"
                   objectFit="cover"
                   className="rounded-md bg-gray-300"
-                  priority={index === 0} // Ưu tiên bài đầu tiên tải nhanh hơn
+                  priority={index === 0}
                 />
               </div>
               <div className="flex-1">
                 <h2 className="text-lg font-semibold">{article.title}</h2>
                 <p className="text-xs text-gray-400">
-                  {new Date(article.date).toLocaleDateString("vi-VN", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  {new Date(article.date as string).toLocaleDateString(
+                    "vi-VN",
+                    {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }
+                  )}
                 </p>
                 <p className="text-sm text-gray-600">
                   {article.summaryContent}
