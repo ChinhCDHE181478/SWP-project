@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.sql.Time;
 
@@ -21,10 +23,12 @@ public class UserMockExam {
     private Long userMockExamId;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "mock_exam_id")
     private MockExam mockExam;
 

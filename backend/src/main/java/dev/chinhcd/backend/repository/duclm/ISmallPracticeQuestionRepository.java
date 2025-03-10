@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface ISmallPracticeQuestionRepository extends JpaRepository<SmallPracticeQuestion, Integer> {
     List<SmallPracticeQuestion> findBySmallPractice(SmallPractice smallPractice);
+
+    List<SmallPracticeQuestion> findBySmallPractice_SmallPracticeId(int smallPracticeId);
 }
