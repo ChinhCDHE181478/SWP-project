@@ -28,6 +28,31 @@ const Quiz: React.FC = () => {
     ];
 
     useEffect(() => {
+        document.addEventListener("contextmenu", (event) => event.preventDefault());
+    
+        // Chặn các phím tắt DevTools
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (
+                event.key === "F12" || // F12 mở DevTools
+                (event.ctrlKey && event.shiftKey && (event.key === "I" || event.key === "J")) || // Ctrl+Shift+I, Ctrl+Shift+J
+                (event.ctrlKey && event.key === "U") || // Ctrl+U (View Page Source)
+                event.key === "F5" || // F5 làm mới trang
+                (event.ctrlKey && event.key === "r") // Ctrl+R làm mới trang
+            ) {
+                event.preventDefault();
+            }
+        };
+    
+        document.addEventListener("keydown", handleKeyDown);
+    
+        return () => {
+            document.removeEventListener("contextmenu", (event) => event.preventDefault());
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, []);
+    
+
+    useEffect(() => {
         if (quizState === "quiz" && timeLeft > 0) {
             const timer = setInterval(() => {
                 setTimeLeft((prevTime) => prevTime - 1);
