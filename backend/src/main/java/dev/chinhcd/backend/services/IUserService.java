@@ -2,6 +2,7 @@ package dev.chinhcd.backend.services;
 
 import dev.chinhcd.backend.dtos.request.*;
 import dev.chinhcd.backend.dtos.response.*;
+import dev.chinhcd.backend.enums.AccountType;
 import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.models.User;
 
@@ -17,6 +18,8 @@ public interface IUserService {
     User getUserById(Long id);
 
     User getUserByUsername(String username);
+
+    User getUserByEmail(String email);
 
     UserResponse getMe();
 
@@ -48,5 +51,5 @@ public interface IUserService {
 
     Boolean changeAccountType(ChangeAccountTypeRequest request);
 
-    PaginateUserResponse getPaginatedUsers(int page, int pageSize, String username, String email);
+    PaginateUserResponse getPaginatedUsers(int page, int pageSize, String username, String email, String accountType, String sort);
 }

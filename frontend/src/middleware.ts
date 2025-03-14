@@ -28,7 +28,7 @@ const onlyGuestPath = [
 
 // Phân quyền theo role
 const rolePaths: Record<string, string[]> = {
-  USER: [
+  STUDENT: [
     "/profile",
     "/update-profile",
     "/about-us",

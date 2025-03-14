@@ -4,6 +4,7 @@ import dev.chinhcd.backend.dtos.request.*;
 import dev.chinhcd.backend.dtos.response.PaginateUserResponse;
 import dev.chinhcd.backend.dtos.response.UserResponse;
 import dev.chinhcd.backend.dtos.response.longnt.PaginateArticlesResponse;
+import dev.chinhcd.backend.enums.AccountType;
 import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.services.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -107,8 +108,10 @@ public class UserController {
     public ResponseEntity<PaginateUserResponse> getPaginatedUsers(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "pageSize", defaultValue = "20") int pageSize,
-            @RequestParam String username, @RequestParam String email) {
-        return ResponseEntity.ok(userService.getPaginatedUsers(page, pageSize, username, email));
+            @RequestParam String username, @RequestParam String email,
+            @RequestParam(name = "accountType", defaultValue = "") String accountType,
+            @RequestParam String sort) {
+        return ResponseEntity.ok(userService.getPaginatedUsers(page, pageSize, username, email, accountType, sort));
     }
 
 }

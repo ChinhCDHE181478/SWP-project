@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request
                                 .anyRequest().permitAll()
+//                                .requestMatchers("/api/v1/ws/**").permitAll()
 //                                .requestMatchers("/private").hasAnyAuthority("USER", "ADMIN")
 //                                .anyRequest().authenticated()
                 )
@@ -47,10 +48,11 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint))
                 .cors(httpSecurityCorsConfigurer -> {
                     CorsConfiguration configuration = new CorsConfiguration();
-                    configuration.setAllowedOrigins(List.of("*"));
+                    configuration.setAllowedOriginPatterns(List.of("*"));
                     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                     configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
                     configuration.setExposedHeaders(List.of("x-auth-token"));
+                    configuration.setAllowCredentials(true);
                     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                     source.registerCorsConfiguration("/**", configuration);
                     httpSecurityCorsConfigurer.configurationSource(source);
