@@ -5,8 +5,8 @@ import { User, FileText, HelpCircle, LifeBuoy, LogOut } from "lucide-react";
 
 const items = [
   {
-    title: "Users",
-    url: "/manager/account-manager?content=User",
+    title: "Student",
+    url: "/manager/account-manager?content=Student",
     icon: User,
   },
   {

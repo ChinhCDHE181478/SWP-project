@@ -8,7 +8,9 @@ export async function getUser(
   page: number,
   pageSize: number,
   username: string,
-  email: string
+  email: string,
+  accountType: string,
+  sort: string
 ) {
   const res = await axios.get(apiURL + GET_USER_PAGE, {
     headers: { "Content-Type": "application/json" },
@@ -17,6 +19,8 @@ export async function getUser(
       pageSize: pageSize,
       username: username,
       email: email,
+      accountType: accountType,
+      sort: sort
     },
   });
   const data = await res.data;

@@ -10,7 +10,7 @@ import useCurrentUser from "@/hooks/useCurrentUser";
 import { useAuth } from "@/app/AuthProvider";
 
 const validContents = [
-  "User",
+  "Student",
   "Quiz_Manager",
   "Content_Manager",
   "Support_Manager",
@@ -23,18 +23,18 @@ const AdminPage = () => {
   const user = useCurrentUser();
   const { isLoading } = useAuth();
 
-  const content = searchParams.get("content") || "User";
+  const content = searchParams.get("content") || "Student";
 
   useEffect(() => {
     if (!validContents.includes(content)) {
-      const newUrl = `${pathname}?content=User`;
+      const newUrl = `${pathname}?content=Student`;
       router.replace(newUrl);
     }
   }, [content, pathname, router]);
 
   const renderContent = () => {
     switch (content) {
-      case "User":
+      case "Student":
         return <UserListTable role={content} />;
       case "Quiz_Manager":
         return <ManagerListTable role={content} />;

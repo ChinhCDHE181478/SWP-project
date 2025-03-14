@@ -17,7 +17,7 @@ const SendSupportRequestForm = () => {
   const [formError, setFormError] = useState<string>("");
   const user = useCurrentUser();
   const router = useRouter();
-  const {toast} = useToast();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof createSupportRequestSchema>>({
     resolver: zodResolver(createSupportRequestSchema),
@@ -52,7 +52,7 @@ const SendSupportRequestForm = () => {
           username: user.data?.username,
           name: data.name,
           email: data.email,
-          detail: data.detail
+          detail: data.detail,
         },
         {
           headers: { "Content-Type": "application/json" },
@@ -68,8 +68,8 @@ const SendSupportRequestForm = () => {
         title: "Gửi yêu cầu hỗ trợ thành công!",
         className: "text-white bg-green-500",
       });
-      
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setFormError("Hệ thống đang bận, vui lòng thử lại sau");
     }
@@ -322,6 +322,7 @@ const SendSupportRequestForm = () => {
           </div>
           <div className="w-full flex justify-around pt-5">
             <Button
+              disabled={form.formState.isSubmitting}
               type="submit"
               className="w-40 bg-orange-500 font-bold py-2 px-4 rounded-lg hover:bg-orange-600 text-white hover:scale-105 transition-all duration-300 ease-in-out"
             >

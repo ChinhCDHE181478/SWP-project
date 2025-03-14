@@ -26,6 +26,22 @@ spring:
           starttls:
             enable: true
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      key-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "dev.chinhcd.backend.dtos.request.classDTO"
+    producer:
+      key-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: "all"
+      retries: 1
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+
 server:
   port: 8080
   servlet:

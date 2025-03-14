@@ -13,10 +13,10 @@ import {
 import { Form, FormField } from "./ui/form";
 import { Label } from "./ui/label";
 import { Input } from "@nextui-org/react";
-import { REGISTER } from "@/helper/urlPath";
+import { ADD_MANAGER} from "@/helper/urlPath";
 import { z } from "zod";
 import { useToast } from "./ui/use-toast";
-import { createUserSchema } from "@/helper/schema";
+import { managerAccountSchema } from "@/helper/schema";
 import { API } from "@/helper/axios";
 
 const AddUserForm = ({
@@ -30,22 +30,25 @@ const AddUserForm = ({
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
-  const form = useForm<z.infer<typeof createUserSchema>>({
-    resolver: zodResolver(createUserSchema),
+  const form = useForm<z.infer<typeof managerAccountSchema>>({
+    resolver: zodResolver(managerAccountSchema),
     defaultValues: {
       username: "",
       password: "",
+      email: "",
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof createUserSchema>) => {
+  const onSubmit = async (data: z.infer<typeof managerAccountSchema>) => {
     setFormError("");
     try {
       const response = await API.post(
-        `${process.env.NEXT_PUBLIC_API_URL}` + REGISTER,
+        `${process.env.NEXT_PUBLIC_API_URL}` + ADD_MANAGER,
         {
           username: data.username,
           password: data.password,
+          email: data.email,
+          role: "STUDENT"
         }
       );
       if (response.data) {
@@ -150,6 +153,40 @@ const AddUserForm = ({
                   }}
                 />
               </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => {
+                    const error = form.formState.errors?.email;
+                    return (
+                      <>
+                        <Label htmlFor="email" className="text-right">
+                          Email
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="email"
+                          autoComplete="email"
+                          errorMessage={
+                            <span className="text-red-500">
+                              {error?.message}
+                            </span>
+                          }
+                          isInvalid={!!error?.message}
+                          radius="sm"
+                          className={`p-2 col-span-3 border ${
+                            error?.message
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          } rounded-sm`}
+                          {...field}
+                        />
+                      </>
+                    );
+                  }}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-4">
               <div className="col-span-1"></div>
@@ -160,6 +197,7 @@ const AddUserForm = ({
             <DialogFooter>
               <button
                 type="submit"
+                disabled={form.formState.isSubmitting}
                 className="p-2 mt-5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
               >
                 Thêm

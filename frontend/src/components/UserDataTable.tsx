@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+
+import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
@@ -44,7 +51,12 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   searchParam: string[];
   fetchData: () => void;
-  setSearchParam: (username: string, email: string) => void;
+  setSearchParam: (
+    username: string,
+    email: string,
+    accountType: string,
+    sort: string
+  ) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -60,6 +72,7 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const sortStatus = useMemo(() => ["Tăng dần", "Giảm dần"], []);
   const accountType = useMemo(
     () => ["FREE_COURSE", "FULL_COURSE", "COMBO_COURSE"],
     []
@@ -72,6 +85,10 @@ export function DataTable<TData, TValue>({
   const [newAccountType, setNewAccountType] = useState<string>("");
   const [email, setEmail] = useState<string>(searchParam[1] || "");
   const [username, setUsername] = useState<string>(searchParam[0] || "");
+  const [accountTypeSearch, setAccountTypeSearch] = useState<string>(
+    searchParam[2] || ""
+  );
+  const [sort, setSort] = useState<string>(searchParam[3] || "");
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDelete = async (id: any) => {
@@ -191,7 +208,7 @@ export function DataTable<TData, TValue>({
           onChange={(event) => {
             setUsername(event.target.value);
           }}
-          className="max-w-sm border border-gray-300 rounded-sm"
+          className="max-w-[200px] h-[45px] border border-gray-300 rounded-sm"
         />
 
         <Input
@@ -201,12 +218,56 @@ export function DataTable<TData, TValue>({
           onChange={(event) => {
             setEmail(event.target.value);
           }}
-          className="max-w-sm border border-gray-300 rounded-sm"
+          className="max-w-[200px] h-[45px] border border-gray-300 rounded-sm"
         />
+
+        <Select
+          value={
+            accountType.includes(accountTypeSearch) ? accountTypeSearch : "all"
+          }
+          onValueChange={(val) =>
+            setAccountTypeSearch(val === "all" ? "" : val)
+          }
+        >
+          <SelectTrigger className="max-w-[200px] h-[45px]">
+            {accountTypeSearch === "" ? "Loại tài khoản" : accountTypeSearch}
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem key="all" value="all">
+              Loại tài khoản
+            </SelectItem>
+            {accountType.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={sortStatus.includes(sort) ? sort : "no"}
+          onValueChange={(val) => setSort(val === "no" ? "" : val)}
+        >
+          <SelectTrigger className="max-w-[200px] h-[45px]">
+            {sort === "" ? "Sắp xếp theo tên tài khoản" : sort}
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem key="no" value="no">
+              Sắp xếp theo tên tài khoản
+            </SelectItem>
+            {sortStatus.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <button
           type="button"
-          onClick={() => setSearchParam(username, email)}
+          onClick={() =>
+            setSearchParam(username, email, accountTypeSearch, sort)
+          }
           className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
         >
           Tìm kiếm

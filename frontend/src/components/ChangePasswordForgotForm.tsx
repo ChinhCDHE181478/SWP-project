@@ -155,6 +155,7 @@ const ChangePasswordForgotForm = ({ token }: { token: string }) => {
               </div>
               <button
                 type="submit"
+                disabled={form.formState.isSubmitting}
                 className="p-2 mt-5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
               >
                 Đổi mật khẩu

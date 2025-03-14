@@ -124,6 +124,7 @@ const UserInformationProfile = ({ user }: any) => {
             <DialogTrigger asChild>
               <button
                 type="button"
+                onClick={() => setNotification("")}
                 className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
               >
                 Xóa email
@@ -162,6 +163,7 @@ const UserInformationProfile = ({ user }: any) => {
             <DialogTrigger asChild>
               <button
                 type="button"
+                onClick={() => setNotification("")}
                 className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
               >
                 Thêm email
