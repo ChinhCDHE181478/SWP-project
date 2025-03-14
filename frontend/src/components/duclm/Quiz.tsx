@@ -8,24 +8,25 @@ const Quiz: React.FC = () => {
     const router = useRouter();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(1800); // 30 phút
-    const [quizState, setQuizState] = useState<"start" | "quiz" | "correct" | "wrong" | "finished">("start");
+    const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes
+    const [quizState, setQuizState] = useState<"start" | "quiz" | "finished">("start");
     const [dinosaurMessage, setDinosaurMessage] = useState("");
+    const [hasAnswered, setHasAnswered] = useState(false);
+    const [dinosaurImage, setDinosaurImage] = useState("/test/dinosaur.svg");
 
     const questions = [
         {
-            question: "Câu hỏi 1?",
-            answers: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+            question: "Question 1?",
+            answers: ["Answer A", "Answer B", "Answer C", "Answer D"],
             correct: 1,
         },
         {
-            question: "Câu hỏi 2?",
-            answers: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+            question: "Question 2?",
+            answers: ["Answer A", "Answer B", "Answer C", "Answer D"],
             correct: 3,
         },
     ];
 
-    // Timer chạy liên tục cho đến khi quiz kết thúc
     useEffect(() => {
         if (quizState === "quiz" && timeLeft > 0) {
             const timer = setInterval(() => {
@@ -33,79 +34,66 @@ const Quiz: React.FC = () => {
             }, 1000);
             return () => clearInterval(timer);
         }
-        if (timeLeft === 0) {
-            setQuizState("finished");
-            setDinosaurMessage("Hết giờ! Xem kết quả nhé!");
-            setTimeout(() => router.push("/practice"), 5000);
-        }
     }, [quizState, timeLeft]);
 
-    // Format thời gian
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
     };
 
-    // Xử lý chọn đáp án
     const handleAnswer = (index: number) => {
+        if (hasAnswered) return;
+        setHasAnswered(true);
+
         if (index === questions[currentQuestionIndex].correct) {
             setScore(score + 1);
-            setDinosaurMessage("Bạn giỏi lắm!");
+            setDinosaurMessage("Great job!");
+            setDinosaurImage("/test/correct.svg");
         } else {
-            setDinosaurMessage("Ôi không! Đáp án sai rồi!");
+            setDinosaurMessage("Oh no! Wrong answer!");
+            setDinosaurImage("/test/wrong.svg");
         }
 
-        // Chuyển sang câu tiếp theo hoặc kết thúc quiz
-        if (currentQuestionIndex + 1 < questions.length) {
-            setTimeout(() => {
+        setTimeout(() => {
+            setDinosaurMessage(""); // Xóa message
+            setDinosaurImage("/test/dinosaur.svg"); // Đổi lại thành khủng long mặc định
+            if (currentQuestionIndex + 1 < questions.length) {
                 setCurrentQuestionIndex(currentQuestionIndex + 1);
-                setDinosaurMessage("");
-            }, 1000);
-        } else {
-            setTimeout(() => {
+                setHasAnswered(false);
+            } else {
                 setQuizState("finished");
-                setDinosaurMessage("Bạn đã hoàn thành quiz! Đang chuyển trang...");
-                setTimeout(() => router.push("/practice"), 5000);
-            }, 1000);
-        }
+                setDinosaurMessage("You have completed the quiz! Click OK to return.");
+            }
+        }, 1000);
     };
 
     return (
         <div className="bg-cover bg-center h-screen flex items-center justify-center relative text-white" style={{ backgroundImage: "url(/test/background.svg)" }}>
-            {/* Hình khủng long */}
-            <img src="/test/dinosaur.svg" alt="Dinosaur" className="absolute left-8 bottom-0 w-[450px]" />
+            {quizState !== "start" && (
+                <img src={dinosaurImage} alt="Dinosaur" className="absolute left-8 bottom-0 w-[450px]" />
+            )}
 
-            {/* Hộp thoại của khủng long */}
-{dinosaurMessage && (
-    <div className="absolute left-[160px] bottom-[320px] bg-white text-black border border-black rounded-lg p-4 shadow-lg text-center max-w-[280px] font-bold">
-        <p className="m-0">{dinosaurMessage}</p>
+            {dinosaurMessage && (
+                <div className="absolute left-[160px] bottom-[320px] bg-white text-black border border-black rounded-lg p-4 shadow-lg text-center max-w-[280px] font-bold">
+                    <p className="m-0">{dinosaurMessage}</p>
+                    <div className="absolute left-[50%] bottom-[-18px] w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-black"></div>
+                    <div className="absolute left-[50%] bottom-[-14px] w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-white"></div>
+                </div>
+            )}
 
-        {/* Mũi nhọn hộp thoại */}
-        <div className="absolute left-[50%] bottom-[-18px] w-0 h-0 
-                        border-l-[10px] border-l-transparent 
-                        border-r-[10px] border-r-transparent 
-                        border-t-[14px] border-black"></div>
+            {quizState === "quiz" && (
+                <div className="absolute top-4 right-4">
+                    <Scoreboard score={score} time={formatTime(timeLeft)} />
+                </div>
+            )}
 
-        <div className="absolute left-[50%] bottom-[-14px] w-0 h-0 
-                        border-l-[10px] border-l-transparent 
-                        border-r-[10px] border-r-transparent 
-                        border-t-[14px] border-white"></div>
-    </div>
-)}
-
-
-            {/* Scoreboard */}
-            <div className="absolute top-4 right-4">
-                <Scoreboard score={score} time={formatTime(timeLeft)} />
-            </div>
-
-            {/* Nội dung Quiz */}
             <div className="bg-black bg-opacity-50 rounded-lg p-10 shadow-lg text-center max-w-lg w-full">
                 {quizState === "start" && (
                     <div>
-                        <h2 className="text-2xl">Chào mừng đến với quiz!</h2>
-                        <button className={buttonStyle} onClick={() => setQuizState("quiz")}>Bắt đầu</button>
+                        <h2 className="text-2xl">Welcome to the Dinosaur game!</h2>
+                        <img src="/test/dinosaur.svg" alt="Dinosaur" className="mx-auto w-[200px] mb-5 mt-3" />
+                        <button className={buttonStyle} onClick={() => setQuizState("quiz")}>Start</button>
                     </div>
                 )}
 
@@ -124,9 +112,10 @@ const Quiz: React.FC = () => {
 
                 {quizState === "finished" && (
                     <div>
-                        <h2 className="text-2xl">Quiz hoàn thành!</h2>
-                        <p className="text-lg">Điểm số của bạn: {score}/{questions.length}</p>
-                        <p className="text-sm">Đang chuyển hướng đến trang Practice...</p>
+                        <h2 className="text-2xl">Game Completed!</h2>
+                        <p className="text-lg">Your score: {score}/{questions.length}</p>
+                        <p className="text-lg">Completion Time: {formatTime(1800 - timeLeft)}</p>
+                        <button className={buttonStyle} onClick={() => router.push("/practice")}>OK</button>
                     </div>
                 )}
             </div>
@@ -134,7 +123,6 @@ const Quiz: React.FC = () => {
     );
 };
 
-// Style nút bấm
 const buttonStyle = "bg-teal-600 text-white rounded-md px-4 py-2 mx-2 cursor-pointer transition duration-300 hover:bg-teal-700";
 
 export default Quiz;
