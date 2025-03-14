@@ -5,23 +5,30 @@ import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.SmallPracticeDetailResponse;
 import dev.chinhcd.backend.models.duclm.*;
 import dev.chinhcd.backend.repository.duclm.*;
+import dev.chinhcd.backend.services.duclm.IPracticeService;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
-
-// Các import khác
-import dev.chinhcd.backend.services.duclm.IPracticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.*;
 import java.sql.Date;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 
 @RestController
 @RequestMapping("/practice")
@@ -60,66 +67,105 @@ public class PracticeController {
     @PostMapping("/upload-practice")
     public ResponseEntity<String> uploadPractice(
             @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "audioZip", required = false) MultipartFile audioZip,
             @RequestParam("practiceDate") String practiceDate,
             @RequestParam("grade") int grade,
-            @RequestParam("practiceLevel") int practiceLevel) {
+            @RequestParam("practiceLevel") int practiceLevel,
+            @RequestParam("status") String status) { // Thêm tham số status
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("Tệp rỗng");
         }
 
-        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
-
-            // Tạo và lưu Practice
+        try {
+            // Create and save Practice
             Practice practice = new Practice();
-            practice.setPracticeDate(Date.valueOf(practiceDate));
+            try {
+                practice.setPracticeDate(Date.valueOf(practiceDate));
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body("Invalid date format");
+            }
             practice.setGrade(grade);
             practice.setPracticeLevel(practiceLevel);
-            if(practiceRepository.findByPracticeLevelAndGrade(practiceLevel, grade).isPresent()) {
+            practice.setStatus(status); // Gán giá trị status
+
+            if (practiceRepository.findByPracticeLevelAndGrade(practiceLevel, grade).isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Dữ liệu đã tồn tại trong hệ thống");
             }
-            practiceRepository.save(practice); // Lưu Practice để lấy ID
+            practiceRepository.save(practice); // Save Practice to get ID
 
-            // Duyệt từng hàng để tạo SmallPractice, Question và Answer
-            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) { // Bắt đầu từ hàng thứ hai
-                Row row = sheet.getRow(i);
-                if (row == null) continue;
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practice.getPracticeId();
+            Path targetDir = Paths.get(folderPath);
+            if (!Files.exists(targetDir)) {
+                Files.createDirectories(targetDir);
+            }
 
-                // Tạo SmallPractice từ Test Name và Test Date
-                SmallPractice smallPractice = new SmallPractice();
-                smallPractice.setTestName(getStringCellValue(row.getCell(1))); // Test Name
-                smallPractice.setTestDate(row.getCell(0).getDateCellValue()); // Test Date
-                smallPractice.setPractice(practice); // Liên kết với Practice
-                smallPracticeRepository.save(smallPractice); // Lưu SmallPractice để lấy ID
+            // Lưu file Excel
+            Path excelFilePath = targetDir.resolve("practice_" + practice.getPracticeId() + ".xlsx");
+            Files.copy(file.getInputStream(), excelFilePath, StandardCopyOption.REPLACE_EXISTING);
 
-                // Tạo Question từ các ô
-                Question question = new Question();
-                question.setQuestionText(getStringCellValue(row.getCell(2))); // Câu hỏi
-                question.setChoice1(getStringCellValue(row.getCell(3))); // Choice1
-                question.setChoice2(getStringCellValue(row.getCell(4))); // Choice2
-                question.setChoice3(getStringCellValue(row.getCell(5))); // Choice3
-                question.setChoice4(getStringCellValue(row.getCell(6))); // Choice4
-                questionRepository.save(question); // Lưu Question để lấy ID
+            // Nếu có file ZIP, lưu và giải nén
+            if (audioZip != null && !audioZip.isEmpty()) {
+                Path zipFilePath = targetDir.resolve("audio_" + practice.getPracticeId() + ".zip");
+                Files.copy(audioZip.getInputStream(), zipFilePath, StandardCopyOption.REPLACE_EXISTING);
 
-                // Tạo SmallPracticeQuestion để liên kết SmallPractice và Question
-                SmallPracticeQuestion smallPracticeQuestion = new SmallPracticeQuestion();
-                smallPracticeQuestion.setSmallPractice(smallPractice); // Liên kết với SmallPractice
-                smallPracticeQuestion.setQuestion(question); // Liên kết với Question
-                smallPracticeQuestionRepository.save(smallPracticeQuestion); // Lưu SmallPracticeQuestion
+                // Giải nén file ZIP
+                unzipFile(zipFilePath.toString(), folderPath);
+            }
 
-                // Tạo Answer cho câu hỏi
-                Answer answer = new Answer();
-                answer.setCorrectAnswer(getStringCellValue(row.getCell(7))); // Lấy câu trả lời đúng từ ô
-                answer.setQuestion(question); // Liên kết với Question
-                answerRepository.save(answer); // Lưu Answer
+
+            // Process the Excel file
+            try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+                Sheet sheet = workbook.getSheetAt(0);
+
+                for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) { // Start from the second row
+                    Row row = sheet.getRow(i);
+                    if (row == null) continue;
+
+                    SmallPractice smallPractice = new SmallPractice();
+                    smallPractice.setTestName(getStringCellValue(row.getCell(1))); // Test Name
+                    smallPractice.setTestDate(row.getCell(0) != null ? row.getCell(0).getDateCellValue() : null); // Test Date
+                    smallPractice.setPractice(practice);
+                    smallPracticeRepository.save(smallPractice);
+
+                    Question question = new Question();
+                    question.setQuestionText(getStringCellValue(row.getCell(2))); // Question
+                    question.setChoice1(getStringCellValue(row.getCell(3))); // Choice1
+                    question.setChoice2(getStringCellValue(row.getCell(4))); // Choice2
+                    question.setChoice3(getStringCellValue(row.getCell(5))); // Choice3
+                    question.setChoice4(getStringCellValue(row.getCell(6))); // Choice4
+
+                    String audioFileName = getStringCellValue(row.getCell(8)); // AudioFileName column
+                    if (audioFileName != null && !audioFileName.isEmpty()) {
+                        Path audioFilePath = targetDir.resolve(audioFileName);
+                        if (Files.exists(audioFilePath)) {
+                            question.setAudioFile(Files.readAllBytes(audioFilePath)); // Lưu tệp âm thanh
+                        } else {
+                            question.setAudioFile(null); // Hoặc có thể không lưu tệp âm thanh
+                        }
+                    } else {
+                        question.setAudioFile(null); // Đặt là null nếu không có tệp âm thanh
+                    }
+
+                    questionRepository.save(question);
+
+                    SmallPracticeQuestion smallPracticeQuestion = new SmallPracticeQuestion();
+                    smallPracticeQuestion.setSmallPractice(smallPractice);
+                    smallPracticeQuestion.setQuestion(question);
+                    smallPracticeQuestionRepository.save(smallPracticeQuestion);
+
+                    Answer answer = new Answer();
+                    answer.setCorrectAnswer(getStringCellValue(row.getCell(7))); // Get the correct answer
+                    answer.setQuestion(question);
+                    answerRepository.save(answer);
+                }
             }
 
             return ResponseEntity.ok("Dữ liệu đã được lưu");
         } catch (Exception e) {
-            e.printStackTrace(); // In ra chi tiết lỗi
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Lỗi khi xử lý tệp: " + e.getMessage());
+                    .body("Lỗi khi lưu dữ liệu: " + e.getMessage());
         }
     }
 
@@ -173,9 +219,11 @@ public class PracticeController {
     public ResponseEntity<String> updatePractice(
             @PathVariable Long practiceId,
             @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "audioZip", required = false) MultipartFile audioZip,
             @RequestParam("practiceDate") String practiceDate,
             @RequestParam("grade") int grade,
-            @RequestParam("practiceLevel") int practiceLevel) {
+            @RequestParam("practiceLevel") int practiceLevel,
+            @RequestParam("status") String status) { // Thêm tham số status
 
         try {
             Optional<Practice> practiceOptional = practiceRepository.findById(practiceId);
@@ -187,8 +235,29 @@ public class PracticeController {
             practice.setPracticeDate(Date.valueOf(practiceDate));
             practice.setGrade(grade);
             practice.setPracticeLevel(practiceLevel);
+            practice.setStatus(status); // Cập nhật giá trị status
             practiceRepository.save(practice); // Cập nhật Practice
 
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practice.getPracticeId();
+            Path targetDir = Paths.get(folderPath);
+            if (!Files.exists(targetDir)) {
+                Files.createDirectories(targetDir);
+            }
+
+            // Lưu file Excel
+            Path excelFilePath = targetDir.resolve("exam_" + practice.getPracticeId() + ".xlsx");
+            Files.copy(file.getInputStream(), excelFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Nếu có file ZIP, lưu và giải nén
+            if (audioZip != null && !audioZip.isEmpty()) {
+                Path zipFilePath = targetDir.resolve("audio_" + practice.getPracticeId() + ".zip");
+                Files.copy(audioZip.getInputStream(), zipFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // Giải nén file ZIP
+                unzipFile(zipFilePath.toString(), folderPath);
+            }
+
+            // Xóa các câu hỏi và bài thực hành nhỏ cũ
             List<Question> questionsToDelete = questionRepository.findByPracticeId(practiceId);
             if (!questionsToDelete.isEmpty()) {
                 questionRepository.deleteAll(questionsToDelete);
@@ -196,10 +265,9 @@ public class PracticeController {
             List<SmallPractice> smallPractices = smallPracticeRepository.findByPractice(practice);
             smallPracticeRepository.deleteAll(smallPractices);
 
-            // Đọc file Excel
+            // Xử lý file Excel
             try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
                 Sheet sheet = workbook.getSheetAt(0);
-
                 for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
                     Row row = sheet.getRow(i);
                     if (row == null) continue;
@@ -218,6 +286,7 @@ public class PracticeController {
                     question.setChoice2(getStringCellValue(row.getCell(4)));
                     question.setChoice3(getStringCellValue(row.getCell(5)));
                     question.setChoice4(getStringCellValue(row.getCell(6)));
+
                     questionRepository.save(question);
 
                     // Liên kết Question với SmallPractice
@@ -233,7 +302,6 @@ public class PracticeController {
                     answerRepository.save(answer);
                 }
             }
-
             return ResponseEntity.ok("Cập nhật thành công!");
 
         } catch (Exception e) {
@@ -242,6 +310,7 @@ public class PracticeController {
                     .body("Lỗi khi cập nhật bài thực hành: " + e.getMessage());
         }
     }
+
     @GetMapping("/get-detail/{id}")
     public ResponseEntity<?> getPracticeDetail(@PathVariable Long id) {
         Practice practice = practiceRepository.findById(id).orElse(null);
@@ -273,6 +342,76 @@ public class PracticeController {
         return ResponseEntity.ok(response);
     }
 
+    private void unzipFile(String zipFilePath, String destDir) throws IOException {
+        File dir = new File(destDir);
+        if (!dir.exists()) dir.mkdirs();
 
+        try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath))) {
+            ZipEntry entry;
+            while ((entry = zipIn.getNextEntry()) != null) {
+                Path filePath = Paths.get(destDir, entry.getName());
+                if (!entry.isDirectory()) {
+                    Files.copy(zipIn, filePath, StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    Files.createDirectories(filePath);
+                }
+                zipIn.closeEntry();
+            }
+        }
+    }
 
+    @GetMapping("/download-excel/{practiceId}")
+    public ResponseEntity<Resource> downloadExcel(@PathVariable Long practiceId) {
+        try {
+            // Lấy bài thực hành từ database để xác định đường dẫn
+            Practice practice = practiceRepository.findById(practiceId).orElse(null);
+            if (practice == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Đường dẫn đến file Excel
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practiceId;
+            Path filePath = Paths.get(folderPath, "practice_" + practiceId + ".xlsx");
+
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // API để tải file audio cho bài thực hành
+    @GetMapping("/download-audio/{practiceId}")
+    public ResponseEntity<Resource> downloadAudio(@PathVariable Long practiceId) {
+        try {
+            // Lấy bài thực hành từ database để xác định đường dẫn
+            Practice practice = practiceRepository.findById(practiceId).orElse(null);
+            if (practice == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Đường dẫn đến file audio
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practiceId; // Đường dẫn thư mục
+            Path filePath = Paths.get(folderPath, "audio_" + practiceId + ".zip"); // Hoặc .rar
+
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }

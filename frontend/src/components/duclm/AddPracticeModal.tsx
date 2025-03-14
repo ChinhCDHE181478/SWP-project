@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { API } from "@/helper/axios";
 import { useToast } from "@/components/ui/use-toast";
+import { FaPlus } from "react-icons/fa"; // Import an icon for the modal title
 
 interface AddPracticeModalProps {
     isOpen: boolean;
@@ -24,19 +25,22 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
     const [grade, setGrade] = useState<string>("");
     const [practiceLevel, setPracticeLevel] = useState<string>("");
     const [file, setFile] = useState<File | null>(null);
+    const [audioFile, setAudioFile] = useState<File | null>(null); // New state for audio file
+    const [status, setStatus] = useState<string>("on"); // Thêm state cho status
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFile(event.target.files?.[0] || null);
+    };
+
+    const handleAudioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setAudioFile(event.target.files?.[0] || null);
     };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         if (!file) {
-            toast({
-                title: "Vui lòng chọn tệp Excel!",
-                className: "text-white bg-red-500",
-            });
+            toast({ title: "Vui lòng chọn tệp Excel!", className: "text-white bg-red-500" });
             return;
         }
 
@@ -45,6 +49,11 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
         formData.append("practiceDate", practiceDate);
         formData.append("grade", grade);
         formData.append("practiceLevel", practiceLevel);
+        formData.append("status", status); // Gán giá trị status vào formData
+
+        if (audioFile) {
+            formData.append("audioZip", audioFile);
+        }
 
         try {
             const response = await API.post("/practice/upload-practice", formData, {
@@ -58,8 +67,8 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
                     className: "text-white bg-green-500",
                 });
 
-                refreshList(); // Cập nhật danh sách mà không cần reload trang
-                onClose(); // Đóng modal
+                refreshList();
+                onClose(); 
             }
         } catch (error: any) {
             if (error.response && error.response.status === 409) {
@@ -81,7 +90,10 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="bg-white shadow-lg rounded-lg">
-                <DialogTitle>Thêm bài tự luyện</DialogTitle>
+                <DialogTitle className="flex items-center">
+                    <FaPlus className="mr-2" /> {/* Add icon here */}
+                    Thêm bài tự luyện
+                </DialogTitle>
                 <form onSubmit={handleSubmit} className="p-4">
                     <div className="mb-4">
                         <label className="block mb-1">Ngày</label>
@@ -113,6 +125,20 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
                             required
                         />
                     </div>
+                    
+                    {/* Status */}
+                    <div className="mb-4">
+                        <label className="block mb-1">Trạng thái</label>
+                        <select
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                            className="border rounded p-2 w-full"
+                        >
+                            <option value="on">Bật</option>
+                            <option value="off">Tắt</option>
+                        </select>
+                    </div>
+
                     <div className="mb-4">
                         <label className="block mb-1">Tải lên file Excel</label>
                         <input
@@ -122,6 +148,25 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
                             className="border rounded p-2 w-full"
                             required
                         />
+                        {file && (
+                            <p className="text-sm text-green-600 mt-1">
+                                📄 Đã chọn: {file.name}
+                            </p>
+                        )}
+                    </div>
+                    <div className="mb-4">
+                        <label className="block mb-1">Tải lên file âm thanh (tùy chọn)</label>
+                        <input
+                            type="file"
+                            accept=".zip,.rar"
+                            onChange={handleAudioChange}
+                            className="border rounded p-2 w-full"
+                        />
+                        {audioFile && (
+                            <p className="text-sm text-green-600 mt-1">
+                                🎵 Đã chọn: {audioFile.name}
+                            </p>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button type="submit"

@@ -36,6 +36,7 @@ interface PracticeDetailModalProps {
     grade: number;
     practiceLevel: number;
     practiceDate: string;
+    status: string;
     practiceDetails: PracticeDetail[];
 }
 
@@ -46,7 +47,11 @@ const PracticeDetailModal: React.FC<PracticeDetailModalProps> = ({
     practiceLevel,
     practiceDate,
     practiceDetails,
+    status,
 }) => {
+    // Chuyển đổi trạng thái
+    const displayStatus = status === "on" ? "Đang hoạt động" : "Ngừng hoạt động";
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="bg-white shadow-lg rounded-lg" style={{ width: '80%', maxWidth: '800px' }}>
@@ -55,11 +60,13 @@ const PracticeDetailModal: React.FC<PracticeDetailModalProps> = ({
                     <p><strong>Khối:</strong> {grade}</p>
                     <p><strong>Vòng tự luyện:</strong> {practiceLevel}</p>
                     <p><strong>Ngày:</strong> {new Date(practiceDate).toLocaleDateString("en-GB")}</p>
+                    <p><strong>Trạng thái:</strong> {displayStatus}</p> {/* Hiển thị trạng thái với mô tả rõ ràng */}
                     
                     <h3 className="mt-4 font-semibold">Chi tiết các bài thực hành:</h3>
                     {practiceDetails.map((detail, index) => (
                         <div key={index} className="mt-4">
                             <h4 className="font-semibold">{detail.testName}</h4>
+                            
                             <table className="mt-2 w-full border-collapse border">
                                 <thead>
                                     <tr>

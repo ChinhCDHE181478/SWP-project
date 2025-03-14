@@ -67,7 +67,8 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
     "/manager/quiz-manager/practice",
     "/manager/quiz-manager/exam",
-    "/manager/quiz-manager/mock-exam"
+    "/manager/quiz-manager/mock-exam",
+    "/manager/quiz-manager/test"
   ],
   SUPPORT_MANAGER: [
     "/manager/support-manager",

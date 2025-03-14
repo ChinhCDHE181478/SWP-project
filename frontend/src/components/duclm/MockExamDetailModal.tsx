@@ -56,7 +56,7 @@ const MockExamDetailModal: React.FC<MockExamDetailModalProps> = ({
                 <DialogTitle className="text-center">Chi tiết kỳ thi giả lập</DialogTitle>
                 <div className="p-4">
                     <p><strong>Tên kỳ thi:</strong> {mockExam.examName}</p>
-                    <p><strong>Ngày thi:</strong> {new Date(mockExam.examDate).toLocaleString("en-GB")}</p>
+                    <p><strong>Ngày thi:</strong> {new Date(mockExam.examDate).toLocaleDateString("en-GB")}</p>
                     <p><strong>Khối:</strong> {mockExam.grade}</p>
                     <p><strong>Loại kỳ thi:</strong> {mockExam.type}</p>
 
