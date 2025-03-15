@@ -29,17 +29,13 @@ public class SecurityConfig {
 
     public static final String[] PUBLIC_ENDPOINTS = {"/auth/register", "/auth/login", "/auth/refresh", "/auth/reset",
             "auth/verify", "/auth/logout", "/user/request-forgot-password", "/articles/{id}", "/articles",
-            "/articles/suggestions", "/exam/next", "/practice/max-level"};
+            "/articles/suggestions", "/exam/next", "/practice/max-level", "/payment/success"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request ->
-                        request
-                                .anyRequest().permitAll()
-//                                .requestMatchers("/api/v1/ws/**").permitAll()
-//                                .requestMatchers("/private").hasAnyAuthority("USER", "ADMIN")
-//                                .anyRequest().authenticated()
+                        request.anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->

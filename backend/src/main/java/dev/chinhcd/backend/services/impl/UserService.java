@@ -290,6 +290,11 @@ public class UserService implements IUserService {
                 pageSize);
     }
 
+    @Override
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+
     public UserResponse mapResponse(User user) {
         return UserResponse.builder()
                 .birthDate(user.getBirthDate())

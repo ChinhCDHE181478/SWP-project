@@ -44,7 +44,7 @@ const RequestForgotPasswordForm = () => {
     <>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="Username" className="text-right">
-          Username:
+          Tên tài khoản:
         </Label>
         <Input
           radius="sm"
