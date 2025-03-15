@@ -42,6 +42,13 @@ spring:
         enable.idempotence: true
         max.in.flight.requests.per.connection: 5
 
+vnpay:
+  vnpayUrl: "${VNPAY_URL}"
+  vnp_ReturnUrl: "${VNPAY_RETURN_URL}"
+  vnp_TmnCode: "${VNPAY_TMP_CODE}"
+  vnp_SecretKey: "${VNPAY_SECRET_KEY}"
+  vnp_ApiUrl: "${VNPAY_API_URL}"
+
 server:
   port: 8080
   servlet:

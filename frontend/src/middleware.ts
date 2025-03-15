@@ -117,10 +117,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (currentPath.match(/^\/(login|home)\/.+/)) {
-    return NextResponse.next();
-  }
-
   if (!allPath.includes(currentPath)) {
     return NextResponse.redirect(new URL("/not-found", request.url));
   }

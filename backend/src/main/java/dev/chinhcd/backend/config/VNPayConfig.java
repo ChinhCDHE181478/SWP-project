@@ -1,6 +1,7 @@
 
 package dev.chinhcd.backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
@@ -24,11 +25,26 @@ import jakarta.servlet.http.HttpServletRequest;
 @Component
 public class VNPayConfig {
 
-    public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "http://localhost:3000/payment-status";
-    public static String vnp_TmnCode = "7WT1XZ8P";
-    public static String secretKey = "9C58GFTPQXNDFKUMGJFZW14YK5VF4AAR";
-    public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
+    public static String vnp_PayUrl;
+    public static String vnp_ReturnUrl;
+    public static String vnp_TmnCode;
+    public static String secretKey;
+    public static String vnp_ApiUrl;
+
+    // Constructor để inject trực tiếp vào biến static
+    public VNPayConfig(
+            @Value("${vnpay.vnpayUrl}") String vnp_PayUrl,
+            @Value("${vnpay.vnp_ReturnUrl}") String vnp_ReturnUrl,
+            @Value("${vnpay.vnp_TmnCode}") String vnp_TmnCode,
+            @Value("${vnpay.vnp_SecretKey}") String secretKey,
+            @Value("${vnpay.vnp_ApiUrl}") String vnp_ApiUrl
+    ) {
+        VNPayConfig.vnp_PayUrl = vnp_PayUrl;
+        VNPayConfig.vnp_ReturnUrl = vnp_ReturnUrl;
+        VNPayConfig.vnp_TmnCode = vnp_TmnCode;
+        VNPayConfig.secretKey = secretKey;
+        VNPayConfig.vnp_ApiUrl = vnp_ApiUrl;
+    }
 
     public static String md5(String message) {
         String digest = null;
