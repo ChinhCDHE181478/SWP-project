@@ -5,7 +5,7 @@ import { useAuth } from "@/app/AuthProvider";
 import { useRouter } from "next/navigation";
 
 const SupportPage = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   const sendSupportPage = () => {
@@ -65,25 +65,16 @@ const SupportPage = () => {
               <p>Nhận kết quả</p>
             </div>
           </div>
-          <div className="w-[1050] flex justify-end mt-8">
-            {!isLoading && isAuthenticated && (
-              <Link href={"/support"}>
-                <button className="bg-orange-500 shadow-lg rounded-lg p-2 font-bold text-white border border-white hover:bg-white hover:text-black hover:scale-205 transition-all duration-300 ease-in-out">
-                  Xem phiếu đã gửi
-                </button>
-              </Link>
-            )}
-          </div>
         </div>
       </div>
-      <div className="w-[1270px] h-[300px] ">
-        <div className="p-5 h-full grid grid-cols-4">
+      <div className="w-[1400px] h-[320px] ">
+        <div className="p-5 h-full grid grid-cols-5">
           <div className="  p-4  text-black">
             <div className="h-full w-full bg-[#F5BA3A] shadow-xl rounded-lg p-4">
-              <div className="h-[70px] flex items-start text-center justify-center pt-2 text-xl font-bold">
+              <div className="h-[75px] flex items-start text-center justify-center pt-2 text-xl font-bold">
                 HỖ TRỢ TÀI KHOẢN
               </div>
-              <div className="flex h-[70px] text-center">
+              <div className="flex h-[90px] text-center">
                 Giải đáp các câu hỏi về thông tin tài khoản, mật khẩu
               </div>
               <div className="flex justify-center">
@@ -97,27 +88,10 @@ const SupportPage = () => {
           </div>
           <div className="  p-4  text-black">
             <div className="h-full w-full bg-[#F5BA3A] shadow-xl rounded-lg p-4">
-              <div className="h-[70px] flex items-start text-center pt-2 text-xl justify-center font-bold">
-                HỖ TRỢ MUA GÓI DỊCH VỤ
-              </div>
-              <div className="flex h-[70px] text-center justify-center">
-                Giải đáp câu hỏi về mua gói
-              </div>
-              <div className="flex justify-center">
-                <Link href={"/support"}>
-                  <button className="bg-orange-500 shadow-lg rounded-lg p-2 font-bold text-white border border-white hover:bg-white hover:text-black hover:scale-205 transition-all duration-300 ease-in-out">
-                    Xem ngay
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div className="  p-4  text-black">
-            <div className="h-full w-full bg-[#F5BA3A] shadow-xl rounded-lg p-4">
-              <div className="h-[70px] flex items-start text-center justify-center pt-2 text-xl font-bold">
+              <div className="h-[75px] flex items-start text-center justify-center pt-2 text-xl font-bold">
                 HỖ TRỢ HỌC - THI
               </div>
-              <div className="flex h-[70px] text-center">
+              <div className="flex h-[90px] text-center">
                 Giải đáp câu hỏi về chương trình học - thi
               </div>
               <div className="flex justify-center">
@@ -131,10 +105,45 @@ const SupportPage = () => {
           </div>
           <div className="  p-4  text-black">
             <div className="h-full w-full bg-[#F5BA3A] shadow-xl rounded-lg p-4">
-              <div className="h-[70px] flex items-start text-center justify-center pt-2 text-xl font-bold">
+              <div className="h-[75px] flex items-start text-center pt-2 text-xl justify-center font-bold">
+                HỖ TRỢ MUA GÓI DỊCH VỤ
+              </div>
+              <div className="flex h-[90px] text-center justify-center">
+                Giải đáp câu hỏi về mua gói
+              </div>
+              <div className="flex justify-center">
+                <Link href={"/support"}>
+                  <button className="bg-orange-500 shadow-lg rounded-lg p-2 font-bold text-white border border-white hover:bg-white hover:text-black hover:scale-205 transition-all duration-300 ease-in-out">
+                    Xem ngay
+                  </button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="  p-4  text-black">
+            <div className="h-full w-full bg-[#F5BA3A] shadow-xl rounded-lg p-4">
+              <div className="h-[75px] flex items-start text-center pt-2 text-xl justify-center font-bold">
+                THEO DÕI PHIẾU
+              </div>
+              <div className="flex h-[90px] text-center justify-center">
+                Theo dõi phiếu yêu cầu bạn đã gửi
+              </div>
+              <div className="flex justify-center">
+                <Link href={"/support"}>
+                  <button className="bg-orange-500 shadow-lg rounded-lg p-2 font-bold text-white border border-white hover:bg-white hover:text-black hover:scale-205 transition-all duration-300 ease-in-out">
+                    Xem ngay
+                  </button>
+                </Link>
+              </div>
+            </div>
+          </div>
+          <div className="  p-4  text-black">
+            <div className="h-full w-full bg-[#F5BA3A] shadow-xl rounded-lg p-4">
+              <div className="h-[75px] flex items-start text-center justify-center pt-2 text-xl font-bold">
                 GỬI PHIẾU HỖ TRỢ - FEEDBACK
               </div>
-              <div className="flex h-[70px] text-center">
+              <div className="flex h-[90px] text-center">
                 Gửi phiếu hỗ trợ vể vấn đề của bạn hoặc gửi feedback
               </div>
               <div className="flex justify-center">

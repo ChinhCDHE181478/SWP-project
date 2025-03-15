@@ -26,7 +26,7 @@ const RequestForgotPasswordForm = () => {
       );
       if (sended === false) {
         setNotification("");
-        setError("Tài khoản không tồn tại hoặc chưa được đăng ký email");
+        setError("Tài khoản chưa được đăng ký email");
         return;
       }
       setError("");
@@ -36,7 +36,7 @@ const RequestForgotPasswordForm = () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setNotification("");
-      setError("Hệ thống đang bận, vui lòng thử lại sau");
+      setError("Tài khoản không tồn tại");
     }
   };
 
@@ -44,7 +44,7 @@ const RequestForgotPasswordForm = () => {
     <>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="Username" className="text-right">
-          Username:
+          Tên tài khoản:
         </Label>
         <Input
           radius="sm"

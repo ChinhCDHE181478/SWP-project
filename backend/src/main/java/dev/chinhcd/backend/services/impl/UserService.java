@@ -1,6 +1,8 @@
 package dev.chinhcd.backend.services.impl;
 
 import dev.chinhcd.backend.dtos.request.*;
+import dev.chinhcd.backend.dtos.request.classDTO.EmailInforDTO;
+import dev.chinhcd.backend.dtos.request.classDTO.UserInforDTO;
 import dev.chinhcd.backend.dtos.response.PaginateUserResponse;
 import dev.chinhcd.backend.dtos.response.RegisterResponse;
 import dev.chinhcd.backend.dtos.response.UserResponse;
@@ -8,18 +10,19 @@ import dev.chinhcd.backend.enums.AccountType;
 import dev.chinhcd.backend.enums.ErrorCode;
 import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.exception.ServiceException;
-import dev.chinhcd.backend.models.Articles;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.repository.IUserRepository;
 import dev.chinhcd.backend.services.IEmailService;
 import dev.chinhcd.backend.services.IJwtService;
+import dev.chinhcd.backend.services.IRefreshTokenService;
 import dev.chinhcd.backend.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,7 +39,9 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final IEmailService emailService;
     private final IJwtService jwtService;
-    private final RefreshTokenService refreshTokenService;
+    private final IRefreshTokenService refreshTokenService;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
 
     @Override
     public RegisterResponse createRegisterUser(RegisterRequest request) {
@@ -44,7 +49,7 @@ public class UserService implements IUserService {
         User user = new User();
         user.setUsername(request.username());
         user.setPassword(passwordEncoder.encode(request.password()));
-        user.setRole(Role.USER);
+        user.setRole(Role.STUDENT);
         user.setAccountType(AccountType.FREE_COURSE);
         user.setIsDoingExam(false);
 
@@ -75,6 +80,12 @@ public class UserService implements IUserService {
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElse(null);
     }
 
     @Override
@@ -112,14 +123,15 @@ public class UserService implements IUserService {
 
     @Override
     public Boolean requestAddMail(VerifyEmailRequest request) {
-        User user = userRepository.findById(request.id())
-                .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
-        User userHasEmail = userRepository.findByEmail(request.email()).orElse(null);
-        if (userHasEmail != null) {
+        Optional<User> userHasEmail = userRepository.findByEmail(request.email());
+        if(userHasEmail.isPresent()) {
             return false;
         }
+        User user = userRepository.findById(request.id())
+                .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
         String token = jwtService.generateAccessToken(user);
-        emailService.sendVerificationEmail(request.email(), "Yêu cầu thêm email", "thêm email", token, "/email-service/add-email", request.id());
+        EmailInforDTO emailInfor = new EmailInforDTO(request.email(), "Yêu cầu thêm email", "thêm email", token, "/email-service/add-email", request.id());
+        kafkaTemplate.send("email", emailInfor);
         return true;
     }
 
@@ -138,10 +150,12 @@ public class UserService implements IUserService {
 
     @Override
     public Boolean requestDeleteMail(Long id) {
+        kafkaTemplate.send("email", id + "");
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
         String token = jwtService.generateAccessToken(user);
-        emailService.sendVerificationEmail(user.getEmail(), "Yêu cầu xóa email", "xóa email", token, "/email-service/delete-email", id);
+        EmailInforDTO emailInforDTO = new EmailInforDTO(user.getEmail(), "Yêu cầu xóa email", "xóa email", token, "/email-service/delete-email", id);
+        kafkaTemplate.send("email", emailInforDTO);
         return true;
     }
 
@@ -172,19 +186,14 @@ public class UserService implements IUserService {
 
     @Override
     public Boolean requestForgotPassword(String username) {
-        Optional<User> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
             return false;
         }
-        if (user.get().getEmail() == null || user.get().getEmail().isBlank()) {
-            return false;
-        }
-        String token = jwtService.generateAccessToken(user.get());
-        try {
-            emailService.sendVerificationEmail(user.get().getEmail(), "Yêu cầu quên mật khẩu", "quên mật khẩu", token, "/email-service/forgot", user.get().getId());
-        } catch (Exception e) {
-            return false;
-        }
+        String token = jwtService.generateAccessToken(user);
+        EmailInforDTO emailInforDTO = new EmailInforDTO(user.getEmail(), "Yêu cầu quên mật khẩu", "quên mật khẩu", token, "/email-service/forgot", user.getId());
+        kafkaTemplate.send("email", emailInforDTO);
         return true;
     }
 
@@ -228,6 +237,8 @@ public class UserService implements IUserService {
                 .isDoingExam(false)
                 .build();
         userRepository.save(user);
+        UserInforDTO userInforDTO = new UserInforDTO(user.getUsername(), request.password(), user.getEmail());
+        kafkaTemplate.send("admin-create-account", userInforDTO);
         return true;
     }
 
@@ -250,15 +261,26 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public PaginateUserResponse getPaginatedUsers(int page, int pageSize, String username, String email) {
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
+    public PaginateUserResponse getPaginatedUsers(int page, int pageSize, String username, String email, String accountType, String sort) {
+        Pageable pageable = null;
+        if(sort.equals("Tăng dần")) {
+            pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.ASC, "username"));
+        } else if (sort.equals("Giảm dần")) {
+            pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "username"));
+        } else {
+            pageable = PageRequest.of(page - 1, pageSize);
+        }
+        AccountType acT = null;
         if (username.isBlank()) {
             username = null;
         }
         if (email.isBlank()) {
             email = null;
         }
-        Page<User> usersPage = userRepository.getUsersByRole(Role.USER, pageable, username, email);
+        if(!accountType.isBlank()){
+            acT = AccountType.valueOf(accountType);
+        }
+        Page<User> usersPage = userRepository.getUsersByRole(Role.STUDENT, pageable, username, email, acT);
 
         List<UserResponse> users = usersPage.getContent().stream().map(this::mapResponse).collect(Collectors.toList());
         return new PaginateUserResponse(users,
@@ -266,6 +288,11 @@ public class UserService implements IUserService {
                 usersPage.getTotalElements(),
                 usersPage.getNumber() + 1,
                 pageSize);
+    }
+
+    @Override
+    public void saveUser(User user) {
+        userRepository.save(user);
     }
 
     public UserResponse mapResponse(User user) {

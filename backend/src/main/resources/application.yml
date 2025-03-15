@@ -26,6 +26,29 @@ spring:
           starttls:
             enable: true
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      key-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "dev.chinhcd.backend.dtos.request.classDTO"
+    producer:
+      key-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: "all"
+      retries: 1
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+
+vnpay:
+  vnpayUrl: "${VNPAY_URL}"
+  vnp_ReturnUrl: "${VNPAY_RETURN_URL}"
+  vnp_TmnCode: "${VNPAY_TMP_CODE}"
+  vnp_SecretKey: "${VNPAY_SECRET_KEY}"
+  vnp_ApiUrl: "${VNPAY_API_URL}"
+
 server:
   port: 8080
   servlet:

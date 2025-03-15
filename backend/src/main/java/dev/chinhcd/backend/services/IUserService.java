@@ -18,6 +18,8 @@ public interface IUserService {
 
     User getUserByUsername(String username);
 
+    User getUserByEmail(String email);
+
     UserResponse getMe();
 
     UserResponse updateUser(UpdateUserRequest request);
@@ -48,5 +50,7 @@ public interface IUserService {
 
     Boolean changeAccountType(ChangeAccountTypeRequest request);
 
-    PaginateUserResponse getPaginatedUsers(int page, int pageSize, String username, String email);
+    PaginateUserResponse getPaginatedUsers(int page, int pageSize, String username, String email, String accountType, String sort);
+
+    void saveUser(User user);
 }
