@@ -1,5 +1,6 @@
 package dev.chinhcd.backend.controllers.duclm;
 
+import dev.chinhcd.backend.dtos.response.duclm.PracticeLevelReportResponse;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.Practice;
 import dev.chinhcd.backend.models.duclm.UserPractice;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Time;
+import java.util.List;
 
 @RestController
 @RequestMapping("/practice")
@@ -42,6 +44,13 @@ public class UserPracticeController {
 
         return ResponseEntity.ok((long) level);
     }
+
+    @GetMapping("/stats")
+    public ResponseEntity<List<PracticeLevelReportResponse>> getPracticeStats() {
+        List<PracticeLevelReportResponse> stats = userPracticeRespository.getUserCountByLevel();
+        return ResponseEntity.ok(stats);
+    }
+
 
 
 

@@ -4,12 +4,14 @@ import { useAuth } from "@/app/AuthProvider";
 import { API } from "@/helper/axios";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { useRouter } from "next/navigation";
+import { useToast } from "../ui/use-toast";
 import React from "react";
 
 const Course: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const user = useCurrentUser();
+  const { toast } = useToast();
 
   const courseData = [
     {
@@ -18,6 +20,7 @@ const Course: React.FC = () => {
       details: ["Tham gia 5 vòng thi đầu tiên", "Truy cập một phần kỳ thi"],
       amount: 0,
       type: "FREE_COURSE",
+      link: "#",
     },
     {
       title: "FULL COURSE",
@@ -46,12 +49,11 @@ const Course: React.FC = () => {
   // Xử lý khi bấm vào "MUA GÓI NGAY"
   const handlePurchaseClick = async (amount: number, type: string) => {
     if (!isAuthenticated) {
-      const confirmLogin = window.confirm(
-        "Bạn cần đăng nhập để sử dụng dịch vụ. Nhấn OK để tiếp tục đăng nhập."
-      );
-      if (confirmLogin) {
-        router.push("/auth/login");
-      }
+      toast({
+        title: "Vui lòng đăng nhập để tiếp tục!",
+        className: "text-white bg-orange-500",
+      });
+      router.push("/auth/login");
     } else {
       try {
         const response = await API.post(
