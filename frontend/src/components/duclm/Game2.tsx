@@ -4,15 +4,15 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Scoreboard from "./Scoreboard";
 
-const Quiz: React.FC = () => {
+const Game2: React.FC = () => {
     const router = useRouter();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes
     const [quizState, setQuizState] = useState<"start" | "quiz" | "finished">("start");
-    const [dinosaurMessage, setDinosaurMessage] = useState("");
+    const [studentMessage, setStudentMessage] = useState("");
     const [hasAnswered, setHasAnswered] = useState(false);
-    const [dinosaurImage, setDinosaurImage] = useState("/test/dinosaur.svg");
+    const [studentImage, setStudentImage] = useState("/game2/student.png");
 
     const questions = [
         {
@@ -73,35 +73,35 @@ const Quiz: React.FC = () => {
 
         if (index === questions[currentQuestionIndex].correct) {
             setScore(score + 1);
-            setDinosaurMessage("Great job!");
-            setDinosaurImage("/test/correct.svg");
+            setStudentMessage("Great job!");
+            setStudentImage("/game2/correct.png");
         } else {
-            setDinosaurMessage("Oh no! Wrong answer!");
-            setDinosaurImage("/test/wrong.svg");
+            setStudentMessage("Oh no! Wrong answer!");
+            setStudentImage("/game2/wrong.png");
         }
 
         setTimeout(() => {
-            setDinosaurMessage(""); // Xóa message
-            setDinosaurImage("/test/dinosaur.svg"); // Đổi lại thành khủng long mặc định
+            setStudentMessage(""); // Xóa message
+            setStudentImage("/game2/start.png"); // Đổi lại thành student mặc định
             if (currentQuestionIndex + 1 < questions.length) {
                 setCurrentQuestionIndex(currentQuestionIndex + 1);
                 setHasAnswered(false);
             } else {
                 setQuizState("finished");
-                setDinosaurMessage("You have completed the quiz! Click OK to return.");
+                setStudentMessage("You have completed the quiz! Click OK to return.");
             }
         }, 1000);
     };
 
     return (
-        <div className="bg-cover bg-center h-screen flex items-center justify-center relative text-white" style={{ backgroundImage: "url(/test/background.svg)" }}>
+        <div className="bg-cover bg-center h-screen flex items-center justify-center relative text-white" style={{ backgroundImage: "url(/game2/background.png)" }}>
             {quizState !== "start" && (
-                <img src={dinosaurImage} alt="Dinosaur" className="absolute left-8 bottom-0 w-[450px]" />
+                <img src={studentImage} alt="Student" className="absolute left-8 bottom-0 w-[450px]" />
             )}
 
-            {dinosaurMessage && (
+            {studentMessage && (
                 <div className="absolute left-[160px] bottom-[320px] bg-white text-black border border-black rounded-lg p-4 shadow-lg text-center max-w-[280px] font-bold">
-                    <p className="m-0">{dinosaurMessage}</p>
+                    <p className="m-0">{studentMessage}</p>
                     <div className="absolute left-[50%] bottom-[-18px] w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-black"></div>
                     <div className="absolute left-[50%] bottom-[-14px] w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-white"></div>
                 </div>
@@ -116,8 +116,8 @@ const Quiz: React.FC = () => {
             <div className="bg-black bg-opacity-50 rounded-lg p-10 shadow-lg text-center max-w-lg w-full">
                 {quizState === "start" && (
                     <div>
-                        <h2 className="text-2xl">Welcome to the Dinosaur game!</h2>
-                        <img src="/test/dinosaur.svg" alt="Dinosaur" className="mx-auto w-[200px] mb-5 mt-3" />
+                        <h2 className="text-2xl">Welcome to the Student game!</h2>
+                        <img src="/game2/start.png" alt="Student" className="mx-auto w-[200px] mb-5 mt-3" />
                         <button className={buttonStyle} onClick={() => setQuizState("quiz")}>Start</button>
                     </div>
                 )}
@@ -148,6 +148,6 @@ const Quiz: React.FC = () => {
     );
 };
 
-const buttonStyle = "bg-teal-600 text-white rounded-md px-4 py-2 mx-2 cursor-pointer transition duration-300 hover:bg-teal-700";
+const buttonStyle = "bg-orange-500 text-white rounded-md px-4 py-2 mx-2 cursor-pointer transition duration-300 hover:bg-orange-600 shadow-lg";
 
-export default Quiz;
+export default Game2;
