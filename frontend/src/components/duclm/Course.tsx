@@ -1,6 +1,8 @@
 "use client";
 
 import { useAuth } from "@/app/AuthProvider";
+import { API } from "@/helper/axios";
+import useCurrentUser from "@/hooks/useCurrentUser";
 import { useRouter } from "next/navigation";
 import { useToast } from "../ui/use-toast";
 import React from "react";
@@ -8,6 +10,7 @@ import React from "react";
 const Course: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const user = useCurrentUser();
   const { toast } = useToast();
 
   const courseData = [
@@ -15,6 +18,8 @@ const Course: React.FC = () => {
       title: "FREE COURSE",
       price: "Miễn Phí",
       details: ["Tham gia 5 vòng thi đầu tiên", "Truy cập một phần kỳ thi"],
+      amount: 0,
+      type: "FREE_COURSE",
       link: "#",
     },
     {
@@ -25,7 +30,8 @@ const Course: React.FC = () => {
         "Thi thử 3 lần",
         "Ôn luyện và đánh giá hiệu quả toàn diện",
       ],
-      link: "#",
+      amount: 99000,
+      type: "FULL_COURSE",
     },
     {
       title: "COMBO COURSE",
@@ -35,12 +41,13 @@ const Course: React.FC = () => {
         "Thi thử không giới hạn số lần",
         "Tối ưu hóa lộ trình học tập và thi",
       ],
-      link: "#",
+      amount: 199000,
+      type: "COMBO_COURSE",
     },
   ];
 
   // Xử lý khi bấm vào "MUA GÓI NGAY"
-  const handlePurchaseClick = (link: string) => {
+  const handlePurchaseClick = async (amount: number, type: string) => {
     if (!isAuthenticated) {
       toast({
         title: "Vui lòng đăng nhập để tiếp tục!",
@@ -48,7 +55,24 @@ const Course: React.FC = () => {
       });
       router.push("/auth/login");
     } else {
-      router.push(link);
+      try {
+        const response = await API.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/payment/create`,
+          {
+            id: user.data?.id,
+            amount: amount,
+            accountType: type,
+            language: "vi",
+          }
+        );
+
+        if (response.data) {
+          window.location.href = response.data;
+        }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        //handle exception
+      }
     }
   };
 
@@ -92,7 +116,9 @@ const Course: React.FC = () => {
               {/* Button Row */}
               <div className="flex justify-center">
                 <button
-                  onClick={() => handlePurchaseClick(course.link)}
+                  onClick={() =>
+                    handlePurchaseClick(course.amount, course.type)
+                  }
                   className="w-full mt-4 py-2 bg-white text-orange-600 rounded-full hover:bg-orange-600 hover:text-white transition-all duration-300 text-center"
                 >
                   MUA GÓI NGAY

@@ -17,6 +17,7 @@ const guestPath = [
   "/support/account-support",
   "/articles",
   "/articles/number",
+  "/payment-status"
 ];
 
 // Các route chỉ dành cho khách (người chưa đăng nhập)
@@ -117,10 +118,6 @@ export async function middleware(request: NextRequest) {
       /\.(png|jpg|jpeg|gif|svg|webp|ico|mp4|mp3|woff2?|ttf|otf|eot|json)$/
     )
   ) {
-    return NextResponse.next();
-  }
-
-  if (currentPath.match(/^\/(login|home)\/.+/)) {
     return NextResponse.next();
   }
 
