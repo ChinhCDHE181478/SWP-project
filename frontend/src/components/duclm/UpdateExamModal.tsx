@@ -25,8 +25,9 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
     const [examStart, setExamStart] = useState<string>("");
     const [examEnd, setExamEnd] = useState<string>("");
     const [grade, setGrade] = useState<string>("");
-    const [status, setStatus] = useState<string>("on"); // Đặt trạng thái mặc định là "on"
+    const [status, setStatus] = useState<string>("on");
     const [file, setFile] = useState<File | null>(null);
+    const [audioFile, setAudioFile] = useState<File | null>(null);
 
     useEffect(() => {
         if (exam) {
@@ -34,13 +35,19 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
             setExamStart(exam.examStart);
             setExamEnd(exam.examEnd);
             setGrade(exam.grade);
-            setStatus(exam.status); // Đảm bảo trạng thái được lấy từ exam
+            setStatus(exam.status);
         }
     }, [exam]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
             setFile(event.target.files[0]);
+        }
+    };
+
+    const handleAudioFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setAudioFile(event.target.files[0]);
         }
     };
 
@@ -54,8 +61,9 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
             formData.append("examEnd", examEnd);
             formData.append("grade", grade);
             formData.append("status", status);
-            
+    
             if (file) formData.append("file", file);
+            if (audioFile) formData.append("audioZip", audioFile);
     
             const response = await API.put(`/exam/update/${exam.examId}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -71,10 +79,49 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
                 onClose();
             }
         } catch (error) {
-            console.error("Error updating exam:", error); // Ghi lại lỗi
+            console.error("Error updating exam:", error);
             toast({
                 title: "Lỗi!",
                 description: "Có lỗi xảy ra khi cập nhật kỳ thi.",
+                className: "text-white bg-red-500",
+            });
+        }
+    };
+    
+
+    const handleDownload = async (type: "excel" | "audio") => {
+        if (!exam || !exam.examId) {
+            toast({
+                title: "Lỗi!",
+                description: "Không tìm thấy ID kỳ thi.",
+                className: "text-white bg-red-500",
+            });
+            return;
+        }
+
+        const apiUrl = type === "excel"
+            ? `/exam/download-excel/${exam.examId}`
+            : `/exam/download-audio/${exam.examId}`;
+
+        try {
+            const response = await API.get(apiUrl, {
+                responseType: "blob", // Nhận phản hồi dưới dạng file blob
+            });
+
+            if (response.status === 200) {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", type === "excel" ? `exam_${exam.examId}.xlsx` : `audio_${exam.examId}.zip`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch (error) {
+            console.error("Error downloading file:", error);
+            toast({
+                title: "Lỗi!",
+                description: `Không thể tải file ${type === "excel" ? "Excel" : "Audio"}.`,
                 className: "text-white bg-red-500",
             });
         }
@@ -87,70 +134,84 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
                     <div>
                         <label className="block text-gray-700 font-medium mb-1">Tên kỳ thi</label>
-                        <input 
-                            type="text" 
-                            value={examName} 
+                        <input
+                            type="text"
+                            value={examName}
                             onChange={(e) => setExamName(e.target.value)}
-                            className="border rounded p-2 w-full focus:outline-orange-500" 
-                            required 
+                            className="border rounded p-2 w-full focus:outline-orange-500"
+                            required
                         />
                     </div>
                     <div>
                         <label className="block text-gray-700 font-medium mb-1">Ngày bắt đầu</label>
-                        <input 
-                            type="datetime-local" 
-                            value={examStart} 
+                        <input
+                            type="datetime-local"
+                            value={examStart}
                             onChange={(e) => setExamStart(e.target.value)}
-                            className="border rounded p-2 w-full focus:outline-orange-500" 
-                            required 
+                            className="border rounded p-2 w-full focus:outline-orange-500"
+                            required
                         />
                     </div>
                     <div>
                         <label className="block text-gray-700 font-medium mb-1">Ngày kết thúc</label>
-                        <input 
-                            type="datetime-local" 
-                            value={examEnd} 
+                        <input
+                            type="datetime-local"
+                            value={examEnd}
                             onChange={(e) => setExamEnd(e.target.value)}
-                            className="border rounded p-2 w-full focus:outline-orange-500" 
-                            required 
+                            className="border rounded p-2 w-full focus:outline-orange-500"
+                            required
                         />
                     </div>
                     <div>
                         <label className="block text-gray-700 font-medium mb-1">Khối</label>
-                        <input 
-                            type="text" 
-                            value={grade} 
+                        <input
+                            type="text"
+                            value={grade}
                             onChange={(e) => setGrade(e.target.value)}
-                            className="border rounded p-2 w-full focus:outline-orange-500" 
-                            required 
+                            className="border rounded p-2 w-full focus:outline-orange-500"
+                            required
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-700 font-medium mb-1">Tải lên file</label>
-                        <input 
-                            type="file" 
-                            onChange={handleFileChange} 
-                            className="border rounded p-2 w-full focus:outline-orange-500" 
-                        />
+                        <label className="block text-gray-700 font-medium mb-1">Trạng thái</label>
+                        <select
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
+                        >
+                            <option value="on">Bật</option>
+                            <option value="off">Tắt</option>
+                        </select>
                     </div>
-                    <div className="flex items-center">
-                        <label className="mr-2">Trạng thái:</label>
-                        <input 
-                            type="checkbox" 
-                            checked={status === "on"} 
-                            onChange={(e) => setStatus(e.target.checked ? "on" : "off")}
-                            className="w-5 h-5" 
-                        />
-                        <span className="ml-2">{status === "on" ? "On" : "Off"}</span>
+
+                    {/* Tải file */}
+                    <div className="flex flex-col space-y-2">
+                        <label className="block text-gray-700 font-medium">Tải lên file</label>
+                        <input type="file" onChange={handleFileChange} className="border rounded p-2 w-full focus:outline-orange-500" />
+                        {file && <p className="text-sm text-green-600">📄 Đã chọn: {file.name}</p>}
                     </div>
-                    <DialogFooter>
-                        <Button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white rounded-md px-4 py-2">
-                            Cập nhật
+
+                    {/* Tải file âm thanh */}
+                    <div className="flex flex-col space-y-2">
+                        <label className="block text-gray-700 font-medium">Tải lên file âm thanh (tùy chọn)</label>
+                        <input type="file" accept=".zip,.rar" onChange={handleAudioFileChange} className="border rounded p-2 w-full focus:outline-orange-500" />
+                        {audioFile && <p className="text-sm text-green-600">🎵 Đã chọn: {audioFile.name}</p>}
+                    </div>
+
+                    {/* Nút tải file */}
+                    <div className="flex space-x-2">
+                        <Button type="button" className="bg-orange-500 hover:bg-blue-600 text-white px-4 py-2" onClick={() => handleDownload("excel")}>
+                            📥 Tải Excel
                         </Button>
+                        <Button type="button" className="bg-orange-500 hover:bg-purple-600 text-white px-4 py-2" onClick={() => handleDownload("audio")}>
+                            🎵 Tải Audio
+                        </Button>
+                    </div>
+
+                    <DialogFooter>
+                        <Button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white">Cập nhật</Button>
                         <DialogClose asChild>
-                            <Button type="button" onClick={onClose} className="border text-black rounded-md px-4 py-2 hover:bg-gray-100">
-                                Đóng
-                            </Button>
+                            <Button type="button" onClick={onClose} className="border text-black hover:bg-gray-100">Đóng</Button>
                         </DialogClose>
                     </DialogFooter>
                 </form>

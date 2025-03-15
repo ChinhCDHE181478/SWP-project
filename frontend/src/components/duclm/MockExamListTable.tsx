@@ -141,7 +141,7 @@ const MockExamListTable = () => {
         {
             accessorKey: "examDate",
             header: "Ngày mở",
-            cell: ({ row }) => new Date(row.original.examDate).toLocaleString("en-GB"),
+            cell: ({ row }) => new Date(row.original.examDate).toLocaleDateString("en-GB"),
         },
         {
             accessorKey: "type",

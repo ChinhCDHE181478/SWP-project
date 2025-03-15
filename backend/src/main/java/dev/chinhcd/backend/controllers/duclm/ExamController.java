@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,9 +16,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 
 @RestController
 @RequestMapping("/exam")
@@ -37,6 +50,7 @@ public class ExamController {
         }
         return ResponseEntity.ok(nextExam);
     }
+
     @GetMapping("/get-all")
     public ResponseEntity<Map<String, Object>> getAll(
             @RequestParam(defaultValue = "1") int page,
@@ -55,6 +69,7 @@ public class ExamController {
     @PostMapping("/upload-exam")
     public ResponseEntity<String> uploadExam(
             @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "audioZip", required = false) MultipartFile audioZip,
             @RequestParam("examName") String examName,
             @RequestParam("examStart") String examStart,
             @RequestParam("examEnd") String examEnd,
@@ -66,7 +81,7 @@ public class ExamController {
         }
 
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
+            Sheet sheet = workbook.getSheetAt(0);
 
             // Kiểm tra xem kỳ thi đã tồn tại chưa
             if (examRepository.findByExamNameAndGrade(examName, grade).isPresent()) {
@@ -82,18 +97,50 @@ public class ExamController {
             exam.setStatus(status);
             examRepository.save(exam);
 
+            // Tạo thư mục lưu trữ cho kỳ thi
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + exam.getExamId();
+            Path targetDir = Paths.get(folderPath);
+            if (!Files.exists(targetDir)) {
+                Files.createDirectories(targetDir);
+            }
+
+            // Lưu file Excel
+            Path excelFilePath = targetDir.resolve("exam_" + exam.getExamId() + ".xlsx");
+            Files.copy(file.getInputStream(), excelFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Nếu có file ZIP, lưu và giải nén
+            if (audioZip != null && !audioZip.isEmpty()) {
+                Path zipFilePath = targetDir.resolve("audio_" + exam.getExamId() + ".zip");
+                Files.copy(audioZip.getInputStream(), zipFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // Giải nén file ZIP
+                unzipFile(zipFilePath.toString(), folderPath);
+            }
+
             // Duyệt file Excel để tạo Questions và Answers
-            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) { // Bắt đầu từ hàng thứ hai
+            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
                 // Tạo Question
                 Question question = new Question();
-                question.setQuestionText(getStringCellValue(row.getCell(0))); // Câu hỏi
-                question.setChoice1(getStringCellValue(row.getCell(1))); // Lựa chọn 1
-                question.setChoice2(getStringCellValue(row.getCell(2))); // Lựa chọn 2
-                question.setChoice3(getStringCellValue(row.getCell(3))); // Lựa chọn 3
-                question.setChoice4(getStringCellValue(row.getCell(4))); // Lựa chọn 4
+                question.setQuestionText(getStringCellValue(row.getCell(0)));
+                question.setChoice1(getStringCellValue(row.getCell(1)));
+                question.setChoice2(getStringCellValue(row.getCell(2)));
+                question.setChoice3(getStringCellValue(row.getCell(3)));
+                question.setChoice4(getStringCellValue(row.getCell(4)));
+
+                // Lấy file âm thanh từ thư mục giải nén
+                String audioFileName = getStringCellValue(row.getCell(5));
+                if (audioFileName != null && !audioFileName.isEmpty()) {
+                    Path audioFilePath = targetDir.resolve(audioFileName);
+                    if (Files.exists(audioFilePath)) {
+                        question.setAudioFile(Files.readAllBytes(audioFilePath));
+                    } else {
+                        question.setAudioFile(null);
+                    }
+                }
+
                 questionRepository.save(question);
 
                 // Liên kết với Exam
@@ -104,7 +151,7 @@ public class ExamController {
 
                 // Tạo Answer
                 Answer answer = new Answer();
-                answer.setCorrectAnswer(getStringCellValue(row.getCell(5))); // Đáp án đúng
+                answer.setCorrectAnswer(getStringCellValue(row.getCell(6)));
                 answer.setQuestion(question);
                 answerRepository.save(answer);
             }
@@ -117,11 +164,31 @@ public class ExamController {
         }
     }
 
+    private void unzipFile(String zipFilePath, String destDir) throws IOException {
+        File dir = new File(destDir);
+        if (!dir.exists()) dir.mkdirs();
+
+        try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath))) {
+            ZipEntry entry;
+            while ((entry = zipIn.getNextEntry()) != null) {
+                Path filePath = Paths.get(destDir, entry.getName());
+                if (!entry.isDirectory()) {
+                    Files.copy(zipIn, filePath, StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    Files.createDirectories(filePath);
+                }
+                zipIn.closeEntry();
+            }
+        }
+    }
+
+
     @PutMapping("/update/{examId}")
     @Transactional
     public ResponseEntity<String> updateExam(
             @PathVariable Long examId,
             @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "audioZip", required = false) MultipartFile audioZip,
             @RequestParam("examName") String examName,
             @RequestParam("examStart") String examStart,
             @RequestParam("examEnd") String examEnd,
@@ -140,12 +207,23 @@ public class ExamController {
             exam.setExamEnd(LocalDateTime.parse(examEnd));
             exam.setGrade(grade);
             exam.setStatus(status);
-            examRepository.save(exam);
+            examRepository.save(exam); // Cập nhật Exam
+
+            // Tạo thư mục cho exam
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + exam.getExamId();
+            Path targetDir = Paths.get(folderPath);
+            if (!Files.exists(targetDir)) {
+                Files.createDirectories(targetDir);
+            }
+
+            // Lưu file Excel
+            String excelFileName = "exam_" + exam.getExamId() + ".xlsx";
+            Path excelFilePath = targetDir.resolve(excelFileName);
+            Files.copy(file.getInputStream(), excelFilePath, StandardCopyOption.REPLACE_EXISTING);
 
             // Xóa dữ liệu cũ
             List<Question> questionsToDelete = questionRepository.findByExamId(examId);
             if (!questionsToDelete.isEmpty()) {
-                // In ra thông tin của các câu hỏi trước khi xóa
                 questionRepository.deleteAll(questionsToDelete);
             }
 
@@ -164,6 +242,20 @@ public class ExamController {
                     question.setChoice2(getStringCellValue(row.getCell(2)));
                     question.setChoice3(getStringCellValue(row.getCell(3)));
                     question.setChoice4(getStringCellValue(row.getCell(4)));
+
+                    // Lưu tệp âm thanh nếu có
+                    String audioFileName = getStringCellValue(row.getCell(5));
+                    if (audioFileName != null && !audioFileName.isEmpty()) {
+                        Path audioFilePath = targetDir.resolve(audioFileName);
+                        if (Files.exists(audioFilePath)) {
+                            question.setAudioFile(Files.readAllBytes(audioFilePath));
+                        } else {
+                            question.setAudioFile(null);
+                        }
+                    } else {
+                        question.setAudioFile(null);
+                    }
+
                     questionRepository.save(question);
 
                     // Liên kết Question với Exam
@@ -174,11 +266,45 @@ public class ExamController {
 
                     // Tạo Answer mới
                     Answer answer = new Answer();
-                    answer.setCorrectAnswer(getStringCellValue(row.getCell(5)));
+                    answer.setCorrectAnswer(getStringCellValue(row.getCell(6)));
                     answer.setQuestion(question);
                     answerRepository.save(answer);
                 }
             }
+
+            // Giải nén file audioZip nếu có
+            if (audioZip != null && !audioZip.isEmpty()) {
+                Path zipFilePath = targetDir.resolve("audio_" + exam.getExamId() + ".zip");
+
+                try {
+                    // Xóa file ZIP cũ nếu tồn tại
+                    if (Files.exists(zipFilePath)) {
+                        Files.delete(zipFilePath);
+                    }
+
+                    // Ghi file ZIP mới
+                    Files.copy(audioZip.getInputStream(), zipFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+                    // Đảm bảo file ZIP đã được lưu trước khi giải nén
+                    if (Files.exists(zipFilePath) && Files.size(zipFilePath) > 0) {
+                        System.out.println("ZIP file saved: " + zipFilePath.toString());
+
+                        // Giải nén vào thư mục exam
+                        unzipFile(zipFilePath.toString(), folderPath);
+                        System.out.println("ZIP file extracted to: " + folderPath);
+                    } else {
+                        System.err.println("Lỗi khi lưu file ZIP! File không tồn tại hoặc rỗng.");
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Lỗi khi lưu file ZIP.");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Lỗi khi xử lý file ZIP: " + e.getMessage());
+                }
+            }
+
+
 
             return ResponseEntity.ok("Cập nhật kỳ thi thành công!");
         } catch (Exception e) {
@@ -187,6 +313,7 @@ public class ExamController {
                     .body("Lỗi khi cập nhật kỳ thi: " + e.getMessage());
         }
     }
+
 
     @DeleteMapping("/delete/{examId}")
     @Transactional
@@ -200,10 +327,8 @@ public class ExamController {
             Exam exam = examOptional.get();
 
             // Xóa tất cả câu hỏi liên quan đến kỳ thi
-            // Tìm tất cả câu hỏi liên quan đến kỳ thi
             List<Question> questionsToDelete = questionRepository.findByExamId(examId);
             if (!questionsToDelete.isEmpty()) {
-                // In ra thông tin của các câu hỏi trước khi xóa
                 questionRepository.deleteAll(questionsToDelete);
             }
 
@@ -256,5 +381,59 @@ public class ExamController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/download-excel/{examId}")
+    public ResponseEntity<Resource> downloadExcel(@PathVariable Long examId) {
+        try {
+            // Lấy kỳ thi từ database để xác định đường dẫn
+            Exam exam = examRepository.findById(Math.toIntExact(examId)).orElse(null);
+            if (exam == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Đường dẫn đến file Excel
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + examId; // Đường dẫn thư mục
+            Path filePath = Paths.get(folderPath, "exam_" + examId + ".xlsx");
+
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/download-audio/{examId}")
+    public ResponseEntity<Resource> downloadAudio(@PathVariable Long examId) {
+        try {
+            // Lấy kỳ thi từ database để xác định đường dẫn
+            Exam exam = examRepository.findById(Math.toIntExact(examId)).orElse(null);
+            if (exam == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Đường dẫn đến file audio
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + examId; // Đường dẫn thư mục
+            Path filePath = Paths.get(folderPath, "audio_" + examId + ".zip"); // Hoặc .rar
+
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }

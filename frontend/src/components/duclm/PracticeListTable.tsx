@@ -17,6 +17,7 @@ interface Practice {
     practiceId: number;
     practiceLevel: number;
     practiceDate: string;
+    status: string;
     grade: number;
 }
 
@@ -50,6 +51,7 @@ const PracticeListTable = () => {
                 practiceLevel: practice.practiceLevel,
                 practiceDate: practice.practiceDate,
                 grade: practice.grade,
+                status: practice.status,
             }));
 
             setPractices(formattedData);
@@ -251,6 +253,7 @@ const PracticeListTable = () => {
                     grade={selectedPracticeDetail.practice.grade}
                     practiceLevel={selectedPracticeDetail.practice.practiceLevel}
                     practiceDate={selectedPracticeDetail.practice.practiceDate}
+                    status={selectedPracticeDetail.practice.status}
                     practiceDetails={selectedPracticeDetail.practiceDetails}
                 />
             )}

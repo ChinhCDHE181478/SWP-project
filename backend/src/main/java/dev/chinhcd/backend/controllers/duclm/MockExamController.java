@@ -8,7 +8,11 @@ import dev.chinhcd.backend.repository.duclm.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,8 +20,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.StandardCopyOption;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/mock-exam")
@@ -47,6 +61,7 @@ public class MockExamController {
     @PostMapping("/upload-mock-exam")
     public ResponseEntity<String> uploadMockExam(
             @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "audioZip", required = false) MultipartFile audioZip, // Thêm audioZip tùy chọn
             @RequestParam("examName") String examName,
             @RequestParam("examDate") String examDate,
             @RequestParam("type") String type,
@@ -57,48 +72,78 @@ public class MockExamController {
         }
 
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0); // Get the first sheet
+            Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
 
-            // Check if the mock exam already exists
+            // Kiểm tra xem kỳ thi đã tồn tại chưa
             if (mockExamRepository.findByExamNameAndGrade(examName, grade).isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Mock exam already exists in the system");
             }
 
-            // Create and save MockExam
+            // Tạo và lưu MockExam
             MockExam mockExam = new MockExam();
             mockExam.setExamName(examName);
-            mockExam.setExamDate(new SimpleDateFormat("yyyy-MM-dd").parse(examDate));
+            mockExam.setExamDate(Date.valueOf(examDate));
             mockExam.setType(type);
             mockExam.setGrade(grade);
             mockExamRepository.save(mockExam);
 
-            // Iterate through the Excel file to create Questions and Answers
-            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\mockexams\\" + mockExam.getMockExamId();
+            Path targetDir = Paths.get(folderPath);
+            if (!Files.exists(targetDir)) {
+                Files.createDirectories(targetDir);
+            }
+
+            // Lưu file Excel
+            Path excelFilePath = targetDir.resolve("mockexam_" + mockExam.getMockExamId() + ".xlsx");
+            Files.copy(file.getInputStream(), excelFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Nếu có file ZIP, lưu và giải nén
+            if (audioZip != null && !audioZip.isEmpty()) {
+                Path zipFilePath = targetDir.resolve("audio_" + mockExam.getMockExamId() + ".zip");
+                Files.copy(audioZip.getInputStream(), zipFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // Giải nén file ZIP
+                unzipFile(zipFilePath.toString(), folderPath);
+            }
+
+            // Duyệt file Excel để tạo Questions và Answers
+            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) { // Bắt đầu từ hàng thứ hai
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                // Create Question
+                // Tạo Question
                 Question question = new Question();
-                question.setQuestionText(getStringCellValue(row.getCell(0))); // Question text
-                question.setChoice1(getStringCellValue(row.getCell(1))); // Choice 1
-                question.setChoice2(getStringCellValue(row.getCell(2))); // Choice 2
-                question.setChoice3(getStringCellValue(row.getCell(3))); // Choice 3
-                question.setChoice4(getStringCellValue(row.getCell(4))); // Choice 4
+                question.setQuestionText(getStringCellValue(row.getCell(0))); // Câu hỏi
+                question.setChoice1(getStringCellValue(row.getCell(1))); // Lựa chọn 1
+                question.setChoice2(getStringCellValue(row.getCell(2))); // Lựa chọn 2
+                question.setChoice3(getStringCellValue(row.getCell(3))); // Lựa chọn 3
+                question.setChoice4(getStringCellValue(row.getCell(4))); // Lựa chọn 4
+                String audioFileName = getStringCellValue(row.getCell(5)); // Giả sử cột âm thanh ở vị trí 5
+                if (audioFileName != null && !audioFileName.isEmpty()) {
+                    Path audioFilePath = targetDir.resolve(audioFileName);
+                    if (Files.exists(audioFilePath)) {
+                        question.setAudioFile(Files.readAllBytes(audioFilePath)); // Lưu tệp âm thanh
+                    } else {
+                        question.setAudioFile(null);
+                    }
+                } else {
+                    question.setAudioFile(null);
+                }
+
                 questionRepository.save(question);
 
-                // Link with MockExam
+                // Liên kết với MockExam
                 MockExamQuestion examQuestion = new MockExamQuestion();
                 examQuestion.setMockExam(mockExam);
                 examQuestion.setQuestion(question);
                 examQuestionRepository.save(examQuestion);
 
-                // Create Answer
+                // Tạo Answer
                 Answer answer = new Answer();
-                answer.setCorrectAnswer(getStringCellValue(row.getCell(5))); // Correct answer
+                answer.setCorrectAnswer(getStringCellValue(row.getCell(6))); // Đáp án đúng
                 answer.setQuestion(question);
                 answerRepository.save(answer);
             }
-
             return ResponseEntity.ok("Mock exam data has been saved");
         } catch (Exception e) {
             e.printStackTrace();
@@ -112,6 +157,7 @@ public class MockExamController {
     public ResponseEntity<String> updateMockExam(
             @PathVariable Long mockExamId,
             @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "audioZip", required = false) MultipartFile audioZip, // Thêm audioZip tùy chọn
             @RequestParam("examName") String examName,
             @RequestParam("examDate") String examDate,
             @RequestParam("type") String type,
@@ -125,18 +171,37 @@ public class MockExamController {
 
             MockExam mockExam = mockExamOptional.get();
             mockExam.setExamName(examName);
-            mockExam.setExamDate(new SimpleDateFormat("yyyy-MM-dd").parse(examDate));
+            mockExam.setExamDate(Date.valueOf(examDate));
             mockExam.setType(type);
             mockExam.setGrade(grade);
-            mockExamRepository.save(mockExam);
+            mockExamRepository.save(mockExam); // Cập nhật MockExam
 
-            // Delete old data
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\mockexams\\" + mockExam.getMockExamId();
+            Path targetDir = Paths.get(folderPath);
+            if (!Files.exists(targetDir)) {
+                Files.createDirectories(targetDir);
+            }
+
+            // Lưu file Excel
+            Path excelFilePath = targetDir.resolve("mockexam_" + mockExam.getMockExamId() + ".xlsx");
+            Files.copy(file.getInputStream(), excelFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Nếu có file ZIP, lưu và giải nén
+            if (audioZip != null && !audioZip.isEmpty()) {
+                Path zipFilePath = targetDir.resolve("audio_" + mockExam.getMockExamId() + ".zip");
+                Files.copy(audioZip.getInputStream(), zipFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // Giải nén file ZIP
+                unzipFile(zipFilePath.toString(), folderPath);
+            }
+
+            // Xóa dữ liệu cũ
             List<Question> questionsToDelete = questionRepository.findByMockExamId(mockExamId);
             if (!questionsToDelete.isEmpty()) {
                 questionRepository.deleteAll(questionsToDelete);
             }
 
-            // Read Excel file to update new data
+            // Đọc file Excel để cập nhật dữ liệu mới
             try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
                 Sheet sheet = workbook.getSheetAt(0);
 
@@ -144,26 +209,66 @@ public class MockExamController {
                     Row row = sheet.getRow(i);
                     if (row == null) continue;
 
-                    // Create new Question
+                    // Tạo Question mới
                     Question question = new Question();
                     question.setQuestionText(getStringCellValue(row.getCell(0)));
                     question.setChoice1(getStringCellValue(row.getCell(1)));
                     question.setChoice2(getStringCellValue(row.getCell(2)));
                     question.setChoice3(getStringCellValue(row.getCell(3)));
                     question.setChoice4(getStringCellValue(row.getCell(4)));
+
+                    // Lưu tệp âm thanh nếu có
+                    String audioFileName = getStringCellValue(row.getCell(5)); // Giả sử cột âm thanh ở vị trí 5
+                    if (audioFileName != null && !audioFileName.isEmpty()) {
+                        Path audioFilePath = targetDir.resolve(audioFileName);
+                        if (Files.exists(audioFilePath)) {
+                            question.setAudioFile(Files.readAllBytes(audioFilePath)); // Lưu tệp âm thanh
+                        } else {
+                            question.setAudioFile(null);
+                        }
+                    } else {
+                        question.setAudioFile(null);
+                    }
+
                     questionRepository.save(question);
 
-                    // Link Question with MockExam
+                    // Liên kết Question với MockExam
                     MockExamQuestion examQuestion = new MockExamQuestion();
                     examQuestion.setMockExam(mockExam);
                     examQuestion.setQuestion(question);
                     examQuestionRepository.save(examQuestion);
 
-                    // Create new Answer
+                    // Tạo Answer mới
                     Answer answer = new Answer();
-                    answer.setCorrectAnswer(getStringCellValue(row.getCell(5)));
+                    answer.setCorrectAnswer(getStringCellValue(row.getCell(6)));
                     answer.setQuestion(question);
                     answerRepository.save(answer);
+                }
+            }
+
+            // Xử lý audioZip nếu có
+            if (audioZip != null && !audioZip.isEmpty()) {
+                if (!Files.exists(targetDir)) {
+                    Files.createDirectories(targetDir);
+                }
+                try (ZipInputStream zis = new ZipInputStream(audioZip.getInputStream())) {
+                    ZipEntry zipEntry;
+                    while ((zipEntry = zis.getNextEntry()) != null) {
+                        File newFile = new File(targetDir.toFile(), zipEntry.getName());
+                        if (zipEntry.isDirectory()) {
+                            newFile.mkdirs();
+                        } else {
+                            // Ngăn chặn việc vượt quá đường dẫn
+                            if (zipEntry.getName().contains("..")) {
+                                return ResponseEntity.badRequest().body("Invalid file path in zip");
+                            }
+                            new File(newFile.getParent()).mkdirs();
+                            Files.copy(zis, newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        }
+                    }
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Failed to process audio zip: " + e.getMessage());
                 }
             }
 
@@ -186,7 +291,7 @@ public class MockExamController {
 
             MockExam mockExam = mockExamOptional.get();
 
-            // Delete all questions related to the mock exam
+            // Xóa tất cả câu hỏi liên quan đến mock exam
             List<Question> questionsToDelete = questionRepository.findByMockExamId(mockExamId);
             if (!questionsToDelete.isEmpty()) {
                 questionRepository.deleteAll(questionsToDelete);
@@ -225,11 +330,11 @@ public class MockExamController {
             }
         }
 
-        // Format the exam date
+        // Định dạng ngày thi
         String examDate = new SimpleDateFormat("yyyy-MM-dd").format(mockExam.getExamDate());
         int grade = Integer.parseInt(mockExam.getGrade());
 
-        // Create a MockExamDetailResponse object
+        // Tạo đối tượng MockExamDetailResponse
         MockExamDetailResponse response = new MockExamDetailResponse(
                 mockExam.getMockExamId(),
                 mockExam.getExamName(),
@@ -240,5 +345,77 @@ public class MockExamController {
         );
 
         return ResponseEntity.ok(response);
+    }
+    private void unzipFile(String zipFilePath, String destDir) throws IOException {
+        File dir = new File(destDir);
+        if (!dir.exists()) dir.mkdirs();
+
+        try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath))) {
+            ZipEntry entry;
+            while ((entry = zipIn.getNextEntry()) != null) {
+                Path filePath = Paths.get(destDir, entry.getName());
+                if (!entry.isDirectory()) {
+                    Files.copy(zipIn, filePath, StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    Files.createDirectories(filePath);
+                }
+                zipIn.closeEntry();
+            }
+        }
+    }
+
+    @GetMapping("/download-excel/{mockexamID}")
+    public ResponseEntity<Resource> downloadExcel(@PathVariable Integer mockexamID) {
+        try {
+            // Lấy bài thực hành từ database để xác định đường dẫn
+            MockExam mockExam = mockExamRepository.findById(mockexamID).orElse(null);
+            if (mockExam == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Đường dẫn đến file Excel
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\mockexams\\" + mockexamID;
+            Path filePath = Paths.get(folderPath, "mockexam_" + mockexamID + ".xlsx");
+
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // API để tải file audio cho bài thực hành
+    @GetMapping("/download-audio/{mockexamID}")
+    public ResponseEntity<Resource> downloadAudio(@PathVariable Integer mockexamID) {
+        try {
+            // Lấy bài thực hành từ database để xác định đường dẫn
+            MockExam mockExam = mockExamRepository.findById(mockexamID).orElse(null);
+            if (mockExam == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Đường dẫn đến file audio
+            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\mockexams\\" + mockexamID; // Đường dẫn thư mục
+            Path filePath = Paths.get(folderPath, "audio_" + mockexamID + ".zip"); // Hoặc .rar
+
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }

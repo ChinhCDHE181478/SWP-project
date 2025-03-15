@@ -24,12 +24,19 @@ const AddExamModal: React.FC<AddExamModalProps> = ({ isOpen, onClose, refreshLis
     const [examStart, setExamStart] = useState<string>("");
     const [examEnd, setExamEnd] = useState<string>("");
     const [grade, setGrade] = useState<string>("");
-    const [status, setStatus] = useState<string>("on"); // Đặt trạng thái mặc định là "on"
+    const [status, setStatus] = useState<string>("on");
     const [file, setFile] = useState<File | null>(null);
+    const [audioFile, setAudioFile] = useState<File | null>(null); // Thêm trạng thái cho tệp âm thanh
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
             setFile(event.target.files[0]);
+        }
+    };
+
+    const handleAudioFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setAudioFile(event.target.files[0]);
         }
     };
 
@@ -42,8 +49,9 @@ const AddExamModal: React.FC<AddExamModalProps> = ({ isOpen, onClose, refreshLis
             formData.append("examStart", examStart);
             formData.append("examEnd", examEnd);
             formData.append("grade", grade);
-            formData.append("status", status); // Gửi trạng thái dưới dạng chuỗi "on" hoặc "off"
+            formData.append("status", status);
             if (file) formData.append("file", file);
+            if (audioFile) formData.append("audioZip", audioFile); // Thêm tệp âm thanh vào formData
 
             const response = await API.post("/exam/upload-exam", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -93,16 +101,37 @@ const AddExamModal: React.FC<AddExamModalProps> = ({ isOpen, onClose, refreshLis
                         <input type="text" value={grade} onChange={(e) => setGrade(e.target.value)}
                             className="border rounded p-2 w-full" required />
                     </div>
+                    {/* Status */}
+                    <div className="mb-4">
+                        <label className="block mb-1">Trạng thái</label>
+                        <select
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                            className="border rounded p-2 w-full"
+                        >
+                            <option value="on">Bật</option>
+                            <option value="off">Tắt</option>
+                        </select>
+                    </div>
                     <div>
                         <label className="block mb-1">Tải lên file</label>
                         <input type="file" onChange={handleFileChange} className="w-full border rounded p-2" />
+                        {file && (
+                            <p className="text-sm text-green-600 mt-1">
+                                📄 Đã chọn: {file.name}
+                            </p>
+                        )}
                     </div>
-                    <div className="flex items-center">
-                        <label className="mr-2">Trạng thái:</label>
-                        <input type="checkbox" checked={status === "on"} onChange={(e) => setStatus(e.target.checked ? "on" : "off")}
-                            className="w-5 h-5" />
-                        <span className="ml-2">{status === "on" ? "On" : "Off"}</span>
+                    <div>
+                        <label className="block mb-1">Tải lên file âm thanh (RAR/ZIP)</label>
+                        <input type="file" onChange={handleAudioFileChange} className="w-full border rounded p-2" accept=".zip,.rar" />
+                        {audioFile && (
+                            <p className="text-sm text-green-600 mt-1">
+                                🎵 Đã chọn: {audioFile.name}
+                            </p>
+                        )}
                     </div>
+                    
                     <DialogFooter>
                         <Button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white rounded-md px-4 py-2">
                             Thêm kỳ thi

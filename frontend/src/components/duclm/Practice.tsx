@@ -6,7 +6,6 @@ import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
 import { API } from "@/helper/axios";
 
-// Định nghĩa kiểu dữ liệu cho các kết quả thi
 interface TestResult {
     testName: string;
     attempts: number;
@@ -23,7 +22,6 @@ const Practice: React.FC = () => {
     const user = useCurrentUser();
     const router = useRouter();
 
-    // Hàm chuyển đổi thời gian từ HH:mm:ss thành giây
     const convertToSeconds = (time: string): number => {
         const [hours, minutes, seconds] = time.split(":").map(Number);
         return hours * 3600 + minutes * 60 + seconds;
