@@ -14,4 +14,5 @@ public interface IPracticeRepository extends JpaRepository<Practice, Long>  {
     Optional<Integer> findMaxLevel();
 
     Optional<Practice> findByPracticeLevelAndGrade(int practiceLevel, int grade);
+
 }

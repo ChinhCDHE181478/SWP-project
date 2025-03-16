@@ -13,4 +13,6 @@ public interface IAnswerRepository extends JpaRepository<Answer, Integer> {
 
     @Query("SELECT a from Answer a where a.question.questionId=:questionId")
     Answer findByQuestionId(Integer questionId);
+
+    Answer findByQuestion_QuestionId(Integer questionId);
 }

@@ -49,7 +49,7 @@ const rolePaths: Record<string, string[]> = {
     "/exam",
     "/practice",
     "/mockexam",
-    "/practice-test",
+    "/test/practice"
   ],
   ADMIN: [
     "/manager/account-manager",
@@ -105,10 +105,19 @@ const normalizeArticlePath = (pathname: string): string => {
   return pathname; // Giữ nguyên nếu không phải "/articles/{id}"
 };
 
+const normalizeTestPath = (pathname: string): string => {
+  if (pathname.startsWith("/test/practice")) {
+    return "/test/practice";
+}
+  return pathname;
+};
+
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const currentPath = normalizeArticlePath(pathname);
+  let currentPath = normalizeArticlePath(pathname);
+  currentPath = normalizeTestPath(pathname);
 
   if (currentPath.startsWith("/_next/")) {
     return NextResponse.next();
