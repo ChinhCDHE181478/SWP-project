@@ -1,5 +1,4 @@
 "use client";
-import axios from "axios";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import React, { useEffect, useState } from "react";
 import { useToast } from "../ui/use-toast";
@@ -7,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { API } from "@/helper/axios";
 
 interface TestResult {
+    smallpracticeID: number;
     testName: string;
     attempts: number;
     score: number;
@@ -21,6 +21,7 @@ const Practice: React.FC = () => {
     const { toast } = useToast();
     const user = useCurrentUser();
     const router = useRouter();
+    const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
     const convertToSeconds = (time: string): number => {
         const [hours, minutes, seconds] = time.split(":").map(Number);
@@ -40,13 +41,13 @@ const Practice: React.FC = () => {
         }
     }, [user.data?.name, user.isLoading]);
 
-    // Lấy dữ liệu currentLevel từ backend
+    // Fetch current level from backend
     useEffect(() => {
         if (!user.data?.id) return;
 
         const fetchCurrentLevel = async () => {
             try {
-                const response = await API.get(`http://localhost:8080/api/v1/practice/get-practice-info/${user.data?.id}`,);
+                const response = await API.get(`http://localhost:8080/api/v1/practice/get-practice-info/${user.data?.id}`);
                 setCurrentLevel(response.data);
             } catch (error) {
                 console.error("Lỗi fetch current level:", error);
@@ -56,11 +57,28 @@ const Practice: React.FC = () => {
         fetchCurrentLevel();
     }, [user.data?.id]);
 
-    // Lấy dữ liệu maxLevel từ backend
+
+    useEffect(() => {
+        const checkCompletion = async () => {
+            if (currentLevel === maxLevel && user.data?.id) {
+                try {
+                    const response = await API.get(`http://localhost:8080/api/v1/practice/completed/${user.data.id}`);
+                    setIsCompleted(response.data); 
+                } catch (error) {
+                    console.log(user.data?.id);
+                    console.error("Error checking completion status:", error);
+                }
+            }
+        };
+    
+        checkCompletion();
+    }, [currentLevel, maxLevel, user.data?.id]);
+
+    // Fetch max level from backend
     useEffect(() => {
         const fetchMaxLevel = async () => {
             try {
-                const response = await axios.get("http://localhost:8080/api/v1/practice/max-level", {
+                const response = await API.get("http://localhost:8080/api/v1/practice/max-level", {
                     headers: {
                         "Content-Type": "application/json"
                     }
@@ -74,7 +92,7 @@ const Practice: React.FC = () => {
         fetchMaxLevel();
     }, []);
 
-    // Lấy kết quả thi từ backend
+    // Fetch test results from backend
     useEffect(() => {
         if (!user.data?.id || !currentLevel) return;
 
@@ -95,9 +113,39 @@ const Practice: React.FC = () => {
         fetchTestResults();
     }, [user.data?.id, currentLevel]);
 
-    // Tính tổng điểm và tổng thời gian
+    // Calculate total score and time spent
     const totalScore = testResults.reduce((acc, result) => acc + result.score, 0);
     const totalTimeSpent = testResults.reduce((acc, result) => acc + convertToSeconds(result.timeSpent), 0);
+
+    const allCompleted = testResults.every(result => result.status === "Hoàn thành");
+    const scoreThreshold = 75 / 100 * 300; // 75% of 300
+
+    const handleCompleteRound = async () => {
+        // Call API to add user practice
+        try {
+            await API.post("/practice/user-practice/add", { userId: user.data?.id, level: currentLevel });
+            toast({ title: "Hoàn tất vòng thi thành công!", className: "text-white bg-green-500" });
+        } catch (error) {
+            console.error("Error completing round:", error);
+            toast({ title: "Lỗi khi hoàn tất vòng thi!", className: "text-white bg-red-500" });
+        }
+        window.location.reload();
+    };
+
+    const handleRetryRound = async () => {
+        // Call API to delete test results with userId and currentLevel
+        try {
+            const response = await API.delete(`/practice/test-results/delete/${currentLevel}`, {
+                data: { userId: user.data?.id }
+            });
+            toast({ title: "Đã xóa kết quả để làm lại vòng thi!", className: "text-white bg-blue-500" });
+            setTestResults([]); // Optionally clear the test results
+        } catch (error) {
+            console.error("Error retrying round:", error);
+            toast({ title: "Lỗi khi làm lại vòng thi!", className: "text-white bg-red-500" });
+        }
+        window.location.reload();
+    };
 
     if (!user.data?.name) return null;
 
@@ -173,7 +221,7 @@ const Practice: React.FC = () => {
                                             <td className="px-6 py-4">
                                                 {result.status === "Chưa thi" ? (
                                                     <a
-                                                        href="#"
+                                                        href={`http://localhost:3000/test/practice/${result.smallpracticeID}/${encodeURIComponent(result.testName)}`}
                                                         className="bg-orange-300 text-white px-4 py-2 rounded hover:bg-orange-400 transition duration-300"
                                                     >
                                                         Làm {result.testName}
@@ -201,6 +249,27 @@ const Practice: React.FC = () => {
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-center mt-6">
+                            {allCompleted ? (
+                                isCompleted ? (
+                                    <p className="text-green-500 font-bold">Bạn đã hoàn tất toàn bộ vòng thi</p>
+                                ) : (
+                                    totalScore < scoreThreshold ? (
+                                        <button onClick={handleRetryRound} className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                                            Làm lại vòng thi
+                                        </button>
+                                    ) : (
+                                        <button onClick={handleCompleteRound} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                                            Hoàn tất vòng thi
+                                        </button>
+                                    )
+                                )
+                            ) : (
+                                <p className="text-gray-500">Chưa hoàn tất vòng thi.</p>
+                            )}
                         </div>
                     </div>
 

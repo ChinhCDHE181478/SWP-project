@@ -4,53 +4,31 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Scoreboard from "./Scoreboard";
 
-const Game1: React.FC = () => {
+interface Question {
+    questionId: number;
+    questionText: string;
+    choice1: string;
+    choice2: string;
+    choice3: string;
+    choice4: string;
+    audioFile?: string | null;
+}
+
+interface Game1Props {
+    questions: Question[]; // Nhận danh sách câu hỏi từ API
+    initialScore: number; // Nhận điểm từ bên ngoài
+    onComplete: (timeTaken: number, finalScore: number) => void; // Callback để gửi thời gian + điểm khi kết thúc
+}
+
+const Game1: React.FC<Game1Props> = ({ questions, initialScore, onComplete }) => {
     const router = useRouter();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes
+    const [score, setScore] = useState(initialScore);
+    const [timeLeft, setTimeLeft] = useState(1800); // Mặc định 30 phút
     const [quizState, setQuizState] = useState<"start" | "quiz" | "finished">("start");
     const [dinosaurMessage, setDinosaurMessage] = useState("");
     const [hasAnswered, setHasAnswered] = useState(false);
     const [dinosaurImage, setDinosaurImage] = useState("/test/dinosaur.svg");
-
-    const questions = [
-        {
-            question: "Question 1?",
-            answers: ["Answer A", "Answer B", "Answer C", "Answer D"],
-            correct: 1,
-        },
-        {
-            question: "Question 2?",
-            answers: ["Answer A", "Answer B", "Answer C", "Answer D"],
-            correct: 3,
-        },
-    ];
-
-    useEffect(() => {
-        document.addEventListener("contextmenu", (event) => event.preventDefault());
-    
-        // Chặn các phím tắt DevTools
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (
-                event.key === "F12" || // F12 mở DevTools
-                (event.ctrlKey && event.shiftKey && (event.key === "I" || event.key === "J")) || // Ctrl+Shift+I, Ctrl+Shift+J
-                (event.ctrlKey && event.key === "U") || // Ctrl+U (View Page Source)
-                event.key === "F5" || // F5 làm mới trang
-                (event.ctrlKey && event.key === "r") // Ctrl+R làm mới trang
-            ) {
-                event.preventDefault();
-            }
-        };
-    
-        document.addEventListener("keydown", handleKeyDown);
-    
-        return () => {
-            document.removeEventListener("contextmenu", (event) => event.preventDefault());
-            document.removeEventListener("keydown", handleKeyDown);
-        };
-    }, []);
-    
 
     useEffect(() => {
         if (quizState === "quiz" && timeLeft > 0) {
@@ -60,6 +38,12 @@ const Game1: React.FC = () => {
             return () => clearInterval(timer);
         }
     }, [quizState, timeLeft]);
+
+    useEffect(() => {
+        if (quizState === "finished") {
+            onComplete(1800 - timeLeft, score); // Gửi thời gian hoàn thành + điểm ra ngoài
+        }
+    }, [quizState]);
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
@@ -71,7 +55,10 @@ const Game1: React.FC = () => {
         if (hasAnswered) return;
         setHasAnswered(true);
 
-        if (index === questions[currentQuestionIndex].correct) {
+        const currentQuestion = questions[currentQuestionIndex];
+        const correctAnswerIndex = [currentQuestion.choice1, currentQuestion.choice2, currentQuestion.choice3, currentQuestion.choice4].indexOf("Cat"); // Cần sửa chỗ này để lấy đúng đáp án từ API
+
+        if (index === correctAnswerIndex) {
             setScore(score + 1);
             setDinosaurMessage("Great job!");
             setDinosaurImage("/test/correct.svg");
@@ -81,8 +68,9 @@ const Game1: React.FC = () => {
         }
 
         setTimeout(() => {
-            setDinosaurMessage(""); // Xóa message
-            setDinosaurImage("/test/dinosaur.svg"); // Đổi lại thành khủng long mặc định
+            setDinosaurMessage(""); 
+            setDinosaurImage("/test/dinosaur.svg");
+
             if (currentQuestionIndex + 1 < questions.length) {
                 setCurrentQuestionIndex(currentQuestionIndex + 1);
                 setHasAnswered(false);
@@ -124,9 +112,9 @@ const Game1: React.FC = () => {
 
                 {quizState === "quiz" && (
                     <div>
-                        <h2 className="text-2xl mb-4">{questions[currentQuestionIndex].question}</h2>
+                        <h2 className="text-2xl mb-4">{questions[currentQuestionIndex].questionText}</h2>
                         <div className="grid grid-cols-2 gap-4">
-                            {questions[currentQuestionIndex].answers.map((answer, index) => (
+                            {[questions[currentQuestionIndex].choice1, questions[currentQuestionIndex].choice2, questions[currentQuestionIndex].choice3, questions[currentQuestionIndex].choice4].map((answer, index) => (
                                 <button key={index} className={buttonStyle} onClick={() => handleAnswer(index)}>
                                     {answer}
                                 </button>

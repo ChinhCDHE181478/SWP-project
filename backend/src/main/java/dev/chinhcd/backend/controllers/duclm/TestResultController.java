@@ -1,6 +1,8 @@
 package dev.chinhcd.backend.controllers.duclm;
 
 import dev.chinhcd.backend.dtos.response.duclm.TestResultResponse;
+import dev.chinhcd.backend.models.User;
+import dev.chinhcd.backend.repository.IUserRepository;
 import dev.chinhcd.backend.services.duclm.ITestResultService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ public class TestResultController {
             List<TestResultResponse> result = testResultService.getTestResults(userId, currentLevel);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(List.of());
         }
     }

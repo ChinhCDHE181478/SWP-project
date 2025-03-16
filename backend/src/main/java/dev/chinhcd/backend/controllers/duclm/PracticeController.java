@@ -117,16 +117,28 @@ public class PracticeController {
             // Process the Excel file
             try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
                 Sheet sheet = workbook.getSheetAt(0);
+                Map<String, SmallPractice> smallPracticeMap = new HashMap<>(); // Lưu trữ SmallPractice theo testName
 
                 for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) { // Start from the second row
                     Row row = sheet.getRow(i);
                     if (row == null) continue;
 
-                    SmallPractice smallPractice = new SmallPractice();
-                    smallPractice.setTestName(getStringCellValue(row.getCell(1))); // Test Name
-                    smallPractice.setTestDate(row.getCell(0) != null ? row.getCell(0).getDateCellValue() : null); // Test Date
-                    smallPractice.setPractice(practice);
-                    smallPracticeRepository.save(smallPractice);
+                    String testName = getStringCellValue(row.getCell(1)); // Test Name
+                    SmallPractice smallPractice = smallPracticeMap.get(testName);
+
+                    if (smallPractice == null) {
+                        Optional<SmallPractice> existingSmallPractice = smallPracticeRepository.findByPracticeAndTestName(practice, testName);
+                        if (existingSmallPractice.isPresent()) {
+                            smallPractice = existingSmallPractice.get();
+                        } else {
+                            smallPractice = new SmallPractice();
+                            smallPractice.setTestName(testName);
+                            smallPractice.setTestDate(row.getCell(0) != null ? row.getCell(0).getDateCellValue() : null);
+                            smallPractice.setPractice(practice);
+                            smallPracticeRepository.save(smallPractice);
+                        }
+                        smallPracticeMap.put(testName, smallPractice); // Lưu vào Map để dùng lại
+                    }
 
                     Question question = new Question();
                     question.setQuestionText(getStringCellValue(row.getCell(2))); // Question
@@ -141,10 +153,10 @@ public class PracticeController {
                         if (Files.exists(audioFilePath)) {
                             question.setAudioFile(Files.readAllBytes(audioFilePath)); // Lưu tệp âm thanh
                         } else {
-                            question.setAudioFile(null); // Hoặc có thể không lưu tệp âm thanh
+                            question.setAudioFile(null);
                         }
                     } else {
-                        question.setAudioFile(null); // Đặt là null nếu không có tệp âm thanh
+                        question.setAudioFile(null);
                     }
 
                     questionRepository.save(question);
@@ -160,6 +172,7 @@ public class PracticeController {
                     answerRepository.save(answer);
                 }
             }
+
 
             return ResponseEntity.ok("Dữ liệu đã được lưu");
         } catch (Exception e) {
@@ -223,7 +236,7 @@ public class PracticeController {
             @RequestParam("practiceDate") String practiceDate,
             @RequestParam("grade") int grade,
             @RequestParam("practiceLevel") int practiceLevel,
-            @RequestParam("status") String status) { // Thêm tham số status
+            @RequestParam("status") String status) {
 
         try {
             Optional<Practice> practiceOptional = practiceRepository.findById(practiceId);
@@ -235,7 +248,7 @@ public class PracticeController {
             practice.setPracticeDate(Date.valueOf(practiceDate));
             practice.setGrade(grade);
             practice.setPracticeLevel(practiceLevel);
-            practice.setStatus(status); // Cập nhật giá trị status
+            practice.setStatus(status);
             practiceRepository.save(practice); // Cập nhật Practice
 
             String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practice.getPracticeId();
@@ -252,34 +265,41 @@ public class PracticeController {
             if (audioZip != null && !audioZip.isEmpty()) {
                 Path zipFilePath = targetDir.resolve("audio_" + practice.getPracticeId() + ".zip");
                 Files.copy(audioZip.getInputStream(), zipFilePath, StandardCopyOption.REPLACE_EXISTING);
-
-                // Giải nén file ZIP
                 unzipFile(zipFilePath.toString(), folderPath);
             }
 
-            // Xóa các câu hỏi và bài thực hành nhỏ cũ
+            // Xóa câu hỏi cũ nhưng giữ lại SmallPractice
             List<Question> questionsToDelete = questionRepository.findByPracticeId(practiceId);
-            if (!questionsToDelete.isEmpty()) {
-                questionRepository.deleteAll(questionsToDelete);
+            questionRepository.deleteAll(questionsToDelete);
+
+            // Tạo danh sách SmallPractice có sẵn
+            Map<String, SmallPractice> smallPracticeMap = new HashMap<>();
+            List<SmallPractice> existingSmallPractices = smallPracticeRepository.findByPractice(practice);
+            for (SmallPractice sp : existingSmallPractices) {
+                smallPracticeMap.put(sp.getTestName(), sp);
             }
-            List<SmallPractice> smallPractices = smallPracticeRepository.findByPractice(practice);
-            smallPracticeRepository.deleteAll(smallPractices);
 
             // Xử lý file Excel
             try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
                 Sheet sheet = workbook.getSheetAt(0);
+
                 for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
                     Row row = sheet.getRow(i);
                     if (row == null) continue;
 
-                    // Tạo SmallPractice mới
-                    SmallPractice smallPractice = new SmallPractice();
-                    smallPractice.setTestName(getStringCellValue(row.getCell(1)));
-                    smallPractice.setTestDate(row.getCell(0).getDateCellValue());
-                    smallPractice.setPractice(practice);
-                    smallPracticeRepository.save(smallPractice);
+                    String testName = getStringCellValue(row.getCell(1));
+                    SmallPractice smallPractice = smallPracticeMap.get(testName);
 
-                    // Tạo Question mới
+                    if (smallPractice == null) { // Nếu chưa có, tạo mới
+                        smallPractice = new SmallPractice();
+                        smallPractice.setTestName(testName);
+                        smallPractice.setTestDate(row.getCell(0).getDateCellValue());
+                        smallPractice.setPractice(practice);
+                        smallPracticeRepository.save(smallPractice);
+                        smallPracticeMap.put(testName, smallPractice);
+                    }
+
+                    // Tạo câu hỏi mới
                     Question question = new Question();
                     question.setQuestionText(getStringCellValue(row.getCell(2)));
                     question.setChoice1(getStringCellValue(row.getCell(3)));
@@ -310,6 +330,7 @@ public class PracticeController {
                     .body("Lỗi khi cập nhật bài thực hành: " + e.getMessage());
         }
     }
+
 
     @GetMapping("/get-detail/{id}")
     public ResponseEntity<?> getPracticeDetail(@PathVariable Long id) {
