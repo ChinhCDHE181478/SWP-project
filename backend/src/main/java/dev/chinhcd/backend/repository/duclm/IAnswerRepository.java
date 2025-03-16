@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IAnswerRepository extends JpaRepository<Answer, Integer> {
     Answer findByQuestion(Question question);
+
+    Answer findByQuestion_QuestionId(Integer questionId);
 }
