@@ -1,9 +1,13 @@
 package dev.chinhcd.backend.controllers.duclm;
 
+import dev.chinhcd.backend.dtos.response.QuestionsResponse;
 import dev.chinhcd.backend.dtos.response.duclm.ExamDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
+import dev.chinhcd.backend.enums.AccountType;
+import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.*;
 import dev.chinhcd.backend.repository.duclm.*;
+import dev.chinhcd.backend.services.IUserService;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.nio.file.Files;
@@ -41,6 +46,8 @@ public class ExamController {
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
     private final IExamQuestionRepository examQuestionRepository;
+    private final IUserExamRepository userExamRepository;
+    private final IUserService userService;
 
     @GetMapping("/next")
     public ResponseEntity<?> getNextExam() {
@@ -98,7 +105,7 @@ public class ExamController {
             examRepository.save(exam);
 
             // Tạo thư mục lưu trữ cho kỳ thi
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + exam.getExamId();
+            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams\\" + exam.getExamId();
             Path targetDir = Paths.get(folderPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
@@ -210,7 +217,7 @@ public class ExamController {
             examRepository.save(exam); // Cập nhật Exam
 
             // Tạo thư mục cho exam
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + exam.getExamId();
+            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams\\" + exam.getExamId();
             Path targetDir = Paths.get(folderPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
@@ -304,8 +311,6 @@ public class ExamController {
                 }
             }
 
-
-
             return ResponseEntity.ok("Cập nhật kỳ thi thành công!");
         } catch (Exception e) {
             e.printStackTrace();
@@ -393,7 +398,7 @@ public class ExamController {
             }
 
             // Đường dẫn đến file Excel
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + examId; // Đường dẫn thư mục
+            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams\\" + examId; // Đường dẫn thư mục
             Path filePath = Paths.get(folderPath, "exam_" + examId + ".xlsx");
 
             Resource resource = new UrlResource(filePath.toUri());
@@ -420,7 +425,7 @@ public class ExamController {
             }
 
             // Đường dẫn đến file audio
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + examId; // Đường dẫn thư mục
+            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams\\" + examId; // Đường dẫn thư mục
             Path filePath = Paths.get(folderPath, "audio_" + examId + ".zip"); // Hoặc .rar
 
             Resource resource = new UrlResource(filePath.toUri());
@@ -436,4 +441,42 @@ public class ExamController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    @GetMapping("/allow-do-exam")
+    public ResponseEntity<Boolean> doExam(@RequestParam Long examId, @RequestParam Long userId) {
+        if(userExamRepository.findByUserIdAndExamId(userId, examId).isPresent()) {
+            return ResponseEntity.ok(false);
+        } else {
+            User user = userService.getUserById(userId);
+            if(user.getAccountType().equals(AccountType.FREE_COURSE)){
+                return ResponseEntity.ok(false);
+            }
+            Exam exam = examRepository.findById(Math.toIntExact(examId)).orElse(null);
+            UserExam userExam = new UserExam();
+            userExam.setUser(user);
+            userExam.setExam(exam);
+            userExam.setScore(0.0);
+            userExam.setExamName(exam.getExamName());
+            userExamRepository.save(userExam);
+            return ResponseEntity.ok(true);
+        }
+    }
+
+    @GetMapping("/get-question")
+    public ResponseEntity<List<QuestionsResponse>> getQuestions(@RequestParam Long examId) {
+        List<Question> ques = questionRepository.findByExamId(examId);
+        List<QuestionsResponse> quesRes = ques.stream().map(q -> {
+            return QuestionsResponse.builder()
+                    .questionId(q.getQuestionId())
+                    .questionText(q.getQuestionText())
+                    .choice4(q.getChoice4())
+                    .choice3(q.getChoice3())
+                    .choice2(q.getChoice2())
+                    .choice1(q.getChoice1())
+                    .audioFile(q.getAudioFile())
+                    .build();
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(quesRes);
+    }
+
 }

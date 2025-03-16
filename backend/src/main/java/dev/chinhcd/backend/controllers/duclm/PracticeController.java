@@ -238,7 +238,7 @@ public class PracticeController {
             practice.setStatus(status); // Cập nhật giá trị status
             practiceRepository.save(practice); // Cập nhật Practice
 
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practice.getPracticeId();
+            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\practices\\" + practice.getPracticeId();
             Path targetDir = Paths.get(folderPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
@@ -370,7 +370,7 @@ public class PracticeController {
             }
 
             // Đường dẫn đến file Excel
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practiceId;
+            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\practices\\" + practiceId;
             Path filePath = Paths.get(folderPath, "practice_" + practiceId + ".xlsx");
 
             Resource resource = new UrlResource(filePath.toUri());
@@ -398,7 +398,7 @@ public class PracticeController {
             }
 
             // Đường dẫn đến file audio
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practiceId; // Đường dẫn thư mục
+            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\practices\\" + practiceId; // Đường dẫn thư mục
             Path filePath = Paths.get(folderPath, "audio_" + practiceId + ".zip"); // Hoặc .rar
 
             Resource resource = new UrlResource(filePath.toUri());
