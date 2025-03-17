@@ -19,7 +19,7 @@ interface UpdatePracticeModalProps {
         practiceDate: string;
         grade: number;
         practiceLevel: number;
-        status: string; 
+        status: string;
     };
     refreshList: () => void;
 }
@@ -88,42 +88,42 @@ const UpdatePracticeModal: React.FC<UpdatePracticeModalProps> = ({
     };
 
     const handleDownload = async (type: "excel" | "audio") => {
-            if (!practice || !practice.practiceId) {
-                toast({
-                    title: "Lỗi!",
-                    description: "Không tìm thấy ID kỳ thi.",
-                    className: "text-white bg-red-500",
-                });
-                return;
+        if (!practice || !practice.practiceId) {
+            toast({
+                title: "Lỗi!",
+                description: "Không tìm thấy ID kỳ thi.",
+                className: "text-white bg-red-500",
+            });
+            return;
+        }
+
+        const apiUrl = type === "excel"
+            ? `/practice/download-excel/${practice.practiceId}`
+            : `/practice/download-audio/${practice.practiceId}`;
+
+        try {
+            const response = await API.get(apiUrl, {
+                responseType: "blob", // Nhận phản hồi dưới dạng file blob
+            });
+
+            if (response.status === 200) {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", type === "excel" ? `practice_${practice.practiceId}.xlsx` : `audio_${practice.practiceId}.zip`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
-    
-            const apiUrl = type === "excel"
-                ? `/practice/download-excel/${practice.practiceId}`
-                : `/practice/download-audio/${practice.practiceId}`;
-    
-            try {
-                const response = await API.get(apiUrl, {
-                    responseType: "blob", // Nhận phản hồi dưới dạng file blob
-                });
-    
-                if (response.status === 200) {
-                    const url = window.URL.createObjectURL(new Blob([response.data]));
-                    const link = document.createElement("a");
-                    link.href = url;
-                    link.setAttribute("download", type === "excel" ? `practice_${practice.practiceId}.xlsx` : `audio_${practice.practiceId}.zip`);
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-            } catch (error) {
-                console.error("Error downloading file:", error);
-                toast({
-                    title: "Lỗi!",
-                    description: `Không thể tải file ${type === "excel" ? "Excel" : "Audio"}.`,
-                    className: "text-white bg-red-500",
-                });
-            }
-        };
+        } catch (error) {
+            console.error("Error downloading file:", error);
+            toast({
+                title: "Lỗi!",
+                description: `Không thể tải file ${type === "excel" ? "Excel" : "Audio"}.`,
+                className: "text-white bg-red-500",
+            });
+        }
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -144,14 +144,24 @@ const UpdatePracticeModal: React.FC<UpdatePracticeModalProps> = ({
                     </div>
 
                     {/* Khối */}
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-1">Khối</label>
-                        <input
-                            type="text"
+                    <div className="mb-4">
+                        <label className="block mb-1">Khối</label>
+                        <select
                             value={grade}
                             onChange={(e) => setGrade(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
-                        />
+                            className="border rounded p-2 w-full"
+                            required
+                        >
+                            <option value="" disabled>Chọn khối</option> {/* Option mặc định không thể chọn */}
+                            {[...Array(7)].map((_, index) => {
+                                const gradeValue = index + 3; // Tạo các giá trị từ 3 đến 9
+                                return (
+                                    <option key={gradeValue} value={gradeValue}>
+                                        {gradeValue}
+                                    </option>
+                                );
+                            })}
+                        </select>
                     </div>
 
                     {/* Vòng tự luyện */}
@@ -210,14 +220,14 @@ const UpdatePracticeModal: React.FC<UpdatePracticeModalProps> = ({
                         )}
                     </div>
                     {/* Nút tải file */}
-                                        <div className="flex space-x-2">
-                                            <Button type="button" className="bg-orange-500 hover:bg-blue-600 text-white px-4 py-2" onClick={() => handleDownload("excel")}>
-                                                📥 Tải Excel
-                                            </Button>
-                                            <Button type="button" className="bg-orange-500 hover:bg-purple-600 text-white px-4 py-2" onClick={() => handleDownload("audio")}>
-                                                🎵 Tải Audio
-                                            </Button>
-                                        </div>
+                    <div className="flex space-x-2">
+                        <Button type="button" className="bg-orange-500 hover:bg-blue-600 text-white px-4 py-2" onClick={() => handleDownload("excel")}>
+                            📥 Tải Excel
+                        </Button>
+                        <Button type="button" className="bg-orange-500 hover:bg-purple-600 text-white px-4 py-2" onClick={() => handleDownload("audio")}>
+                            🎵 Tải Audio
+                        </Button>
+                    </div>
 
                     {/* Footer */}
                     <DialogFooter className="mt-6 flex justify-end gap-3">

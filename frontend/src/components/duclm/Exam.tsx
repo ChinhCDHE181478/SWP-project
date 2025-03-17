@@ -5,6 +5,7 @@ import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { API } from "@/helper/axios";
+import Link from "next/link";
 
 interface ExamData {
     examId: number;
@@ -57,11 +58,11 @@ const Exam: React.FC = () => {
                 title: "Hiện tại không có bài thi nào.",
                 className: "text-white bg-orange-500",
             });
-    
+
             setTimeout(() => {
                 router.push("/");
             }, 300);
-    
+
             return;
         }
 
@@ -102,7 +103,7 @@ const Exam: React.FC = () => {
         if (user.data?.id && examData?.examName) {
             fetchExamResult(user.data.id.toString(), examData.examName);
             checkUserEligibility();
-        }   
+        }
     }, [isLoading, user.data?.accountType, user.data?.id, examData]);
 
     async function fetchExamResult(userId: string, examName: string) {
@@ -110,22 +111,22 @@ const Exam: React.FC = () => {
             const response = await API.get<ExamResult>(`http://localhost:8080/api/v1/user-exam/get-result/${userId}?examName=${examName}`,
             );
             setExamResult(response.data);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             console.error("No previous exam result found.");
         }
     }
-    
+
 
     async function checkUserEligibility() {
         const examName = examData?.examName;
         const userId = user.data?.id; // Lưu user.data?.id vào biến trước
-    
+
         if (!examName || userId === undefined) return; // Kiểm tra userId trước khi tiếp tục
-    
+
         let previousExamName = "";
         let limit = 0;
-    
+
         if (examName === "Cấp Quận/Huyện") {
             previousExamName = "Cấp Phường/Xã";
             limit = 1;
@@ -135,9 +136,9 @@ const Exam: React.FC = () => {
         } else {
             return;
         }
-    
+
         const url = `http://localhost:8080/api/v1/user-exam/get-users/${limit}?examName=${previousExamName}`;
-    
+
         try {
             const response = await axios.get(url,
                 {
@@ -145,10 +146,10 @@ const Exam: React.FC = () => {
                 }
             );
             const userList = response.data;
-    
+
             console.log("User List: ", userList);
             console.log("Current User ID: ", userId);
-    
+
             // Kiểm tra nếu user không nằm trong danh sách đủ điều kiện
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if (!userList.some((u: any) => u.user.id.toString() === userId.toString())) {
@@ -157,7 +158,7 @@ const Exam: React.FC = () => {
                     description: `Bạn cần đạt đủ điều kiện là Top ${limit} ở vòng ${previousExamName} để tiếp tục.`,
                     className: "text-white bg-orange-500",
                 });
-    
+
                 // Chuyển trang về trang chủ
                 setTimeout(() => {
                     router.push("/");
@@ -167,10 +168,10 @@ const Exam: React.FC = () => {
             console.error(`Error fetching top users for ${previousExamName}:`, error);
         }
     }
-    
-    
-    
-    
+
+
+
+
     if (isLoading || (examData?.examStart && Date.now() < new Date(examData.examStart).getTime())) {
         return <div className="h-screen flex justify-center items-center text-lg">Đang kiểm tra thông tin thi...</div>;
     }
@@ -183,7 +184,7 @@ const Exam: React.FC = () => {
                     <h3 className="text-xl font-semibold">Vòng thi chính thức EduTest {examData?.examName}</h3>
                 </div>
             </div>
-    
+
             {/* Main Content */}
             <div className="px-6 py-8 max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -193,7 +194,7 @@ const Exam: React.FC = () => {
                             <div className="text-sm">Khối tham gia: {examData?.grade}</div>
                             <h3 className="text-lg font-bold">Vòng thi chính thức</h3>
                         </div>
-    
+
                         {/* Exam Rules */}
                         <div className="bg-yellow-100 p-4 rounded-lg mb-8">
                             <h4 className="text-lg font-semibold mb-4">Lưu ý:</h4>
@@ -206,7 +207,7 @@ const Exam: React.FC = () => {
                                 </ul>
                             </ul>
                         </div>
-    
+
                         {/* Exam Violations */}
                         <div className="bg-red-100 p-4 rounded-lg mb-8">
                             <h4 className="text-lg font-semibold mb-4">Các trường hợp thi sai luật:</h4>
@@ -219,7 +220,7 @@ const Exam: React.FC = () => {
                                 Các tài khoản vi phạm sẽ bị hệ thống tự động thoát ra ngoài và tính một lần trượt vòng thi.
                             </p>
                         </div>
-    
+
                         {/* Exam Results or Start Exam Button */}
                         {examResult ? (
                             <div className="overflow-x-auto shadow-lg rounded-lg bg-white mt-8">
@@ -242,13 +243,15 @@ const Exam: React.FC = () => {
                             </div>
                         ) : (
                             <div className="flex justify-center">
-                                <button className="bg-orange-500 text-white px-3 py-1.5 rounded w-fit hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out">
-                                    Vào thi ngay
-                                </button>
+                                <Link href={`/test/exam/exam/${examData?.examId}?name=${examData?.examName}`}>
+                                    <button className="bg-orange-500 text-white px-3 py-1.5 rounded w-fit hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out">
+                                        Vào thi ngay
+                                    </button>
+                                </Link>
                             </div>
                         )}
                     </div>
-    
+
                     {/* Right Column: Avatar and Additional Information */}
                     <div className="flex flex-col md:col-span-1">
                         {/* User Avatar & Info */}
@@ -266,7 +269,7 @@ const Exam: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-    
+
                         {/* Additional User Info */}
                         <div className="bg-gray-200 p-4 rounded-lg">
                             <div className="text-sm text-gray-700">
@@ -286,7 +289,7 @@ const Exam: React.FC = () => {
             </div>
         </div>
     );
-    
+
 };
 
 export default Exam;

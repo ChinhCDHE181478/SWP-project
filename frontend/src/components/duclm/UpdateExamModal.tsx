@@ -55,6 +55,10 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
         event.preventDefault();
     
         try {
+            if (!file) {
+                toast({ title: "Vui lòng chọn tệp Excel!", className: "text-white bg-red-500" });
+                return;
+            }
             const formData = new FormData();
             formData.append("examName", examName);
             formData.append("examStart", examStart);
@@ -62,7 +66,7 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
             formData.append("grade", grade);
             formData.append("status", status);
     
-            if (file) formData.append("file", file);
+            formData.append("file", file);
             if (audioFile) formData.append("audioZip", audioFile);
     
             const response = await API.put(`/exam/update/${exam.examId}`, formData, {
@@ -132,15 +136,19 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
             <DialogContent className="bg-white shadow-lg rounded-lg">
                 <DialogTitle>Cập nhật kỳ thi</DialogTitle>
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
-                    <div>
+                <div>
                         <label className="block text-gray-700 font-medium mb-1">Tên kỳ thi</label>
-                        <input
-                            type="text"
+                        <select
                             value={examName}
                             onChange={(e) => setExamName(e.target.value)}
-                            className="border rounded p-2 w-full focus:outline-orange-500"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
-                        />
+                        >
+                            <option value="" disabled>Chọn tên kỳ thi</option> {/* Option mặc định không thể chọn */}
+                            <option value="Cấp Phường/Xã">Cấp Phường/Xã</option>
+                            <option value="Cấp Quận/Huyện">Cấp Quận/Huyện</option>
+                            <option value="Cấp Tỉnh/Thành phố">Cấp Tỉnh/Thành phố</option>
+                        </select>
                     </div>
                     <div>
                         <label className="block text-gray-700 font-medium mb-1">Ngày bắt đầu</label>
@@ -148,7 +156,7 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
                             type="datetime-local"
                             value={examStart}
                             onChange={(e) => setExamStart(e.target.value)}
-                            className="border rounded p-2 w-full focus:outline-orange-500"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
                         />
                     </div>
@@ -158,19 +166,28 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
                             type="datetime-local"
                             value={examEnd}
                             onChange={(e) => setExamEnd(e.target.value)}
-                            className="border rounded p-2 w-full focus:outline-orange-500"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
                         />
                     </div>
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-1">Khối</label>
-                        <input
-                            type="text"
+                    <div className="mb-4">
+                        <label className="block mb-1">Khối</label>
+                        <select
                             value={grade}
-                            onChange={(e) => setGrade(e.target.value)}
-                            className="border rounded p-2 w-full focus:outline-orange-500"
+                            onChange={(e) => setGrade(e.target.value)} // Chuyển đổi giá trị sang kiểu number
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
-                        />
+                        >
+                            <option value="" disabled>Chọn khối</option> {/* Option mặc định không thể chọn */}
+                            {[...Array(7)].map((_, index) => {
+                                const gradeValue = index + 3; // Tạo các giá trị từ 3 đến 9
+                                return (
+                                    <option key={gradeValue} value={gradeValue}>
+                                        {gradeValue}
+                                    </option>
+                                );
+                            })}
+                        </select>
                     </div>
                     <div>
                         <label className="block text-gray-700 font-medium mb-1">Trạng thái</label>
@@ -187,14 +204,14 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({ isOpen, onClose, refr
                     {/* Tải file */}
                     <div className="flex flex-col space-y-2">
                         <label className="block text-gray-700 font-medium">Tải lên file</label>
-                        <input type="file" onChange={handleFileChange} className="border rounded p-2 w-full focus:outline-orange-500" />
+                        <input type="file" onChange={handleFileChange} className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500" />
                         {file && <p className="text-sm text-green-600">📄 Đã chọn: {file.name}</p>}
                     </div>
 
                     {/* Tải file âm thanh */}
                     <div className="flex flex-col space-y-2">
                         <label className="block text-gray-700 font-medium">Tải lên file âm thanh (tùy chọn)</label>
-                        <input type="file" accept=".zip,.rar" onChange={handleAudioFileChange} className="border rounded p-2 w-full focus:outline-orange-500" />
+                        <input type="file" accept=".zip,.rar" onChange={handleAudioFileChange} className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500" />
                         {audioFile && <p className="text-sm text-green-600">🎵 Đã chọn: {audioFile.name}</p>}
                     </div>
 

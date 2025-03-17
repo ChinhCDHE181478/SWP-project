@@ -14,6 +14,11 @@ interface MockExamData {
     totalTime: string;
 }
 
+interface MockExam {
+    mockExamId: number;
+    examName: string;
+}
+
 const MockExam: React.FC = () => {
     const { toast } = useToast();
     const user = useCurrentUser();
@@ -21,7 +26,7 @@ const MockExam: React.FC = () => {
 
     const [mockExamData, setMockExamData] = useState<MockExamData | null>(null);
     const [allMockResults, setAllMockResults] = useState<MockExamData[]>([]); // State to hold all mock results
-
+    const [mockExams, setMockExams] = useState<MockExam[]>([]);
     // Fetch mock exam data based on the user's id and grade
     useEffect(() => {
         if (user.data?.id && user.data?.grade) {
@@ -44,6 +49,19 @@ const MockExam: React.FC = () => {
             fetchMockExamData();
         }
     }, [user.data?.id, user.data?.grade]);
+
+    useEffect(() => {
+        const fetchMockExams = async () => {
+            try {
+                const response = await API.get(`/mock-exam/get-infor/${user.data?.grade}`);
+                setMockExams(response.data);
+            } catch (error) {
+                console.error("Error fetching mock exams:", error);
+            }
+        };
+
+        fetchMockExams();
+    }, [user.data?.grade]);
 
     // Fetch all mock results data
     useEffect(() => {
@@ -104,24 +122,16 @@ const MockExam: React.FC = () => {
 
                         {/* Dropdown for selecting test level */}
                         <div className="mb-8">
-                            <a
-                                href="#"
-                                className="bg-orange-500 text-white px-4 py-2 rounded mr-2 hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
-                            >
-                                Cấp Phường/Xã
-                            </a>
-                            <a
-                                href="#"
-                                className="bg-orange-500 text-white px-4 py-2 rounded mr-2 hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
-                            >
-                                Cấp Quận/Huyện
-                            </a>
-                            <a
-                                href="#"
-                                className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
-                            >
-                                Cấp Tỉnh/Thành Phố
-                            </a>
+                            {mockExams.map((exam) => (
+                                <a
+                                    key={exam.mockExamId || exam.examName} // Sử dụng ID hoặc tên làm key
+                                    href={exam.mockExamId ? `/test/exam/mock-exam/${exam.mockExamId}?name=${exam.examName}` : "#"}
+                                    className={`bg-orange-500 text-white px-4 py-2 rounded mr-2 ${exam.mockExamId ? "hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out" : "bg-gray-400 cursor-not-allowed"}`}
+                                    onClick={exam.mockExamId ? undefined : (e) => e.preventDefault()}
+                                >
+                                    {exam.examName}
+                                </a>
+                            ))}
                         </div>
 
                         {/* Exam Completion Notice */}

@@ -52,7 +52,7 @@ const MockExamDetailModal: React.FC<MockExamDetailModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="bg-white shadow-lg rounded-lg" style={{ width: '80%', maxWidth: '800px' }}>
+            <DialogContent className="bg-white shadow-lg rounded-lg" style={{ width: '80%', maxWidth: '800px', maxHeight: '80vh', overflowY: 'auto' }}>
                 <DialogTitle className="text-center">Chi tiết kỳ thi giả lập</DialogTitle>
                 <div className="p-4">
                     <p><strong>Tên kỳ thi:</strong> {mockExam.examName}</p>

@@ -41,6 +41,7 @@ public class ExamController {
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
     private final IExamQuestionRepository examQuestionRepository;
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\exams\\";
 
     @GetMapping("/next")
     public ResponseEntity<?> getNextExam() {
@@ -66,6 +67,51 @@ public class ExamController {
         return ResponseEntity.ok(response);
     }
 
+    private ResponseEntity<String> validateExcelFile(MultipartFile file) {
+        Workbook workbook = null;
+        try {
+            workbook = WorkbookFactory.create(file.getInputStream());
+            Sheet sheet = workbook.getSheetAt(0);
+
+            if (sheet.getPhysicalNumberOfRows() <= 1) {
+                return ResponseEntity.badRequest().body("File Excel không có dữ liệu hợp lệ");
+            }
+
+            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                // Kiểm tra cột câu hỏi không được để trống
+                if (getStringCellValue(row.getCell(0)).isEmpty()) {
+                    return ResponseEntity.badRequest().body("Câu hỏi không được để trống ở hàng " + (i + 1));
+                }
+
+                // Kiểm tra các đáp án
+                for (int j = 1; j <= 4; j++) { // Các cột đáp án
+                    if (getStringCellValue(row.getCell(j)).isEmpty()) {
+                        return ResponseEntity.badRequest().body("Đáp án không được để trống ở hàng " + (i + 1) + ", cột " + (j + 1));
+                    }
+                }
+
+                // Kiểm tra câu trả lời đúng
+                if (getStringCellValue(row.getCell(6)).isEmpty()) {
+                    return ResponseEntity.badRequest().body("Đáp án đúng không được để trống ở hàng " + (i + 1));
+                }
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi khi đọc file Excel: " + e.getMessage());
+        } finally {
+            if (workbook != null) {
+                try {
+                    workbook.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return ResponseEntity.ok("File Excel hợp lệ");
+    }
+
     @PostMapping("/upload-exam")
     public ResponseEntity<String> uploadExam(
             @RequestParam("file") MultipartFile file,
@@ -78,6 +124,10 @@ public class ExamController {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("Tệp rỗng");
+        }
+        ResponseEntity<String> validationResponse = validateExcelFile(file);
+        if (!validationResponse.getStatusCode().equals(HttpStatus.OK)) {
+            return validationResponse;
         }
 
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
@@ -98,7 +148,7 @@ public class ExamController {
             examRepository.save(exam);
 
             // Tạo thư mục lưu trữ cho kỳ thi
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + exam.getExamId();
+            String folderPath = BASE_FOLDER_PATH + exam.getExamId();
             Path targetDir = Paths.get(folderPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
@@ -200,6 +250,10 @@ public class ExamController {
             if (examOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy kỳ thi!");
             }
+            ResponseEntity<String> validationResponse = validateExcelFile(file);
+            if (!validationResponse.getStatusCode().equals(HttpStatus.OK)) {
+                return validationResponse;
+            }
 
             Exam exam = examOptional.get();
             exam.setExamName(examName);
@@ -210,7 +264,7 @@ public class ExamController {
             examRepository.save(exam); // Cập nhật Exam
 
             // Tạo thư mục cho exam
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + exam.getExamId();
+            String folderPath = BASE_FOLDER_PATH + exam.getExamId();
             Path targetDir = Paths.get(folderPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
@@ -393,7 +447,7 @@ public class ExamController {
             }
 
             // Đường dẫn đến file Excel
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + examId; // Đường dẫn thư mục
+            String folderPath = BASE_FOLDER_PATH + examId; // Đường dẫn thư mục
             Path filePath = Paths.get(folderPath, "exam_" + examId + ".xlsx");
 
             Resource resource = new UrlResource(filePath.toUri());
@@ -420,7 +474,7 @@ public class ExamController {
             }
 
             // Đường dẫn đến file audio
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\exams\\" + examId; // Đường dẫn thư mục
+            String folderPath = BASE_FOLDER_PATH + examId; // Đường dẫn thư mục
             Path filePath = Paths.get(folderPath, "audio_" + examId + ".zip"); // Hoặc .rar
 
             Resource resource = new UrlResource(filePath.toUri());
