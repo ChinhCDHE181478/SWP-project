@@ -9,4 +9,6 @@ public interface IUserExamService {
     public Optional<UserExam> getUserExamResult(Long userId, String examName);
 
     public List<UserExam> getUserExamList(String examName, int limit);
+
+    List<UserExam> searchResults(String province, Integer grade,String examName);
 }

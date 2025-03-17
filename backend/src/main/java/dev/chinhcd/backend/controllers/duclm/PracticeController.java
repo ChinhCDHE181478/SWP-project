@@ -43,6 +43,7 @@ public class PracticeController {
     private final IAnswerRepository answerRepository;
     private final IUserPracticeRepository userPracticeRepository;
     private final ITestResultRepository testResultRepository;
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\practices\\";
 
     @GetMapping("/max-level")
     public ResponseEntity<Integer> getMaxLevel() {
@@ -64,41 +65,107 @@ public class PracticeController {
         return ResponseEntity.ok(response);
     }
 
+
+
+    private ResponseEntity<String> validateExcelFile(MultipartFile file) {
+        Workbook workbook = null;
+        try {
+            workbook = WorkbookFactory.create(file.getInputStream());
+            Sheet sheet = workbook.getSheetAt(0);
+
+            if (sheet.getPhysicalNumberOfRows() <= 1) {
+                return ResponseEntity.badRequest().body("File Excel không có dữ liệu hợp lệ");
+            }
+
+            // Duyệt từng dòng để kiểm tra định dạng dữ liệu
+            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                // Kiểm tra cột ngày (nếu có)
+                Cell dateCell = row.getCell(0);
+                if (dateCell != null && dateCell.getCellType() != CellType.NUMERIC) {
+                    return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ: Cột ngày phải là định dạng ngày tháng ở hàng " + (i + 1));
+                }
+
+                // Kiểm tra cột câu hỏi không được rỗng
+                if (getStringCellValue(row.getCell(2)).isEmpty()) {
+                    return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ: Câu hỏi không được để trống ở hàng " + (i + 1));
+                }
+
+                // Kiểm tra các đáp án
+                for (int j = 3; j <= 6; j++) {
+                    if (getStringCellValue(row.getCell(j)).isEmpty()) {
+                        return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ: Đáp án không được để trống ở hàng " + (i + 1));
+                    }
+                }
+
+                // Kiểm tra câu trả lời đúng
+                if (getStringCellValue(row.getCell(7)).isEmpty()) {
+                    return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ: Đáp án đúng không được để trống ở hàng " + (i + 1));
+                }
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi khi đọc file Excel: " + e.getMessage());
+        } finally {
+            if (workbook != null) {
+                try {
+                    workbook.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return ResponseEntity.ok("File Excel hợp lệ");
+    }
+
     @PostMapping("/upload-practice")
+    @Transactional
     public ResponseEntity<String> uploadPractice(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "audioZip", required = false) MultipartFile audioZip,
             @RequestParam("practiceDate") String practiceDate,
             @RequestParam("grade") int grade,
             @RequestParam("practiceLevel") int practiceLevel,
-            @RequestParam("status") String status) { // Thêm tham số status
+            @RequestParam("status") String status) {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("Tệp rỗng");
         }
 
+        // Kiểm tra định dạng ngày
+        Date practiceDateValue;
         try {
-            // Create and save Practice
+            practiceDateValue = Date.valueOf(practiceDate);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid date format");
+        }
+
+        // Kiểm tra xem Practice đã tồn tại chưa
+        if (practiceRepository.findByPracticeLevelAndGrade(practiceLevel, grade).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Dữ liệu đã tồn tại trong hệ thống");
+        }
+
+        // Kiểm tra file Excel
+        ResponseEntity<String> validationResponse = validateExcelFile(file);
+        if (!validationResponse.getStatusCode().equals(HttpStatus.OK)) {
+            return validationResponse;
+        }
+
+        try {
+            // Nếu file hợp lệ, tạo thực thể Practice
             Practice practice = new Practice();
-            try {
-                practice.setPracticeDate(Date.valueOf(practiceDate));
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body("Invalid date format");
-            }
+            practice.setPracticeDate(practiceDateValue);
             practice.setGrade(grade);
             practice.setPracticeLevel(practiceLevel);
-            practice.setStatus(status); // Gán giá trị status
+            practice.setStatus(status);
+            practiceRepository.save(practice); // Chỉ lưu khi file hợp lệ
 
-            if (practiceRepository.findByPracticeLevelAndGrade(practiceLevel, grade).isPresent()) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Dữ liệu đã tồn tại trong hệ thống");
-            }
-            practiceRepository.save(practice); // Save Practice to get ID
-
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practice.getPracticeId();
+            // Tạo thư mục lưu trữ
+            String folderPath = BASE_FOLDER_PATH + practice.getPracticeId();
             Path targetDir = Paths.get(folderPath);
-            if (!Files.exists(targetDir)) {
-                Files.createDirectories(targetDir);
-            }
+            Files.createDirectories(targetDir);
 
             // Lưu file Excel
             Path excelFilePath = targetDir.resolve("practice_" + practice.getPracticeId() + ".xlsx");
@@ -108,71 +175,53 @@ public class PracticeController {
             if (audioZip != null && !audioZip.isEmpty()) {
                 Path zipFilePath = targetDir.resolve("audio_" + practice.getPracticeId() + ".zip");
                 Files.copy(audioZip.getInputStream(), zipFilePath, StandardCopyOption.REPLACE_EXISTING);
-
-                // Giải nén file ZIP
                 unzipFile(zipFilePath.toString(), folderPath);
             }
 
-
-            // Process the Excel file
+            // Xử lý file Excel (đọc từ workbook đã mở trước đó)
             try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
                 Sheet sheet = workbook.getSheetAt(0);
-                Map<String, SmallPractice> smallPracticeMap = new HashMap<>(); // Lưu trữ SmallPractice theo testName
+                Map<String, SmallPractice> smallPracticeMap = new HashMap<>();
 
-                for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) { // Start from the second row
+                for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
                     Row row = sheet.getRow(i);
                     if (row == null) continue;
 
-                    String testName = getStringCellValue(row.getCell(1)); // Test Name
-                    SmallPractice smallPractice = smallPracticeMap.get(testName);
-
-                    if (smallPractice == null) {
-                        Optional<SmallPractice> existingSmallPractice = smallPracticeRepository.findByPracticeAndTestName(practice, testName);
-                        if (existingSmallPractice.isPresent()) {
-                            smallPractice = existingSmallPractice.get();
-                        } else {
-                            smallPractice = new SmallPractice();
-                            smallPractice.setTestName(testName);
-                            smallPractice.setTestDate(row.getCell(0) != null ? row.getCell(0).getDateCellValue() : null);
-                            smallPractice.setPractice(practice);
-                            smallPracticeRepository.save(smallPractice);
-                        }
-                        smallPracticeMap.put(testName, smallPractice); // Lưu vào Map để dùng lại
-                    }
+                    String testName = getStringCellValue(row.getCell(1));
+                    SmallPractice smallPractice = smallPracticeMap.computeIfAbsent(testName, k -> {
+                        SmallPractice sp = new SmallPractice();
+                        sp.setTestName(k);
+                        sp.setTestDate(row.getCell(0) != null ? row.getCell(0).getDateCellValue() : null);
+                        sp.setPractice(practice);
+                        return smallPracticeRepository.save(sp);
+                    });
 
                     Question question = new Question();
-                    question.setQuestionText(getStringCellValue(row.getCell(2))); // Question
-                    question.setChoice1(getStringCellValue(row.getCell(3))); // Choice1
-                    question.setChoice2(getStringCellValue(row.getCell(4))); // Choice2
-                    question.setChoice3(getStringCellValue(row.getCell(5))); // Choice3
-                    question.setChoice4(getStringCellValue(row.getCell(6))); // Choice4
+                    question.setQuestionText(getStringCellValue(row.getCell(2)));
+                    question.setChoice1(getStringCellValue(row.getCell(3)));
+                    question.setChoice2(getStringCellValue(row.getCell(4)));
+                    question.setChoice3(getStringCellValue(row.getCell(5)));
+                    question.setChoice4(getStringCellValue(row.getCell(6)));
 
-                    String audioFileName = getStringCellValue(row.getCell(8)); // AudioFileName column
+                    String audioFileName = getStringCellValue(row.getCell(8));
                     if (audioFileName != null && !audioFileName.isEmpty()) {
                         Path audioFilePath = targetDir.resolve(audioFileName);
-                        if (Files.exists(audioFilePath)) {
-                            question.setAudioFile(Files.readAllBytes(audioFilePath)); // Lưu tệp âm thanh
-                        } else {
-                            question.setAudioFile(null);
-                        }
-                    } else {
-                        question.setAudioFile(null);
+                        question.setAudioFile(Files.exists(audioFilePath) ? Files.readAllBytes(audioFilePath) : null);
                     }
 
                     questionRepository.save(question);
 
-                    SmallPracticeQuestion smallPracticeQuestion = new SmallPracticeQuestion();
-                    smallPracticeQuestion.setSmallPractice(smallPractice);
-                    smallPracticeQuestion.setQuestion(question);
-                    smallPracticeQuestionRepository.save(smallPracticeQuestion);
+                    SmallPracticeQuestion spq = new SmallPracticeQuestion();
+                    spq.setSmallPractice(smallPractice);
+                    spq.setQuestion(question);
+                    smallPracticeQuestionRepository.save(spq);
 
                     Answer answer = new Answer();
-                    answer.setCorrectAnswer(getStringCellValue(row.getCell(7))); // Get the correct answer
+                    answer.setCorrectAnswer(getStringCellValue(row.getCell(7)));
                     answer.setQuestion(question);
                     answerRepository.save(answer);
                 }
             }
-
 
             return ResponseEntity.ok("Dữ liệu đã được lưu");
         } catch (Exception e) {
@@ -181,6 +230,8 @@ public class PracticeController {
                     .body("Lỗi khi lưu dữ liệu: " + e.getMessage());
         }
     }
+
+
 
     private String getStringCellValue(Cell cell) {
         if (cell == null) {
@@ -244,6 +295,12 @@ public class PracticeController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy bài thực hành!");
             }
 
+
+            ResponseEntity<String> validationResponse = validateExcelFile(file);
+            if (!validationResponse.getStatusCode().equals(HttpStatus.OK)) {
+                return validationResponse;
+            }
+
             Practice practice = practiceOptional.get();
             practice.setPracticeDate(Date.valueOf(practiceDate));
             practice.setGrade(grade);
@@ -251,7 +308,7 @@ public class PracticeController {
             practice.setStatus(status);
             practiceRepository.save(practice); // Cập nhật Practice
 
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practice.getPracticeId();
+            String folderPath = BASE_FOLDER_PATH + practice.getPracticeId(); // Sử dụng biến đường dẫn
             Path targetDir = Paths.get(folderPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
@@ -322,6 +379,7 @@ public class PracticeController {
                     answerRepository.save(answer);
                 }
             }
+
             return ResponseEntity.ok("Cập nhật thành công!");
 
         } catch (Exception e) {
@@ -391,7 +449,7 @@ public class PracticeController {
             }
 
             // Đường dẫn đến file Excel
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practiceId;
+            String folderPath = BASE_FOLDER_PATH + practiceId;
             Path filePath = Paths.get(folderPath, "practice_" + practiceId + ".xlsx");
 
             Resource resource = new UrlResource(filePath.toUri());
@@ -419,7 +477,7 @@ public class PracticeController {
             }
 
             // Đường dẫn đến file audio
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practiceId; // Đường dẫn thư mục
+            String folderPath = BASE_FOLDER_PATH + practiceId; // Đường dẫn thư mục
             Path filePath = Paths.get(folderPath, "audio_" + practiceId + ".zip"); // Hoặc .rar
 
             Resource resource = new UrlResource(filePath.toUri());

@@ -20,8 +20,11 @@ public class PracticeService implements IPracticeService {
     @Override
     public boolean isUserCompleted(Long userId) {
         UserPractice userPractice =  userPracticeRepository.findByUserId(userId).get();
-        Practice practice = practiceRepository.findById((long) userPractice.getPractice().getPracticeId()).get();
-        return  practice.getPracticeLevel() == practiceRepository.findMaxLevel().get();
+        if (userPractice.getTotalScore() != 0) {
+            Practice practice = practiceRepository.findById((long) userPractice.getPractice().getPracticeId()).get();
+            return  practice.getPracticeLevel() == practiceRepository.findMaxLevel().get();
+        }
+        return false;
     }
 
 

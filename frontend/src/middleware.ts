@@ -17,7 +17,8 @@ const guestPath = [
   "/support/account-support",
   "/articles",
   "/articles/number",
-  "/payment-status"
+  "/payment-status",
+  "/get-ranking",
 ];
 
 // Các route chỉ dành cho khách (người chưa đăng nhập)
@@ -49,7 +50,8 @@ const rolePaths: Record<string, string[]> = {
     "/exam",
     "/practice",
     "/mockexam",
-    "/test/practice"
+    "/test/practice",
+    "/get-ranking",
   ],
   ADMIN: [
     "/manager/account-manager",

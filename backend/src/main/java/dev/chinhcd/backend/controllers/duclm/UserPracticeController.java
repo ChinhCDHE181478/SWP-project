@@ -66,7 +66,9 @@ public class UserPracticeController {
     @PostMapping("/user-practice/add")
     public ResponseEntity<?> addUserPractice(@RequestBody UserPracticeRequest request) {
         try {
+            UserPractice userPractices = userPracticeService.getResult(request.userId()).getFirst();
             userPracticeService.saveUserPractice(request.userId(), request.level());
+            userPracticeRespository.delete(userPractices);
             return ResponseEntity.ok().body("Hoàn tất vòng thi thành công!");
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,6 +111,26 @@ public class UserPracticeController {
             // Xử lý lỗi
             return ResponseEntity.status(500).body(false);
         }
+    }
+
+    @GetMapping("/get-result/{userId}")
+    public List<UserPractice> getResult(@PathVariable Long userId) {
+        List<UserPractice> userPractices = userPracticeService.getResult(userId);
+        for(UserPractice userPractice : userPractices) {
+            if(userPractice.getTotalScore() == 0){
+                userPractices.remove(userPractice);
+            }
+        }
+        return userPractices;
+    }
+
+    @GetMapping("/latest-result/{userId}")
+    public boolean getLatestResult(@PathVariable Long userId) {
+        UserPractice userPractices = userPracticeService.getResult(userId).getLast();
+        if (userPractices.getTotalScore() == 0 || userPractices.getPractice().getPracticeLevel() != practiceRepository.findMaxLevel().get()) {
+            return false;
+        }
+        return true;
     }
 
 
