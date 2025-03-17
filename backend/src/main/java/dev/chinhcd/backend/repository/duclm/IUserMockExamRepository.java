@@ -1,6 +1,5 @@
 package dev.chinhcd.backend.repository.duclm;
 
-import dev.chinhcd.backend.models.duclm.UserExam;
 import dev.chinhcd.backend.models.duclm.UserMockExam;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,9 +19,11 @@ public interface IUserMockExamRepository extends JpaRepository<UserMockExam, Lon
             "where FUNCTION('MONTH', m.examDate)=:month and ue.user.id=:userId")
     List<UserMockExam> findByMonthAndUserId(Integer month, Long userId);
 
-    @Query("select ue from UserMockExam ue " +
-            "join MockExam e on e.mockExamId = ue.mockExam.mockExamId " +
-            "join MockExamQuestion eq on eq.mockExam.mockExamId = e.mockExamId" +
-            " where eq.question.questionId=:questionId and ue.user.id=:userId")
-    Optional<UserMockExam> findByQuestionIdAndUserId(Integer questionId, Long userId);
+    Optional<UserMockExam> findByUserMockExamId(Long userMockExamId);
+
+    @Query("select ume.score from UserMockExam ume where ume.user.id=:userId and ume.mockExam.mockExamId=:mockExamId")
+    List<Double> getScoreByUserIdAndMockExamId(Long userId, Long mockExamId);
+
+    @Query("select ume from UserMockExam ume where ume.user.id=:userId and ume.mockExam.mockExamId=:mockExamId")
+    List<UserMockExam> findUserMockExamByUserIdAndExamId(Long userId, Long examId);
 }

@@ -172,7 +172,7 @@ public class MockExamController {
             @RequestParam("grade") String grade) {
 
         try {
-            Optional<MockExam> mockExamOptional = mockExamRepository.findById(Math.toIntExact(mockExamId));
+            Optional<MockExam> mockExamOptional = mockExamRepository.findById(mockExamId);
             if (mockExamOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mock exam not found!");
             }
@@ -292,7 +292,7 @@ public class MockExamController {
     @Transactional
     public ResponseEntity<String> deleteMockExam(@PathVariable Long mockExamId) {
         try {
-            Optional<MockExam> mockExamOptional = mockExamRepository.findById(Math.toIntExact(mockExamId));
+            Optional<MockExam> mockExamOptional = mockExamRepository.findById(mockExamId);
             if (mockExamOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mock exam not found!");
             }
@@ -321,7 +321,7 @@ public class MockExamController {
 
     @GetMapping("/get-detail/{id}")
     public ResponseEntity<?> getMockExamDetail(@PathVariable Long id) {
-        MockExam mockExam = mockExamRepository.findById(Math.toIntExact(id)).orElse(null);
+        MockExam mockExam = mockExamRepository.findById(id).orElse(null);
         if (mockExam == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mock exam does not exist");
         }
@@ -373,7 +373,7 @@ public class MockExamController {
     }
 
     @GetMapping("/download-excel/{mockexamID}")
-    public ResponseEntity<Resource> downloadExcel(@PathVariable Integer mockexamID) {
+    public ResponseEntity<Resource> downloadExcel(@PathVariable Long mockexamID) {
         try {
             // Lấy bài thực hành từ database để xác định đường dẫn
             MockExam mockExam = mockExamRepository.findById(mockexamID).orElse(null);
@@ -401,7 +401,7 @@ public class MockExamController {
 
     // API để tải file audio cho bài thực hành
     @GetMapping("/download-audio/{mockexamID}")
-    public ResponseEntity<Resource> downloadAudio(@PathVariable Integer mockexamID) {
+    public ResponseEntity<Resource> downloadAudio(@PathVariable Long mockexamID) {
         try {
             // Lấy bài thực hành từ database để xác định đường dẫn
             MockExam mockExam = mockExamRepository.findById(mockexamID).orElse(null);

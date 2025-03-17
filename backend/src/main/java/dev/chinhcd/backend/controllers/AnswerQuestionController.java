@@ -1,18 +1,18 @@
 package dev.chinhcd.backend.controllers;
 
-import dev.chinhcd.backend.services.IExamService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import dev.chinhcd.backend.dtos.request.duclm.TimeRequest;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.SmallPractice;
 import dev.chinhcd.backend.models.duclm.TestResult;
+import dev.chinhcd.backend.services.IExamService;
 import dev.chinhcd.backend.services.duclm.impl.AnswerService;
 import dev.chinhcd.backend.services.duclm.impl.TestResultService;
+import dev.chinhcd.backend.services.duclm.impl.UserExamService;
+import dev.chinhcd.backend.services.duclm.impl.UserMockExamService;
+import dev.chinhcd.backend.services.impl.MockExamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -37,6 +37,9 @@ public class AnswerQuestionController {
     private final Map<String, Integer> userScores = new ConcurrentHashMap<>();
     private final AnswerService answerService;
     private final TestResultService testResultService;
+    private final MockExamService mockExamService;
+    private final UserExamService userExamService;
+    private final UserMockExamService userMockExamService;
 
     @MessageMapping("/register")
     public void registerUser(@Payload String username, SimpMessageHeaderAccessor headerAccessor) {
@@ -51,24 +54,53 @@ public class AnswerQuestionController {
         return result;
     }
 
+    @SendToUser("/queue/final-result")
+    @MessageMapping("/final-result")
+    public Double getFinalResult(@Payload String message, SimpMessageHeaderAccessor headerAccessor) {
+        String[] parts = message.split("-", 3);
+        Long uexamId = Long.parseLong(parts[0]);
+        Long time = Long.parseLong(parts[1]);
+        String type = parts[2];
+        if (type.equals("exam")) {
+            return userExamService.getScore(uexamId, time);
+        } else {
+            return userMockExamService.getScores(uexamId, time);
+        }
+    }
+
     @MessageMapping("/answer/exam")
     public void answerExam(@Payload String message, SimpMessageHeaderAccessor headerAccessor) {
         String[] parts = message.split("-", 3);
-        Long userId = Long.parseLong(parts[0]);
-        Integer questionId = Integer.parseInt(parts[1]);
+        Integer questionId = Integer.parseInt(parts[0]);
+        Long uexamId = Long.parseLong(parts[1]);
         String answer = parts[2];
         // Xử lý đáp án
-        examService.answerQuestion(userId, questionId, answer);
+        examService.answerQuestion(questionId, uexamId, answer);
     }
 
     @MessageMapping("/answer/mock-exam")
     public void answerMockExam(@Payload String message, SimpMessageHeaderAccessor headerAccessor) {
         String[] parts = message.split("-", 3);
-        Long userId = Long.parseLong(parts[0]);
-        Integer questionId = Integer.parseInt(parts[1]);
+        Integer questionId = Integer.parseInt(parts[0]);
+        Long uexamId = Long.parseLong(parts[1]);
         String answer = parts[2];
         // Xử lý đáp án
-        examService.answerQuestion(userId, questionId, answer);
+        mockExamService.answerQuestion(questionId, uexamId, answer);
+    }
+
+    @SendToUser("/queue/exam-id")
+    @MessageMapping("/start-exam")
+    public Long startExam(@Payload String message, SimpMessageHeaderAccessor headerAccessor) {
+        String[] parts = message.split("-", 3);
+        Long userId = Long.parseLong(parts[0]);
+        Long examId = Long.parseLong(parts[1]);
+        String type = parts[2];
+
+        if (type.equals("exam")) {
+            return userExamService.addUserExam(userId, examId);
+        } else {
+            return userMockExamService.addUserMockExam(userId, examId);
+        }
     }
 
     @MessageMapping("/reset-score")

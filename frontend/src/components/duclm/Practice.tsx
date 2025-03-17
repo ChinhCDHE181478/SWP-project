@@ -253,24 +253,24 @@ const Practice: React.FC = () => {
 
                         {/* Action Buttons */}
                         <div className="flex justify-center mt-6">
-                            {allCompleted ? (
-                                isCompleted ? (
-                                    <p className="text-green-500 font-bold">Bạn đã hoàn tất toàn bộ vòng thi</p>
-                                ) : (
-                                    totalScore < scoreThreshold ? (
-                                        <button onClick={handleRetryRound} className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
-                                            Làm lại vòng thi
-                                        </button>
-                                    ) : (
-                                        <button onClick={handleCompleteRound} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                                            Hoàn tất vòng thi
-                                        </button>
-                                    )
-                                )
-                            ) : (
-                                <p className="text-gray-500">Chưa hoàn tất vòng thi.</p>
-                            )}
-                        </div>
+    {totalScore < scoreThreshold ? (
+        <button
+            onClick={handleRetryRound}
+            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+        >
+            Làm lại vòng thi
+        </button>
+    ) : isCompleted ? (
+        <p className="text-green-500 font-bold">Bạn đã hoàn tất toàn bộ vòng thi</p>
+    ) : (
+        <button
+            onClick={handleCompleteRound}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
+            Hoàn tất vòng thi
+        </button>
+    )}
+</div>
                     </div>
 
                     {/* Right Column: User Info */}

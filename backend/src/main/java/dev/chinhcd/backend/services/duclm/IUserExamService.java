@@ -9,4 +9,8 @@ public interface IUserExamService {
     public Optional<UserExam> getUserExamResult(Long userId, String examName);
 
     public List<UserExam> getUserExamList(String examName, int limit);
+
+    public Double getScore(Long uexamId, Long time);
+
+    Long addUserExam(Long userId, Long examId);
 }

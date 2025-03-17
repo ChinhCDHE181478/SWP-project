@@ -26,7 +26,7 @@ const managerColumns: ColumnDef<User>[] = [
           Tài khoản
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
-      )
+      );
     },
   },
   {
@@ -37,6 +37,7 @@ const managerColumns: ColumnDef<User>[] = [
 
 const ManagerListTable = ({ role }: { role: string }) => {
   const [users, setUsers] = useState<User[]>([]);
+  const [totalManagers, setTotalManagers] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchManagers = async (param: string) => {
@@ -44,6 +45,7 @@ const ManagerListTable = ({ role }: { role: string }) => {
     try {
       const res = await getManager(param);
       setUsers(res);
+      setTotalManagers(res.length);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -57,12 +59,24 @@ const ManagerListTable = ({ role }: { role: string }) => {
 
   return (
     <div className="py-10">
+      <div className="flex">
+        <p>Tổng số lượng tài khoản {role}: {totalManagers}</p>
+      </div>
+
       <div className="my-5">
-        {role !== "Student" && <AddManagerForm role={role} onSuccess={() => fetchManagers(role)} />}
+        {role !== "Student" && (
+          <AddManagerForm role={role} onSuccess={() => fetchManagers(role)} />
+        )}
       </div>
 
       {isLoading && <div>Loading...</div>}
-      {!isLoading && <DataTable fetchData={() => fetchManagers(role)} columns={managerColumns} data={users} />}
+      {!isLoading && (
+        <DataTable
+          fetchData={() => fetchManagers(role)}
+          columns={managerColumns}
+          data={users}
+        />
+      )}
     </div>
   );
 };

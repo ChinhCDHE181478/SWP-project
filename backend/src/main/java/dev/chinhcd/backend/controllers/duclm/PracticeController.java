@@ -94,7 +94,7 @@ public class PracticeController {
             }
             practiceRepository.save(practice); // Save Practice to get ID
 
-            String folderPath = "C:\\Users\\Minh Duc\\Desktop\\practices\\" + practice.getPracticeId();
+            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\practices\\" + practice.getPracticeId();
             Path targetDir = Paths.get(folderPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
@@ -250,7 +250,6 @@ public class PracticeController {
             practice.setPracticeLevel(practiceLevel);
             practice.setStatus(status);
             practiceRepository.save(practice); // Cập nhật Practice
-
             String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\practices\\" + practice.getPracticeId();
             Path targetDir = Paths.get(folderPath);
             if (!Files.exists(targetDir)) {

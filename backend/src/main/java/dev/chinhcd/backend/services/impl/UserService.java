@@ -281,11 +281,11 @@ public class UserService implements IUserService {
             acT = AccountType.valueOf(accountType);
         }
         Page<User> usersPage = userRepository.getUsersByRole(Role.STUDENT, pageable, username, email, acT);
-
+        Long total = userRepository.countByRole(Role.STUDENT);
         List<UserResponse> users = usersPage.getContent().stream().map(this::mapResponse).collect(Collectors.toList());
         return new PaginateUserResponse(users,
                 usersPage.getTotalPages(),
-                usersPage.getTotalElements(),
+                total,
                 usersPage.getNumber() + 1,
                 pageSize);
     }

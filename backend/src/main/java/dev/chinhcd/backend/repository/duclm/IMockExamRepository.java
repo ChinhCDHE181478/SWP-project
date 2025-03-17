@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface IMockExamRepository extends JpaRepository<MockExam, Integer> {
+public interface IMockExamRepository extends JpaRepository<MockExam, Long> {
     Optional<Object> findByExamNameAndGrade(String examName, String grade);
 }

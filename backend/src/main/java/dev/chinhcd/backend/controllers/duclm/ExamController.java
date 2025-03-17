@@ -203,7 +203,7 @@ public class ExamController {
             @RequestParam("status") String status) {
 
         try {
-            Optional<Exam> examOptional = examRepository.findById(Math.toIntExact(examId));
+            Optional<Exam> examOptional = examRepository.findById(examId);
             if (examOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy kỳ thi!");
             }
@@ -324,7 +324,7 @@ public class ExamController {
     @Transactional
     public ResponseEntity<String> deleteExam(@PathVariable Long examId) {
         try {
-            Optional<Exam> examOptional = examRepository.findById(Math.toIntExact(examId));
+            Optional<Exam> examOptional = examRepository.findById(examId);
             if (examOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy kỳ thi!");
             }
@@ -353,7 +353,7 @@ public class ExamController {
 
     @GetMapping("/get-detail/{id}")
     public ResponseEntity<?> getExamDetail(@PathVariable Long id) {
-        Exam exam = examRepository.findById(Math.toIntExact(id)).orElse(null);
+        Exam exam = examRepository.findById(id).orElse(null);
         if (exam == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Kỳ thi không tồn tại");
         }
@@ -392,7 +392,7 @@ public class ExamController {
     public ResponseEntity<Resource> downloadExcel(@PathVariable Long examId) {
         try {
             // Lấy kỳ thi từ database để xác định đường dẫn
-            Exam exam = examRepository.findById(Math.toIntExact(examId)).orElse(null);
+            Exam exam = examRepository.findById(examId).orElse(null);
             if (exam == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -419,7 +419,7 @@ public class ExamController {
     public ResponseEntity<Resource> downloadAudio(@PathVariable Long examId) {
         try {
             // Lấy kỳ thi từ database để xác định đường dẫn
-            Exam exam = examRepository.findById(Math.toIntExact(examId)).orElse(null);
+            Exam exam = examRepository.findById(examId).orElse(null);
             if (exam == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -439,26 +439,6 @@ public class ExamController {
                     .body(resource);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
-    @GetMapping("/allow-do-exam")
-    public ResponseEntity<Boolean> doExam(@RequestParam Long examId, @RequestParam Long userId) {
-        if(userExamRepository.findByUserIdAndExamId(userId, examId).isPresent()) {
-            return ResponseEntity.ok(false);
-        } else {
-            User user = userService.getUserById(userId);
-            if(user.getAccountType().equals(AccountType.FREE_COURSE)){
-                return ResponseEntity.ok(false);
-            }
-            Exam exam = examRepository.findById(Math.toIntExact(examId)).orElse(null);
-            UserExam userExam = new UserExam();
-            userExam.setUser(user);
-            userExam.setExam(exam);
-            userExam.setScore(0.0);
-            userExam.setExamName(exam.getExamName());
-            userExamRepository.save(userExam);
-            return ResponseEntity.ok(true);
         }
     }
 

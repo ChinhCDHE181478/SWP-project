@@ -15,6 +15,7 @@ const guestPath = [
   "/api/auth/token",
   "/support",
   "/support/account-support",
+  "/support/payment-support",
   "/articles",
   "/articles/number",
   "/payment-status"
@@ -43,13 +44,15 @@ const rolePaths: Record<string, string[]> = {
     "/email-service/delete-email",
     "/support",
     "/support/account-support",
+    "/support/payment-support",
     "/support/send-support-request",
     "/articles",
     "/articles/number",
     "/exam",
     "/practice",
     "/mockexam",
-    "/test/practice"
+    "/test",
+    "/payment-status",
   ],
   ADMIN: [
     "/manager/account-manager",
@@ -106,8 +109,8 @@ const normalizeArticlePath = (pathname: string): string => {
 };
 
 const normalizeTestPath = (pathname: string): string => {
-  if (pathname.startsWith("/test/practice")) {
-    return "/test/practice";
+  if (pathname.startsWith("/test")) {
+    return "/test";
 }
   return pathname;
 };
