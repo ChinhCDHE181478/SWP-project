@@ -9,5 +9,9 @@ public interface IUserMockExamService {
     UserMockExam getMostRecentMockExam(Long userId);
 
     List<UserMockExam> getAggregatedResults(Long userId);
+
+    Double getScores(Long mockExamId, Long time);
+
+    Long addUserMockExam(Long userId, Long mockExamId);
 }
 

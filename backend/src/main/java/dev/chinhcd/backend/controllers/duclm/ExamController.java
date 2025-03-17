@@ -1,5 +1,6 @@
 package dev.chinhcd.backend.controllers.duclm;
 
+import dev.chinhcd.backend.dtos.response.QuestionsResponse;
 import dev.chinhcd.backend.dtos.response.duclm.ExamDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
 import dev.chinhcd.backend.models.duclm.*;
@@ -23,6 +24,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.nio.file.Files;
@@ -41,7 +43,7 @@ public class ExamController {
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
     private final IExamQuestionRepository examQuestionRepository;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\exams\\";
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams";
 
     @GetMapping("/next")
     public ResponseEntity<?> getNextExam() {
@@ -246,7 +248,7 @@ public class ExamController {
             @RequestParam("status") String status) {
 
         try {
-            Optional<Exam> examOptional = examRepository.findById(Math.toIntExact(examId));
+            Optional<Exam> examOptional = examRepository.findById(examId);
             if (examOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy kỳ thi!");
             }
@@ -358,8 +360,6 @@ public class ExamController {
                 }
             }
 
-
-
             return ResponseEntity.ok("Cập nhật kỳ thi thành công!");
         } catch (Exception e) {
             e.printStackTrace();
@@ -373,7 +373,7 @@ public class ExamController {
     @Transactional
     public ResponseEntity<String> deleteExam(@PathVariable Long examId) {
         try {
-            Optional<Exam> examOptional = examRepository.findById(Math.toIntExact(examId));
+            Optional<Exam> examOptional = examRepository.findById(examId);
             if (examOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy kỳ thi!");
             }
@@ -402,7 +402,7 @@ public class ExamController {
 
     @GetMapping("/get-detail/{id}")
     public ResponseEntity<?> getExamDetail(@PathVariable Long id) {
-        Exam exam = examRepository.findById(Math.toIntExact(id)).orElse(null);
+        Exam exam = examRepository.findById(id).orElse(null);
         if (exam == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Kỳ thi không tồn tại");
         }
@@ -441,7 +441,7 @@ public class ExamController {
     public ResponseEntity<Resource> downloadExcel(@PathVariable Long examId) {
         try {
             // Lấy kỳ thi từ database để xác định đường dẫn
-            Exam exam = examRepository.findById(Math.toIntExact(examId)).orElse(null);
+            Exam exam = examRepository.findById(examId).orElse(null);
             if (exam == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -468,7 +468,7 @@ public class ExamController {
     public ResponseEntity<Resource> downloadAudio(@PathVariable Long examId) {
         try {
             // Lấy kỳ thi từ database để xác định đường dẫn
-            Exam exam = examRepository.findById(Math.toIntExact(examId)).orElse(null);
+            Exam exam = examRepository.findById(examId).orElse(null);
             if (exam == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -490,4 +490,22 @@ public class ExamController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    @GetMapping("/get-question")
+    public ResponseEntity<List<QuestionsResponse>> getQuestions(@RequestParam Long examId) {
+        List<Question> ques = questionRepository.findByExamId(examId);
+        List<QuestionsResponse> quesRes = ques.stream().map(q -> {
+            return QuestionsResponse.builder()
+                    .questionId(q.getQuestionId())
+                    .questionText(q.getQuestionText())
+                    .choice4(q.getChoice4())
+                    .choice3(q.getChoice3())
+                    .choice2(q.getChoice2())
+                    .choice1(q.getChoice1())
+                    .audioFile(q.getAudioFile())
+                    .build();
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(quesRes);
+    }
+
 }

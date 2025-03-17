@@ -1,6 +1,5 @@
 package dev.chinhcd.backend.repository.duclm;
 
-import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.TestResult;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository

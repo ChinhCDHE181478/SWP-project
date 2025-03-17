@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { QuizSideBar } from "@/components/duclm/QuizSideBar";
 import LogoIcon from "@/components/LogoIcon";
-import { API } from "@/helper/axios"; // Import API
+import { API } from "@/helper/axios";
 import PracticeListTable from "./PracticeListTable";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { useAuth } from "@/app/AuthProvider";

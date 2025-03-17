@@ -1,8 +1,14 @@
 package dev.chinhcd.backend.services.duclm.impl;
 
 
+import dev.chinhcd.backend.models.User;
+import dev.chinhcd.backend.models.duclm.Exam;
+import dev.chinhcd.backend.models.duclm.MockExam;
+import dev.chinhcd.backend.models.duclm.UserExam;
 import dev.chinhcd.backend.models.duclm.UserMockExam;
+import dev.chinhcd.backend.repository.duclm.IMockExamRepository;
 import dev.chinhcd.backend.repository.duclm.IUserMockExamRepository;
+import dev.chinhcd.backend.services.IUserService;
 import dev.chinhcd.backend.services.duclm.IUserMockExamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,12 +23,14 @@ import java.util.List;
 public class UserMockExamService implements IUserMockExamService {
 
     private final IUserMockExamRepository userMockExamRepository;
+    private final IMockExamRepository mockExamRepository;
+    private final IUserService userService;
 
     @Override
     public UserMockExam getMostRecentMockExam(Long userId) {
         UserMockExam userMockExam = new UserMockExam();
         UserMockExam userMockExam1 = userMockExamRepository.findTopByUser_IdOrderByUserMockExamIdDesc(userId);
-        if(userMockExam1 != null){
+        if (userMockExam1 != null) {
             userMockExam.setExamName(userMockExam1.getExamName());
             userMockExam.setScore(userMockExam1.getScore());
             userMockExam.setTotalTime(userMockExam1.getTotalTime());
@@ -70,7 +78,6 @@ public class UserMockExamService implements IUserMockExamService {
         for (UserMockExam exam : userMockExams) {
             String examName = exam.getExamName();
 
-
             // Check if the examName matches one of the fixed names without accents
             if (aggregatedResults.containsKey(examName)) {
                 UserMockExam existingResult = aggregatedResults.get(examName);
@@ -98,6 +105,31 @@ public class UserMockExamService implements IUserMockExamService {
 
         // Return the filtered list, removing any exam results with userMockExamId == 0
         return filteredResults;
+    }
+
+    @Override
+    public Double getScores(Long mockExamId, Long time) {
+        LocalTime localTime = LocalTime.ofSecondOfDay(time);
+        Time timeSpent = Time.valueOf(localTime);
+        UserMockExam ue = userMockExamRepository.findByUserMockExamId(mockExamId).get();
+        ue.setTotalTime(timeSpent);
+        userMockExamRepository.save(ue);
+        return ue.getScore();
+    }
+
+    @Override
+    public Long addUserMockExam(Long userId, Long mockExamId) {
+        MockExam e = mockExamRepository.findById(mockExamId).orElse(null);
+        User u = userService.getUserById(userId);
+        UserMockExam uem = new UserMockExam();
+        uem.setUser(u);
+        uem.setTotalTime(Time.valueOf("00:45:00"));
+        uem.setMockExam(e);
+        uem.setUser(userService.getUserById(userId));
+        uem.setExamName(e.getExamName());
+        uem.setScore(0.0);
+        UserMockExam us = userMockExamRepository.save(uem);
+        return us.getUserMockExamId();
     }
 
 }

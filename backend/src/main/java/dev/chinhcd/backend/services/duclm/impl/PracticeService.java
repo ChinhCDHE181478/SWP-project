@@ -2,9 +2,7 @@ package dev.chinhcd.backend.services.duclm.impl;
 
 import dev.chinhcd.backend.models.duclm.Practice;
 import dev.chinhcd.backend.models.duclm.UserPractice;
-import dev.chinhcd.backend.repository.IUserRepository;
 import dev.chinhcd.backend.repository.duclm.IPracticeRepository;
-import dev.chinhcd.backend.repository.duclm.ITestResultRepository;
 import dev.chinhcd.backend.repository.duclm.IUserPracticeRepository;
 import dev.chinhcd.backend.services.duclm.IPracticeService;
 import lombok.RequiredArgsConstructor;

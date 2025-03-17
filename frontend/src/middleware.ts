@@ -15,6 +15,7 @@ const guestPath = [
   "/api/auth/token",
   "/support",
   "/support/account-support",
+  "/support/payment-support",
   "/articles",
   "/articles/number",
   "/payment-status",
@@ -44,17 +45,19 @@ const rolePaths: Record<string, string[]> = {
     "/email-service/delete-email",
     "/support",
     "/support/account-support",
+    "/support/payment-support",
     "/support/send-support-request",
     "/articles",
     "/articles/number",
     "/exam",
     "/practice",
     "/mockexam",
-    "/test/practice",
+    "/test",
+    "/payment-status",
     "/get-ranking",
   ],
   ADMIN: [
-    "/manager/account-manager",
+    "/management/account-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -62,19 +65,19 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
   ],
   QUIZ_MANAGER: [
-    "/manager/quiz-manager",
+    "/management/quiz-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
     "/api/auth/refresh",
     "/api/auth/token",
-    "/manager/quiz-manager/practice",
-    "/manager/quiz-manager/exam",
-    "/manager/quiz-manager/mock-exam",
-    "/manager/quiz-manager/test"
+    "/management/quiz-management/practice",
+    "/management/quiz-management/exam",
+    "/management/quiz-management/mock-exam",
+    "/management/quiz-management/test"
   ],
   SUPPORT_MANAGER: [
-    "/manager/support-manager",
+    "/management/support-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -82,7 +85,7 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
   ],
   CONTENT_MANAGER: [
-    "/manager/content-manager",
+    "/management/content-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -108,8 +111,8 @@ const normalizeArticlePath = (pathname: string): string => {
 };
 
 const normalizeTestPath = (pathname: string): string => {
-  if (pathname.startsWith("/test/practice")) {
-    return "/test/practice";
+  if (pathname.startsWith("/test")) {
+    return "/test";
 }
   return pathname;
 };
