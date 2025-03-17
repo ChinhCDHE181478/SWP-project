@@ -3,7 +3,6 @@ import useCurrentUser from "@/hooks/useCurrentUser";
 import React, { useEffect, useState } from "react";
 import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { API } from "@/helper/axios";
 
 // Define the type for the mock exam data

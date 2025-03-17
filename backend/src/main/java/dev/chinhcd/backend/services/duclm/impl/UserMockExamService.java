@@ -52,32 +52,31 @@ public class UserMockExamService implements IUserMockExamService {
         // Initialize the UserMockExam objects for each fixed examName without accents
         UserMockExam capXa = new UserMockExam();
         capXa.setUserMockExamId(0L);
-        capXa.setExamName("Cấp Xã");  // Use examName without accents
+        capXa.setExamName("Cấp Phường/Xã");  // Use examName without accents
         capXa.setScore(0.0);
         capXa.setTotalTime(Time.valueOf(LocalTime.of(0, 0)));  // Initialize with zero time
 
         UserMockExam capHuyen = new UserMockExam();
         capHuyen.setUserMockExamId(0L);
-        capHuyen.setExamName("Cấp Huyện");  // Use examName without accents
+        capHuyen.setExamName("Cấp Quận/Huyện");  // Use examName without accents
         capHuyen.setScore(0.0);
         capHuyen.setTotalTime(Time.valueOf(LocalTime.of(0, 0)));  // Initialize with zero time
 
         UserMockExam capTinh = new UserMockExam();
         capTinh.setUserMockExamId(0L);
-        capTinh.setExamName("Cấp Tỉnh");  // Use examName without accents
+        capTinh.setExamName("Cấp Tỉnh/Thành phố");  // Use examName without accents
         capTinh.setScore(0.0);
         capTinh.setTotalTime(Time.valueOf(LocalTime.of(0, 0)));  // Initialize with zero time
 
         // Map to hold the results for each examName without accents
         Map<String, UserMockExam> aggregatedResults = new HashMap<>();
-        aggregatedResults.put("Cấp Xã", capXa);
-        aggregatedResults.put("Cấp Huyện", capHuyen);
-        aggregatedResults.put("Cấp Tỉnh", capTinh);
+        aggregatedResults.put("Cấp Phường/Xã", capXa);
+        aggregatedResults.put("Cấp Quận/Huyện", capHuyen);
+        aggregatedResults.put("Cấp Tỉnh/Thành phố", capTinh);
 
         // Aggregate data for each examName
         for (UserMockExam exam : userMockExams) {
             String examName = exam.getExamName();
-
 
             // Check if the examName matches one of the fixed names without accents
             if (aggregatedResults.containsKey(examName)) {
@@ -124,6 +123,7 @@ public class UserMockExamService implements IUserMockExamService {
         User u = userService.getUserById(userId);
         UserMockExam uem = new UserMockExam();
         uem.setUser(u);
+        uem.setTotalTime(Time.valueOf("00:45:00"));
         uem.setMockExam(e);
         uem.setUser(userService.getUserById(userId));
         uem.setExamName(e.getExamName());

@@ -1,4 +1,4 @@
-import ProfilePageContent from "@/app/(main)/profile/ProfilePageContent";
+import ProfilePageContent from "@/components/ProfilePageContent";
 import { Metadata } from "next";
 import Link from "next/link";
 

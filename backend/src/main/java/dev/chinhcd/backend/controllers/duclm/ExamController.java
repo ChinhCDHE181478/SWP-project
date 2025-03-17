@@ -3,11 +3,8 @@ package dev.chinhcd.backend.controllers.duclm;
 import dev.chinhcd.backend.dtos.response.QuestionsResponse;
 import dev.chinhcd.backend.dtos.response.duclm.ExamDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
-import dev.chinhcd.backend.enums.AccountType;
-import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.*;
 import dev.chinhcd.backend.repository.duclm.*;
-import dev.chinhcd.backend.services.IUserService;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import lombok.RequiredArgsConstructor;
@@ -46,9 +43,7 @@ public class ExamController {
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
     private final IExamQuestionRepository examQuestionRepository;
-    private final IUserExamRepository userExamRepository;
-    private final IUserService userService;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\exams\\";
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams";
 
     @GetMapping("/next")
     public ResponseEntity<?> getNextExam() {

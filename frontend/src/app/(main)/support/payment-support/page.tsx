@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import PaymentSupportPage from "./PaymentSupportPage";
+import PaymentSupportPage from "../../../../components/PaymentSupportPage";
 
 export const metadata: Metadata = {
   title: "Payment Support",

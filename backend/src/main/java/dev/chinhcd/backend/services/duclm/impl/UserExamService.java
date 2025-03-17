@@ -87,6 +87,7 @@ public class UserExamService implements IUserExamService {
         Exam e = examRepository.findById(examId).orElse(null);
         User u = userService.getUserById(userId);
         UserExam ue = new UserExam();
+        ue.setTotalTime(Time.valueOf("00:45:00"));
         ue.setExamName(e.getExamName());
         ue.setUser(u);
         ue.setScore(0.0d);

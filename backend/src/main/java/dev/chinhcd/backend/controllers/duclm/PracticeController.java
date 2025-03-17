@@ -7,11 +7,14 @@ import dev.chinhcd.backend.models.duclm.*;
 import dev.chinhcd.backend.repository.duclm.*;
 import dev.chinhcd.backend.services.duclm.IPracticeService;
 import jakarta.transaction.Transactional;
-import org.apache.poi.ss.usermodel.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +24,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Date;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 
 @RestController
 @RequestMapping("/practice")
@@ -41,9 +44,7 @@ public class PracticeController {
     private final ISmallPracticeRepository smallPracticeRepository;
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
-    private final IUserPracticeRepository userPracticeRepository;
-    private final ITestResultRepository testResultRepository;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\practices\\";
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams";
 
     @GetMapping("/max-level")
     public ResponseEntity<Integer> getMaxLevel() {
@@ -64,7 +65,6 @@ public class PracticeController {
 
         return ResponseEntity.ok(response);
     }
-
 
 
     private ResponseEntity<String> validateExcelFile(MultipartFile file) {
@@ -231,7 +231,6 @@ public class PracticeController {
                     .body("Lỗi khi lưu dữ liệu: " + e.getMessage());
         }
     }
-
 
 
     private String getStringCellValue(Cell cell) {

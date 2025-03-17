@@ -6,10 +6,10 @@ import dev.chinhcd.backend.dtos.response.longnt.PaginateArticlesResponse;
 import dev.chinhcd.backend.enums.ArticlesType;
 import dev.chinhcd.backend.models.Articles;
 import dev.chinhcd.backend.services.IArticlesService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;

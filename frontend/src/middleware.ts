@@ -57,7 +57,7 @@ const rolePaths: Record<string, string[]> = {
     "/get-ranking",
   ],
   ADMIN: [
-    "/manager/account-manager",
+    "/management/account-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -65,19 +65,19 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
   ],
   QUIZ_MANAGER: [
-    "/manager/quiz-manager",
+    "/management/quiz-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
     "/api/auth/refresh",
     "/api/auth/token",
-    "/manager/quiz-manager/practice",
-    "/manager/quiz-manager/exam",
-    "/manager/quiz-manager/mock-exam",
-    "/manager/quiz-manager/test"
+    "/management/quiz-management/practice",
+    "/management/quiz-management/exam",
+    "/management/quiz-management/mock-exam",
+    "/management/quiz-management/test"
   ],
   SUPPORT_MANAGER: [
-    "/manager/support-manager",
+    "/management/support-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -85,7 +85,7 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
   ],
   CONTENT_MANAGER: [
-    "/manager/content-manager",
+    "/management/content-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",

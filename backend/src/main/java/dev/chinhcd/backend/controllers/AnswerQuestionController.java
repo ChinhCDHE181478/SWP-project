@@ -5,11 +5,11 @@ import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.SmallPractice;
 import dev.chinhcd.backend.models.duclm.TestResult;
 import dev.chinhcd.backend.services.IExamService;
+import dev.chinhcd.backend.services.duclm.IMockExamService;
 import dev.chinhcd.backend.services.duclm.impl.AnswerService;
 import dev.chinhcd.backend.services.duclm.impl.TestResultService;
 import dev.chinhcd.backend.services.duclm.impl.UserExamService;
 import dev.chinhcd.backend.services.duclm.impl.UserMockExamService;
-import dev.chinhcd.backend.services.impl.MockExamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +37,7 @@ public class AnswerQuestionController {
     private final Map<String, Integer> userScores = new ConcurrentHashMap<>();
     private final AnswerService answerService;
     private final TestResultService testResultService;
-    private final MockExamService mockExamService;
+    private final IMockExamService mockExamService;
     private final UserExamService userExamService;
     private final UserMockExamService userMockExamService;
 

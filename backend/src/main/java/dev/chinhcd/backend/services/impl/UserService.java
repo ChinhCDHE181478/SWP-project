@@ -12,7 +12,6 @@ import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.exception.ServiceException;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.repository.IUserRepository;
-import dev.chinhcd.backend.services.IEmailService;
 import dev.chinhcd.backend.services.IJwtService;
 import dev.chinhcd.backend.services.IRefreshTokenService;
 import dev.chinhcd.backend.services.IUserService;
@@ -37,7 +36,6 @@ import java.util.stream.Collectors;
 public class UserService implements IUserService {
     private final IUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final IEmailService emailService;
     private final IJwtService jwtService;
     private final IRefreshTokenService refreshTokenService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -80,12 +78,6 @@ public class UserService implements IUserService {
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    @Override
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElse(null);
     }
 
     @Override

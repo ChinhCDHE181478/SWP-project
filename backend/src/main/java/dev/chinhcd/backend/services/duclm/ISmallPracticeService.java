@@ -5,5 +5,5 @@ import dev.chinhcd.backend.models.duclm.Question;
 import java.util.List;
 
 public interface ISmallPracticeService {
-    public List<Question> getQuestionsBySmallPracticeId(Long smallPracticeId);
+    List<Question> getQuestionsBySmallPracticeId(Long smallPracticeId);
 }

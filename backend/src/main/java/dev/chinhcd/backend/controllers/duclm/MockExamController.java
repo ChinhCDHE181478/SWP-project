@@ -1,12 +1,14 @@
 package dev.chinhcd.backend.controllers.duclm;
 
 import dev.chinhcd.backend.dtos.response.QuestionsResponse;
-import dev.chinhcd.backend.dtos.response.duclm.ExamDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.MockExamDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
 import dev.chinhcd.backend.enums.AccountType;
 import dev.chinhcd.backend.models.User;
-import dev.chinhcd.backend.models.duclm.*;
+import dev.chinhcd.backend.models.duclm.Answer;
+import dev.chinhcd.backend.models.duclm.MockExam;
+import dev.chinhcd.backend.models.duclm.MockExamQuestion;
+import dev.chinhcd.backend.models.duclm.Question;
 import dev.chinhcd.backend.repository.duclm.*;
 import dev.chinhcd.backend.services.IUserService;
 import dev.chinhcd.backend.services.duclm.impl.MockExamService;
@@ -15,19 +17,22 @@ import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -36,9 +41,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/mock-exam")
@@ -51,7 +53,7 @@ public class MockExamController {
     private final IMockExamQuestionRepository examQuestionRepository;
     private final IUserService userService;
     private final IUserMockExamRepository userMockExamRepository;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\mockexams\\";
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams";
     private final MockExamService mockExamService;
 
     @GetMapping("/get-all")
@@ -412,6 +414,7 @@ public class MockExamController {
 
         return ResponseEntity.ok(response);
     }
+
     private void unzipFile(String zipFilePath, String destDir) throws IOException {
         File dir = new File(destDir);
         if (!dir.exists()) dir.mkdirs();
@@ -488,7 +491,7 @@ public class MockExamController {
     @GetMapping("/allow-do-exam")
     public ResponseEntity<Boolean> doExam(@RequestParam Long userId) {
         User user = userService.getUserById(userId);
-        if(user.getAccountType().equals(AccountType.FREE_COURSE)) {
+        if (user.getAccountType().equals(AccountType.FREE_COURSE)) {
             return ResponseEntity.ok(false);
         } else if (user.getAccountType().equals(AccountType.COMBO_COURSE)) {
             return ResponseEntity.ok(true);
@@ -520,8 +523,8 @@ public class MockExamController {
     }
 
     @GetMapping("/get-infor/{grade}")
-    public List<MockExam> getMockExam(@PathVariable String grade){
-            return mockExamService.getMockExams(grade);
+    public List<MockExam> getMockExam(@PathVariable String grade) {
+        return mockExamService.getMockExams(grade);
     }
-    
+
 }

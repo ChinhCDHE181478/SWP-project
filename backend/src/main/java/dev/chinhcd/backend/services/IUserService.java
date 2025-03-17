@@ -18,8 +18,6 @@ public interface IUserService {
 
     User getUserByUsername(String username);
 
-    User getUserByEmail(String email);
-
     UserResponse getMe();
 
     UserResponse updateUser(UpdateUserRequest request);

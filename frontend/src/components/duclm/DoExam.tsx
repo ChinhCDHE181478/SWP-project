@@ -26,6 +26,21 @@ interface ExamProps {
   examType: string;
 }
 
+const enterFullScreen = () => {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem
+      .requestFullscreen()
+      .catch((err) => console.warn("Lỗi fullscreen:", err));
+  }
+};
+
+const exitFullScreen = () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+};
+
 const DoExam: React.FC<ExamProps> = ({
   questions,
   examID,
@@ -62,6 +77,96 @@ const DoExam: React.FC<ExamProps> = ({
     return Math.floor(Math.random() * 4);
   }
 
+  useEffect(() => {
+    // 🛑 Chặn ESC + Các phím F1 → F19, Ctrl, Alt
+    const blockKeys = (event: KeyboardEvent) => {
+      if (quizState === "quiz") {
+        if (
+          /^F\d{1,2}$/.test(event.key) || // Chặn F1 - F19
+          event.key.toLowerCase() === "control" ||
+          event.key.toLowerCase() === "alt" ||
+          event.key.toLowerCase() === "escape" ||
+          (event.ctrlKey && event.key.length === 1) ||
+          (event.ctrlKey && event.shiftKey && event.key.length === 1)
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          console.warn(`Chặn phím: ${event.key}`); // Debug
+        }
+      }
+    };
+
+    // 🛑 Chặn keyup để tránh thoát fullscreen
+    const blockKeyUp = (event: KeyboardEvent) => {
+      if (quizState === "quiz") {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    // 🛑 Chặn thoát fullscreen (bật lại ngay nếu bị thoát)
+    const handleFullScreenChange = () => {
+      setTimeout(() => {
+        if (quizState === "quiz" && !document.fullscreenElement) {
+          enterFullScreen();
+        }
+      }, 10);
+    };
+
+    // 🛑 Chặn context menu (chuột phải)
+    const blockContextMenu = (event: MouseEvent) => {
+      if (quizState === "quiz") {
+        event.preventDefault();
+      }
+    };
+
+    // 🛑 Chặn rời khỏi trang
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (quizState === "quiz") {
+        event.preventDefault();
+        event.returnValue = ""; // Hiển thị cảnh báo
+      }
+    };
+
+    // 🛑 Auto-submit khi thoát trang
+    const handleUnload = () => {
+      if (quizState === "quiz") {
+        autoSubmit();
+      }
+    };
+
+    // 🛑 Khi mất focus (mở app khác), cũng cảnh báo
+    const handleBlur = () => {
+      if (quizState === "quiz") {
+        alert("Bạn đã rời khỏi màn hình! Bài thi sẽ bị nộp.");
+        autoSubmit();
+      }
+    };
+
+    if (quizState === "quiz") {
+      enterFullScreen();
+      document.addEventListener("fullscreenchange", handleFullScreenChange);
+      document.addEventListener("keydown", blockKeys);
+      document.addEventListener("keyup", blockKeyUp);
+      document.addEventListener("contextmenu", blockContextMenu);
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      window.addEventListener("unload", handleUnload);
+      window.addEventListener("blur", handleBlur);
+    } else {
+      exitFullScreen();
+    }
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+      document.removeEventListener("keydown", blockKeys);
+      document.removeEventListener("keyup", blockKeyUp);
+      document.removeEventListener("contextmenu", blockContextMenu);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, [quizState]);
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -70,71 +175,6 @@ const DoExam: React.FC<ExamProps> = ({
       "0"
     )}`;
   };
-
-  // useEffect(() => {
-  //   const handleKeyDown = (event: KeyboardEvent) => {
-  //     if (
-  //       event.key.startsWith("F") || // Chặn tất cả các phím F1 - F12
-  //       event.ctrlKey // Chặn tất cả các tổ hợp với Ctrl
-  //     ) {
-  //       event.preventDefault();
-  //       alert("Bạn không thể sử dụng phím này khi đang làm bài!");
-  //     }
-  //   };
-  //   document.addEventListener("keydown", handleKeyDown);
-  //   return () => {
-  //     document.removeEventListener("keydown", handleKeyDown);
-  //   };
-  // }, []);
-
-  // // 🛑 Chặn thoát trang khi làm bài
-  // useEffect(() => {
-  //   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-  //     event.preventDefault();
-  //     event.returnValue = ""; // Chặn thoát trang mà không cần cảnh báo
-  //     submit();
-  //   };
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, []);
-
-  // // 👀 Phát hiện đổi tab hoặc ẩn trang
-  // useEffect(() => {
-  //   const handleVisibilityChange = () => {
-  //     if (document.hidden) {
-  //       submit();
-  //     }
-  //   };
-  //   document.addEventListener("visibilitychange", handleVisibilityChange);
-  //   return () => {
-  //     document.removeEventListener("visibilitychange", handleVisibilityChange);
-  //   };
-  // }, []);
-
-  // const enterFullScreen = () => {
-  //   const elem = document.documentElement;
-  //   if (elem.requestFullscreen) {
-  //     elem.requestFullscreen();
-  //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //   } else if ((elem as any).mozRequestFullScreen) {
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     (elem as any).mozRequestFullScreen();
-  //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //   } else if ((elem as any).webkitRequestFullscreen) {
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     (elem as any).webkitRequestFullscreen();
-  //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //   } else if ((elem as any).msRequestFullscreen) {
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     (elem as any).msRequestFullscreen();
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   enterFullScreen();
-  // }, []);
 
   const handleStartExam = () => {
     if (stompClient && user.data?.id) {
@@ -200,6 +240,12 @@ const DoExam: React.FC<ExamProps> = ({
       body: payload,
     });
     handleAnswerFeedback();
+  };
+
+  const autoSubmit = () => {
+    setQuizState("finished");
+    setStudentMessage("You have completed the quiz! Click OK to return.");
+    submit();
   };
 
   const handleAnswerFeedback = () => {
@@ -344,7 +390,7 @@ const DoExam: React.FC<ExamProps> = ({
               className={buttonStyle}
               onClick={() => {
                 submit();
-                router.push("/exam");
+                router.push(examType === "exam" ? `/exam` : `/mockexam`);
               }}
             >
               OK

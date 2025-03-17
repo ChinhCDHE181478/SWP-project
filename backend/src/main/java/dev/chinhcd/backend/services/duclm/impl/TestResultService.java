@@ -5,7 +5,6 @@ import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.SmallPractice;
 import dev.chinhcd.backend.models.duclm.TestResult;
 import dev.chinhcd.backend.repository.IUserRepository;
-import dev.chinhcd.backend.repository.duclm.IPracticeRepository;
 import dev.chinhcd.backend.repository.duclm.ISmallPracticeRepository;
 import dev.chinhcd.backend.repository.duclm.ITestResultRepository;
 import dev.chinhcd.backend.services.duclm.ITestResultService;
@@ -24,7 +23,6 @@ public class TestResultService implements ITestResultService {
 
     private final ITestResultRepository testResultRepository;
     private final IUserRepository userRepository;
-    private final IPracticeRepository practiceRepository;
     private final ISmallPracticeRepository smallPracticeRepository;
 
     @Override

@@ -2,7 +2,6 @@ package dev.chinhcd.backend.services;
 
 import dev.chinhcd.backend.dtos.request.classDTO.EmailInforDTO;
 import dev.chinhcd.backend.dtos.request.classDTO.UserInforDTO;
-import dev.chinhcd.backend.models.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -11,8 +10,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class KafkaConsumerService {
     private final IEmailService emailService;
-    private final IUserService userService;
-    private final IJwtService jwtService;
 
     @KafkaListener(topics = "email", groupId = "email-group")
     public Boolean sendVerificationAddEmail(EmailInforDTO e) {

@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IUserExamService {
-    public Optional<UserExam> getUserExamResult(Long userId, String examName);
+    Optional<UserExam> getUserExamResult(Long userId, String examName);
 
-    public List<UserExam> getUserExamList(String examName, int limit);
+    List<UserExam> getUserExamList(String examName, int limit);
 
-    public Double getScore(Long uexamId, Long time);
+    Double getScore(Long uexamId, Long time);
 
     Long addUserExam(Long userId, Long examId);
 
