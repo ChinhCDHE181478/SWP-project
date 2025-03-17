@@ -9,6 +9,7 @@ import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.*;
 import dev.chinhcd.backend.repository.duclm.*;
 import dev.chinhcd.backend.services.IUserService;
+import dev.chinhcd.backend.services.duclm.impl.MockExamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -50,6 +51,8 @@ public class MockExamController {
     private final IMockExamQuestionRepository examQuestionRepository;
     private final IUserService userService;
     private final IUserMockExamRepository userMockExamRepository;
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\mockexams\\";
+    private final MockExamService mockExamService;
 
     @GetMapping("/get-all")
     public ResponseEntity<Map<String, Object>> getAll(
@@ -66,6 +69,51 @@ public class MockExamController {
         return ResponseEntity.ok(response);
     }
 
+    private ResponseEntity<String> validateExcelFile(MultipartFile file) {
+        Workbook workbook = null;
+        try {
+            workbook = WorkbookFactory.create(file.getInputStream());
+            Sheet sheet = workbook.getSheetAt(0);
+
+            if (sheet.getPhysicalNumberOfRows() <= 1) {
+                return ResponseEntity.badRequest().body("File Excel không có dữ liệu hợp lệ");
+            }
+
+            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                // Kiểm tra cột câu hỏi không được để trống
+                if (getStringCellValue(row.getCell(0)).isEmpty()) {
+                    return ResponseEntity.badRequest().body("Câu hỏi không được để trống ở hàng " + (i + 1));
+                }
+
+                // Kiểm tra các đáp án
+                for (int j = 1; j <= 4; j++) { // Các cột đáp án
+                    if (getStringCellValue(row.getCell(j)).isEmpty()) {
+                        return ResponseEntity.badRequest().body("Đáp án không được để trống ở hàng " + (i + 1) + ", cột " + (j + 1));
+                    }
+                }
+
+                // Kiểm tra câu trả lời đúng
+                if (getStringCellValue(row.getCell(6)).isEmpty()) {
+                    return ResponseEntity.badRequest().body("Đáp án đúng không được để trống ở hàng " + (i + 1));
+                }
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi khi đọc file Excel: " + e.getMessage());
+        } finally {
+            if (workbook != null) {
+                try {
+                    workbook.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return ResponseEntity.ok("File Excel hợp lệ");
+    }
+
     @PostMapping("/upload-mock-exam")
     public ResponseEntity<String> uploadMockExam(
             @RequestParam("file") MultipartFile file,
@@ -77,6 +125,11 @@ public class MockExamController {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("File is empty");
+        }
+
+        ResponseEntity<String> validationResponse = validateExcelFile(file);
+        if (!validationResponse.getStatusCode().equals(HttpStatus.OK)) {
+            return validationResponse;
         }
 
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
@@ -95,7 +148,7 @@ public class MockExamController {
             mockExam.setGrade(grade);
             mockExamRepository.save(mockExam);
 
-            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\mockexams\\" + mockExam.getMockExamId();
+            String folderPath = BASE_FOLDER_PATH + mockExam.getMockExamId();
             Path targetDir = Paths.get(folderPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
@@ -177,6 +230,11 @@ public class MockExamController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mock exam not found!");
             }
 
+            ResponseEntity<String> validationResponse = validateExcelFile(file);
+            if (!validationResponse.getStatusCode().equals(HttpStatus.OK)) {
+                return validationResponse;
+            }
+
             MockExam mockExam = mockExamOptional.get();
             mockExam.setExamName(examName);
             mockExam.setExamDate(Date.valueOf(examDate));
@@ -184,7 +242,7 @@ public class MockExamController {
             mockExam.setGrade(grade);
             mockExamRepository.save(mockExam); // Cập nhật MockExam
 
-            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\mockexams\\" + mockExam.getMockExamId();
+            String folderPath = BASE_FOLDER_PATH + mockExam.getMockExamId();
             Path targetDir = Paths.get(folderPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
@@ -382,7 +440,7 @@ public class MockExamController {
             }
 
             // Đường dẫn đến file Excel
-            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\mockexams\\" + mockexamID;
+            String folderPath = BASE_FOLDER_PATH + mockexamID;
             Path filePath = Paths.get(folderPath, "mockexam_" + mockexamID + ".xlsx");
 
             Resource resource = new UrlResource(filePath.toUri());
@@ -410,7 +468,7 @@ public class MockExamController {
             }
 
             // Đường dẫn đến file audio
-            String folderPath = "C:\\Users\\Chinh\\OneDrive\\Desktop\\mockexams\\" + mockexamID; // Đường dẫn thư mục
+            String folderPath = BASE_FOLDER_PATH + mockexamID; // Đường dẫn thư mục
             Path filePath = Paths.get(folderPath, "audio_" + mockexamID + ".zip"); // Hoặc .rar
 
             Resource resource = new UrlResource(filePath.toUri());
@@ -460,4 +518,10 @@ public class MockExamController {
         }).collect(Collectors.toList());
         return ResponseEntity.ok(quesRes);
     }
+
+    @GetMapping("/get-infor/{grade}")
+    public List<MockExam> getMockExam(@PathVariable String grade){
+            return mockExamService.getMockExams(grade);
+    }
+    
 }

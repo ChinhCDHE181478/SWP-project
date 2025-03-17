@@ -68,7 +68,7 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
                 });
 
                 refreshList();
-                onClose(); 
+                onClose();
             }
         } catch (error: any) {
             if (error.response && error.response.status === 409) {
@@ -101,19 +101,28 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
                             type="date"
                             value={practiceDate}
                             onChange={(e) => setPracticeDate(e.target.value)}
-                            className="border rounded p-2 w-full"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
                         />
                     </div>
                     <div className="mb-4">
                         <label className="block mb-1">Khối</label>
-                        <input
-                            type="text"
+                        <select
                             value={grade}
                             onChange={(e) => setGrade(e.target.value)}
-                            className="border rounded p-2 w-full"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
-                        />
+                        >
+                            <option value="">Chọn khối</option> {/* Option mặc định */}
+                            {[...Array(10)].map((_, index) => {
+                                const gradeValue = index + 3; // Tạo các giá trị từ 3 đến 12
+                                return (
+                                    <option key={gradeValue} value={gradeValue}>
+                                        {gradeValue}
+                                    </option>
+                                );
+                            })}
+                        </select>
                     </div>
                     <div className="mb-4">
                         <label className="block mb-1">Tự Luyện Vòng</label>
@@ -121,18 +130,18 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
                             type="text"
                             value={practiceLevel}
                             onChange={(e) => setPracticeLevel(e.target.value)}
-                            className="border rounded p-2 w-full"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
                         />
                     </div>
-                    
+
                     {/* Status */}
                     <div className="mb-4">
                         <label className="block mb-1">Trạng thái</label>
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
-                            className="border rounded p-2 w-full"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                         >
                             <option value="on">Bật</option>
                             <option value="off">Tắt</option>
@@ -145,7 +154,7 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
                             type="file"
                             accept=".xlsx, .xls"
                             onChange={handleFileChange}
-                            className="border rounded p-2 w-full"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
                         />
                         {file && (
@@ -160,7 +169,7 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
                             type="file"
                             accept=".zip,.rar"
                             onChange={handleAudioChange}
-                            className="border rounded p-2 w-full"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                         />
                         {audioFile && (
                             <p className="text-sm text-green-600 mt-1">

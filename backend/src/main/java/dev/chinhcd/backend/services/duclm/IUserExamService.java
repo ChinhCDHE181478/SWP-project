@@ -13,4 +13,6 @@ public interface IUserExamService {
     public Double getScore(Long uexamId, Long time);
 
     Long addUserExam(Long userId, Long examId);
+
+    List<UserExam> searchResults(String province, Integer grade,String examName);
 }

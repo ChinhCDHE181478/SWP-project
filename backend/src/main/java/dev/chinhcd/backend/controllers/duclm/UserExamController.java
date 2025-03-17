@@ -26,4 +26,14 @@ public class UserExamController {
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/get-result")
+    public ResponseEntity<List<UserExam>> getExamResults(
+            @RequestParam(required = false) String province,
+            @RequestParam(required = false) String examName,
+            @RequestParam(required = false) Integer grade
+    ) {
+        List<UserExam> results = userExamService.searchResults(province, grade, examName);
+        return ResponseEntity.ok(results);
+    }
+
 }

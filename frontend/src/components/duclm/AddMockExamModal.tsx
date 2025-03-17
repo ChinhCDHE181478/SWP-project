@@ -42,15 +42,19 @@ const AddMockExamModal: React.FC<AddMockExamModalProps> = ({ isOpen, onClose, re
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        
+
         try {
+            if (!file) {
+                toast({ title: "Vui lòng chọn tệp Excel!", className: "text-white bg-red-500" });
+                return;
+            }
             const formData = new FormData();
             formData.append("examName", examName);
             formData.append("examDate", examDate);
             formData.append("grade", grade.toString());
             formData.append("type", type);
             formData.append("status", status);
-            if (file) formData.append("file", file);
+            formData.append("file", file);
             if (audioFile) formData.append("audioZip", audioFile); // Thêm tệp âm thanh vào formData
 
             const response = await API.post("/mock-exam/upload-mock-exam", formData, {
@@ -82,28 +86,60 @@ const AddMockExamModal: React.FC<AddMockExamModalProps> = ({ isOpen, onClose, re
                 <DialogTitle>Thêm kỳ thi giả lập</DialogTitle>
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
                     <div>
-                        <label className="block mb-1">Tên kỳ thi</label>
-                        <input type="text" value={examName} onChange={(e) => setExamName(e.target.value)}
-                            className="border rounded p-2 w-full" required />
+                        <label className="block text-gray-700 font-medium mb-1">Tên kỳ thi</label>
+                        <select
+                            value={examName}
+                            onChange={(e) => setExamName(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
+                            required
+                        >
+                            <option value="" disabled>Chọn tên kỳ thi</option> {/* Option mặc định không thể chọn */}
+                            <option value="Cấp Phường/Xã">Cấp Phường/Xã</option>
+                            <option value="Cấp Quận/Huyện">Cấp Quận/Huyện</option>
+                            <option value="Cấp Tỉnh/Thành phố">Cấp Tỉnh/Thành phố</option>
+                        </select>
                     </div>
                     <div>
                         <label className="block mb-1">Ngày thi</label>
                         <input type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)}
-                            className="border rounded p-2 w-full" required />
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500" required />
                     </div>
-                    <div>
+                    <div className="mb-4">
                         <label className="block mb-1">Khối</label>
-                        <input type="number" value={grade} onChange={(e) => setGrade(Number(e.target.value))}
-                            className="border rounded p-2 w-full" required />
+                        <select
+                            value={grade}
+                            onChange={(e) => setGrade(Number(e.target.value))} // Chuyển đổi giá trị sang kiểu number
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
+                            required
+                        >
+                            <option value="" disabled>Chọn khối</option> {/* Option mặc định không thể chọn */}
+                            {[...Array(7)].map((_, index) => {
+                                const gradeValue = index + 3; // Tạo các giá trị từ 3 đến 9
+                                return (
+                                    <option key={gradeValue} value={gradeValue}>
+                                        {gradeValue}
+                                    </option>
+                                );
+                            })}
+                        </select>
                     </div>
                     <div>
                         <label className="block mb-1">Loại kỳ thi</label>
-                        <input type="text" value={type} onChange={(e) => setType(e.target.value)}
-                            className="border rounded p-2 w-full" required />
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
+                            required
+                        >
+                            <option value="" disabled>Chọn loại kỳ thi</option> {/* Option mặc định không thể chọn */}
+                            <option value="ward">Ward</option>
+                            <option value="district">District</option>
+                            <option value="province">Province</option>
+                        </select>
                     </div>
                     <div>
                         <label className="block mb-1">Tải lên file</label>
-                        <input type="file" onChange={handleFileChange} className="w-full border rounded p-2" />
+                        <input type="file" onChange={handleFileChange} className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500" />
                         {file && (
                             <p className="text-sm text-green-600 mt-1">
                                 📄 Đã chọn: {file.name}
@@ -112,7 +148,7 @@ const AddMockExamModal: React.FC<AddMockExamModalProps> = ({ isOpen, onClose, re
                     </div>
                     <div>
                         <label className="block mb-1">Tải lên file âm thanh (RAR/ZIP)</label>
-                        <input type="file" onChange={handleAudioFileChange} className="w-full border rounded p-2" accept=".zip,.rar" />
+                        <input type="file" onChange={handleAudioFileChange} className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500" accept=".zip,.rar" />
                         {audioFile && (
                             <p className="text-sm text-green-600 mt-1">
                                 🎵 Đã chọn: {audioFile.name}

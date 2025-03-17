@@ -92,6 +92,19 @@ public class UserPracticeService implements IUserPracticeService {
 
     }
 
+    @Override
+    public List<UserPractice> getResult(Long userId) {
+        List<UserPractice> userPractices = userPracticeRepository.findAllByUserId(userId);
+        for(UserPractice userPractice : userPractices) {
+            User user = new User();
+            user.setId(userPractice.getUser().getId());
+            user.setGrade(userPractice.getUser().getGrade());
+            user.setName(userPractice.getUser().getName());
+            userPractice.setUser(user);
+        }
+        return userPractices;
+    }
+
     public Integer getMaxPracticeLevelByUserId(Long userId) {
         return userPracticeRepository.findMaxPracticeLevelByUserId(userId)
                 .orElse(null); // Nếu không có thì trả về null

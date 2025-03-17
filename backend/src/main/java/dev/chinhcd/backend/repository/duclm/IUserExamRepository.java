@@ -18,8 +18,19 @@ public interface IUserExamRepository extends JpaRepository<UserExam, Integer> {
 
     Optional<UserExam> findByUserExamId(Long userExamId);
 
-    @Query("select ue.score from UserExam ue where ue.user.id=:userId and ue.exam.examId=:examId")
-    Double getScoreByUserIdAndExamId(Long userId, Long examId);
+        @Query("SELECT ue FROM UserExam ue " +
+                "JOIN ue.user u " +
+                "JOIN ue.exam e " +
+                "WHERE (:examName IS NULL OR e.examName LIKE %:examName%) " +
+                "AND (:grade IS NULL OR u.grade = %:grade%) " +
+                "AND (:province IS NULL OR u.province LIKE %:province%) " +
+                "ORDER BY ue.score DESC")
+        List<UserExam> searchResults(@Param("examName") String examName,
+                                     @Param("grade") Integer grade,
+                                     @Param("province") String province);
+
+
+//    List<UserExam> findUserExamByExam_ExamNameAndAndExam_GradeAndUser_ProvinceOrderByScoreDesc(String examName, String examGrade, String userProvince);
 
     @Query("select ue from UserExam ue where ue.user.id=:userId and ue.exam.examId=:examId")
     UserExam findUserExamByUserIdAndExamId(Long userId, Long examId);
