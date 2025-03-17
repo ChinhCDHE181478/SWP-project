@@ -1,4 +1,5 @@
-import AdminPage from "@/app/manager/account-manager/AdminPage";
+
+import AdminPage from "@/components/AdminPage";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

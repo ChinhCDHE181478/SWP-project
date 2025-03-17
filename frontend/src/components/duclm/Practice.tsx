@@ -316,7 +316,6 @@ const Practice: React.FC = () => {
                             </table>
                         </div>
 
-
                     </div>
 
 

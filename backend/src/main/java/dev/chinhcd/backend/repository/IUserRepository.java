@@ -29,4 +29,6 @@ public interface IUserRepository extends JpaRepository<User, Long> {
             "AND (:accountType IS NULL OR u.accountType = :accountType)")
     Page<User> getUsersByRole(Role role, Pageable pageable, String username, String email, AccountType accountType);
 
+    Long countByRole(Role role);
+
 }

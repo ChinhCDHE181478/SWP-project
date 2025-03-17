@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface IExamRepository extends JpaRepository<Exam, Integer> {
+public interface IExamRepository extends JpaRepository<Exam, Long> {
     @Query("SELECT e FROM Exam e WHERE e.status = 'on' ORDER BY e.examStart ASC LIMIT 1")
     Exam findNextExam();
 

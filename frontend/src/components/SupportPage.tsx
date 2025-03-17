@@ -112,7 +112,7 @@ const SupportPage = () => {
                 Giải đáp câu hỏi về mua gói
               </div>
               <div className="flex justify-center">
-                <Link href={"/support"}>
+                <Link href={"/support/payment-support"}>
                   <button className="bg-orange-500 shadow-lg rounded-lg p-2 font-bold text-white border border-white hover:bg-white hover:text-black hover:scale-205 transition-all duration-300 ease-in-out">
                     Xem ngay
                   </button>
