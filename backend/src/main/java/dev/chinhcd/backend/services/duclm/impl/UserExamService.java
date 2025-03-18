@@ -1,5 +1,6 @@
 package dev.chinhcd.backend.services.duclm.impl;
 
+import dev.chinhcd.backend.dtos.response.UserExamResponse;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.Exam;
 import dev.chinhcd.backend.models.duclm.UserExam;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -39,6 +41,7 @@ public class UserExamService implements IUserExamService {
         }
         return userExams;
     }
+
     @Override
     public Optional<UserExam> getUserExamResult(Long userId, String examName) {
         Optional<UserExam> userExamOpt = userExamRepository.findTopByUserIdAndExamNameOrderByUserExamIdDesc(userId, examName);

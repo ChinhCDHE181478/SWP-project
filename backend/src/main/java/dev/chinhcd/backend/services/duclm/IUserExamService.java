@@ -14,5 +14,5 @@ public interface IUserExamService {
 
     Long addUserExam(Long userId, Long examId);
 
-    List<UserExam> searchResults(String province, Integer grade,String examName);
+    List<UserExam> searchResults(String province, Integer grade, String examName);
 }
