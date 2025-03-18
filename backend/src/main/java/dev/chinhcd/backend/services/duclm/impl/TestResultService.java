@@ -97,4 +97,3 @@ public class TestResultService implements ITestResultService {
         }).collect(Collectors.toList());
     }
 }
-

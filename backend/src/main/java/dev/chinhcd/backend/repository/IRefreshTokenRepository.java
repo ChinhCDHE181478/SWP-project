@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface IRefreshTokenRepository extends JpaRepository<RefreshToken, String> {
-
     @Modifying
     @Transactional
     @Query("delete from RefreshToken r where r.user.id=:userId")

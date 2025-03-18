@@ -16,16 +16,15 @@ import { Form, FormField } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { Input, Textarea } from "@nextui-org/react";
 import { useToast } from "@/components/ui/use-toast";
-import axios from "axios";
 import dynamic from "next/dynamic";
 import React from "react";
+import Image from "next/image";
+import { API } from "@/helper/axios";
 
 // Import TinyMCE
 const Editor = dynamic(
   () => import("@tinymce/tinymce-react").then((mod) => mod.Editor),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
 
 // Schema kiểm tra dữ liệu nhập vào
@@ -34,19 +33,17 @@ const articleSchema = z.object({
   content: z
     .string()
     .min(10, "Nội dung quá ngắn")
-    .max(5000, "Nội dung quá dài"),
+    .max(20000, "Nội dung quá dài"),
   summaryContent: z.string().min(5, "Mô tả quá ngắn").max(300, "Mô tả quá dài"),
-  imageUrl: z.string().refine((url) => {
-    return url.startsWith("/") || url.startsWith("http");
-  }, "Hình ảnh phải là URL hợp lệ hoặc đường dẫn cục bộ"),
+  imageFile: z.any().optional(),
   articlesType: z.enum(["NEWS", "TIPS"]),
   date: z.string(),
 });
 
 const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
-  // const [formError, setFormError] = useState<string>("");
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof articleSchema>>({
     resolver: zodResolver(articleSchema),
@@ -54,7 +51,6 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
       title: "",
       content: "",
       summaryContent: "",
-      imageUrl: "",
       articlesType: "NEWS",
       date: new Date().toISOString().split("T")[0],
     },
@@ -62,30 +58,58 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
   const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file) {
+      form.setValue("imageFile", file);
+      const imageUrl = URL.createObjectURL(file);
+      setPreviewImage(imageUrl);
+    }
+  };
+
   const handleAddArticle = async (data: z.infer<typeof articleSchema>) => {
     try {
-      const response = await axios.post(apiURL + "/articles", data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const formData = new FormData();
+      // Thêm dữ liệu bài viết dưới dạng JSON
+      const articleData = {
+        title: data.title,
+        content: data.content,
+        summaryContent: data.summaryContent,
+        articlesType: data.articlesType,
+        date: new Date(data.date).toISOString(),
+      };
+
+      formData.append("article", JSON.stringify(articleData));
+
+      if (data.imageFile) {
+        formData.append("imageFile", data.imageFile);
+      }
+
+      const response = await API.post(`${apiURL}/articles`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Nếu response trả về mã trạng thái không thành công, hiển thị lỗi
       if (response.status !== 201) {
         throw new Error("Lỗi khi thêm bài viết.");
       }
 
-      // Hiển thị thông báo thành công nếu phản hồi thành công
       toast({
         title: "Bài viết đã được lưu!",
         className: "text-white bg-green-500",
       });
+      form.reset({
+        title: "",
+        content: "",
+        summaryContent: "",
+        articlesType: "NEWS",
+        date: new Date().toISOString().split("T")[0],
+        imageFile: null,
+      });
 
-      // Gọi callback để làm mới danh sách hoặc cập nhật trạng thái
       onSuccess();
       setOpen(false);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      // Xử lý lỗi mạng hoặc lỗi không mong muốn khác
       toast({
         title: "Có lỗi xảy ra khi kết nối tới máy chủ.",
         className: "text-white bg-red-500",
@@ -103,7 +127,7 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
           Thêm bài viết
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] z-[999] bg-white">
+      <DialogContent className="sm:max-w-[600px] z-[999] bg-white max-h-[80vh] overflow-y-auto">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleAddArticle)}>
             <DialogHeader>
@@ -145,56 +169,13 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
                       init={{
                         height: 400,
                         menubar: true,
-                        language: "vi",
-                        plugins: [
-                          "advlist",
-                          "autolink",
-                          "lists",
-                          "link",
-                          "image",
-                          "charmap",
-                          "code",
-                          "fullscreen",
-                          "media",
-                          "searchreplace",
-                          "visualblocks",
-                          "wordcount",
-                        ],
+                        plugins:
+                          "advlist autolink lists link image charmap code fullscreen media",
                         toolbar:
-                          "undo redo | blocks fontfamily fontsize | bold italic underline | " +
-                          "alignleft aligncenter alignright | bullist numlist outdent indent | link image media table | searchreplace visualblocks wordcount",
+                          "undo redo | bold italic | bullist numlist | link image",
                         content_style:
-                          "body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 14px; direction: ltr; text-align: left; }",
-                        directionality: "ltr",
-                        forced_root_block: "p",
-                        entity_encoding: "raw",
-                        convert_urls: false,
-                        verify_html: false,
-                        allow_script_urls: true,
-                        extended_valid_elements: "*[*]",
-                        valid_children: "+body[style]",
-                        setup: (editor) => {
-                          editor.on("init", () => {
-                            editor.setContent(field.value || "");
-                            const editorIframe = document.querySelector(
-                              ".tox-edit-area__iframe"
-                            );
-                            if (editorIframe) {
-                              try {
-                                const iframeDoc = (
-                                  editorIframe as HTMLIFrameElement
-                                ).contentDocument;
-                                if (iframeDoc) {
-                                  const body = iframeDoc.body;
-                                  body.style.direction = "ltr";
-                                  body.style.textAlign = "left";
-                                }
-                              } catch (e) {
-                                console.error("Error setting editor styles", e);
-                              }
-                            }
-                          });
-                        },
+                          "body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 14px; }",
+                        branding: false,
                       }}
                     />
                     {fieldState.error && (
@@ -228,35 +209,42 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
               <FormField
                 control={form.control}
-                name="imageUrl"
-                render={({ field, fieldState }) => (
+                name="imageFile"
+                render={({}) => (
                   <div>
-                    <Label htmlFor="imageUrl">URL hình ảnh</Label>
-                    <Input
-                      {...field}
-                      placeholder="Nhập đường dẫn hình ảnh"
-                      maxLength={300}
-                      onBlur={(e) => {
-                        const url = e.target.value;
-                        if (url.startsWith("http") || url.startsWith("/")) {
-                          form.setValue("imageUrl", url);
-                        }
-                      }}
+                    <Label htmlFor="imageFile">Chọn hình ảnh</Label>
+                    <div className="items-center grid grid-cols-4 mb-4">
+                      <div className="h-full flex items-start">
+                        <label
+                          htmlFor="imageFile"
+                          className="px-4 py-2 bg-white text-gray-700 border border-gray-400 rounded-md cursor-pointer hover:bg-gray-100 transition w-fit"
+                        >
+                          📂 Chọn tệp
+                        </label>
+                      </div>
+
+                      <div className="col-span-3 flex-grow min-w-[150px] border border-gray-400 px-3 py-1 rounded-md text-gray-600">
+                        {previewImage
+                          ? previewImage
+                          : "Chưa có tệp nào được chọn"}
+                      </div>
+                    </div>
+
+                    {/* Input file (ẩn đi) */}
+                    <input
+                      id="imageFile"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
                     />
-                    {field.value &&
-                      (field.value.startsWith("http") ||
-                        field.value.startsWith("/")) && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={field.value}
-                          alt="Preview"
-                          className="mt-2 w-full h-40 object-cover rounded-lg border"
-                        />
-                      )}
-                    {fieldState.error && (
-                      <span className="text-red-500 text-sm">
-                        {fieldState.error.message}
-                      </span>
+                    {previewImage && (
+                      <Image
+                        src={previewImage}
+                        alt="Preview"
+                        width={500}
+                        height={200}
+                      />
                     )}
                   </div>
                 )}
@@ -286,7 +274,12 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
                 render={({ field }) => (
                   <div>
                     <Label htmlFor="date">Ngày đăng</Label>
-                    <Input type="date" {...field} />
+                    <Input
+                      type="date"
+                      {...field}
+                      disabled
+                      value={field.value}
+                    />
                   </div>
                 )}
               />
@@ -294,6 +287,7 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
             <DialogFooter>
               <button
                 type="submit"
+                disabled={form.formState.isSubmitting}
                 className="p-2 mt-5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
               >
                 Thêm bài viết

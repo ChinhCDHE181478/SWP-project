@@ -13,7 +13,7 @@ import {
 import { Form, FormField } from "./ui/form";
 import { Label } from "./ui/label";
 import { Input } from "@nextui-org/react";
-import { ADD_MANAGER} from "@/helper/urlPath";
+import { ADD_MANAGER } from "@/helper/urlPath";
 import { z } from "zod";
 import { useToast } from "./ui/use-toast";
 import { managerAccountSchema } from "@/helper/schema";
@@ -48,7 +48,7 @@ const AddUserForm = ({
           username: data.username,
           password: data.password,
           email: data.email,
-          role: "STUDENT"
+          role: "STUDENT",
         }
       );
       if (response.data) {

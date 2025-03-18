@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 
 interface PaginationProps {
   currentPage: number;
@@ -13,19 +13,18 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
 }) => {
   const renderPageButtons = () => {
-    let buttons = [];
-    let startPage = Math.max(currentPage - 2, 1); // Display 2 pages before current page
-    let endPage = Math.min(currentPage + 2, totalPages); // Display 2 pages after current page
+    const buttons = [];
+    let startPage = Math.max(currentPage - 2, 1);
+    let endPage = Math.min(currentPage + 2, totalPages);
 
     if (currentPage <= 3) {
-      endPage = Math.min(5, totalPages); // Show first 5 pages if currentPage is 1, 2, or 3
+      endPage = Math.min(5, totalPages);
     }
 
     if (currentPage >= totalPages - 2) {
-      startPage = Math.max(totalPages - 4, 1); // Show last 5 pages if near end
+      startPage = Math.max(totalPages - 4, 1);
     }
 
-    // Adding "Previous" page range
     if (startPage > 1) {
       buttons.push(
         <button
@@ -61,7 +60,6 @@ const Pagination: React.FC<PaginationProps> = ({
       );
     }
 
-    // Adding "Next" page range
     if (endPage < totalPages) {
       buttons.push(
         <button

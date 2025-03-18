@@ -31,13 +31,14 @@ import React from "react";
 import { Input } from "@nextui-org/react";
 import { Articles } from "@/types/type";
 import UpdateContentForm from "./UpdateContentForm";
+import Image from "next/image";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   fetchData: () => void;
-  filterType: string; // Nhận filter từ component cha
-  setFilterType: (type: string) => void; // Hàm cập nhật filter
+  filterType: string;
+  setFilterType: (type: string) => void;
   filterDate: string;
   setFilterDate: (date: string) => void;
   onSearch: () => void;
@@ -68,7 +69,7 @@ export function ContentDataTable<TData, TValue>({
   const [detailData, setDetailData] = useState<Articles | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<Articles | null>(null);
   const [open, setOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<TData | null>(null);
+  const [selectedRow, setSelectedRow] = useState<Articles | null>(null);
   const { toast } = useToast();
 
   const handleDelete = async (id: number) => {
@@ -85,6 +86,7 @@ export function ContentDataTable<TData, TValue>({
       });
       fetchData();
       setOpen(false);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast({
         title: "Xóa bài viết thất bại!",
@@ -94,7 +96,7 @@ export function ContentDataTable<TData, TValue>({
   };
 
   const openDeleteModal = (rowData: TData) => {
-    setSelectedRow(rowData);
+    setSelectedRow(rowData as Articles);
     setOpen(true);
   };
 
@@ -104,7 +106,7 @@ export function ContentDataTable<TData, TValue>({
   };
 
   const openDetailModal = (rowData: TData) => {
-    setDetailData(rowData);
+    setDetailData(rowData as Articles);
     setDetailModalOpen(true);
   };
 
@@ -122,8 +124,9 @@ export function ContentDataTable<TData, TValue>({
           className: "text-white bg-green-500",
         });
 
-        fetchData(); // ✅ Đóng modal
+        fetchData();
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast({
         title: "Cập nhật bài viết thất bại!",
@@ -240,17 +243,16 @@ export function ContentDataTable<TData, TValue>({
           <DialogHeader>
             <DialogTitle>
               Xóa Bài Viết “
-              <strong>
-                {selectedRow ? (selectedRow as any).title : "Chưa chọn"}
-              </strong>
-              ”
+              <strong>{selectedRow ? selectedRow.title : "Chưa chọn"}</strong>”
             </DialogTitle>
           </DialogHeader>
           <DialogFooter>
             <button
               type="button"
               className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
-              onClick={() => handleDelete((selectedRow as any).id)}
+              onClick={() =>
+                selectedRow?.id && handleDelete(selectedRow.id ?? 0)
+              }
             >
               Xóa bài viết
             </button>
@@ -273,13 +275,26 @@ export function ContentDataTable<TData, TValue>({
       </Dialog>
 
       <Dialog open={detailModalOpen} onOpenChange={setDetailModalOpen}>
-        <DialogContent className="sm:max-w-[425px] z-[999] bg-white">
+        <DialogContent className="sm:max-w-[900px] z-[999] bg-white max-h-[90vh] overflow-y-auto p-6">
           <DialogHeader>
             <DialogTitle>Chi tiết Bài Viết</DialogTitle>
           </DialogHeader>
-          <div className="p-4">
+          <div className="space-y-4">
             {detailData ? (
               <>
+                {detailData.imageUrl && (
+                  <div className="w-full flex justify-center">
+                    <Image
+                      src={detailData.imageUrl}
+                      alt={detailData.title}
+                      width={400}
+                      height={300}
+                      className="rounded-md max-w-full h-auto border border-gray-300"
+                      priority
+                    />
+                  </div>
+                )}
+
                 <p>
                   <strong>Tiêu đề:</strong> {detailData.title}
                 </p>
@@ -289,14 +304,15 @@ export function ContentDataTable<TData, TValue>({
                 <p>
                   <strong>Ngày đăng:</strong> {detailData.date || "N/A"}
                 </p>
-                <p>
-                  <strong>Nội dung:</strong>{" "}
+                <div>
+                  <strong>Nội dung:</strong>
                   <div
+                    className="mt-2 overflow-y-auto max-h-[75vh] break-all whitespace-pre-line p-4 border border-gray-300 rounded-md"
                     dangerouslySetInnerHTML={{
                       __html: detailData.content || "Không có nội dung",
                     }}
                   />
-                </p>
+                </div>
               </>
             ) : (
               <p>Không có thông tin chi tiết để hiển thị.</p>

@@ -27,5 +27,4 @@ public class Practice {
     @Column
     private String status;
 
-
 }

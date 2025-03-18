@@ -1,46 +1,52 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Articles } from "@/types/type";
 import axios from "axios";
 
 interface Props {
-  type: string; // news hoặc tips
+  type: string; 
 }
-
-const API_URL = "http://localhost:8080/api/v1/articles/suggestions";
 
 // Hàm lấy dữ liệu gợi ý bài viết theo type
 async function getSuggestedArticles(type: string): Promise<Articles[]> {
+  const API_URL = `http://localhost:8080/api/v1/articles/suggestions`;
+  
+  console.log("Fetching articles with type:", type); 
+
   const res = await axios.get(API_URL, {
     headers: { "Content-Type": "application/json" },
-    params: { type: type.toUpperCase() },
+    params: { type: type.toUpperCase()},
   });
   return res.data as Articles[];
 }
 
-const ScheduleSuggestion: React.FC<Props> = ({ type }) => {
+const SuggestionArticles: React.FC<Props> = ({ type }) => {
   const [suggestedArticles, setSuggestedArticles] = useState<Articles[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  useEffect(() => {
-    const fetchArticles = async () => {
-      setLoading(true);
-      try {
-        const data = await getSuggestedArticles(type);
-        setSuggestedArticles(data);
-      } catch (err: any) {
-        console.error("Error fetching suggested articles:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchArticles = useCallback(async () => {
+    setLoading(true);
+    setError("");  
+    try {
+      const data = await getSuggestedArticles(type);
+      setSuggestedArticles(data);
+    } catch (err: any) {
+      console.error("Error fetching suggested articles:", err);
+      setError("Error fetching articles.");
+    } finally {
+      setLoading(false);
+    }
+  }, [type]); 
 
-    fetchArticles();
-  }, [type]);
+  useEffect(() => {
+    if (type) {
+      fetchArticles(); 
+    }
+  }, [type, fetchArticles]);
 
   if (loading || error) {
     return (
@@ -55,10 +61,9 @@ const ScheduleSuggestion: React.FC<Props> = ({ type }) => {
 
   return (
     <div className="max-w-screen-xl mx-auto w-[1050px] px-4">
-      <div className="flex items-center bg-orange-100 px-3 py-1 w-fit">
-        <div className="w-1 h-5 bg-orange-500 mr-2"></div>
-        <h2 className="text-lg font-bold text-orange-500 uppercase">
-          Tin tức liên quan
+      <div className="text-left mb-6">
+        <h2 className="text-2xl font-bold text-blue-500">
+          Có thể bạn quan tâm
         </h2>
       </div>
 
@@ -93,4 +98,4 @@ const ScheduleSuggestion: React.FC<Props> = ({ type }) => {
   );
 };
 
-export default ScheduleSuggestion;
+export default SuggestionArticles;

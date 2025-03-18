@@ -1,39 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Articles } from "@/types/type";
 import { ContentDataTable } from "./ContentDataTable";
 import AddContentForm from "./AddContentForm";
 import { ColumnDef } from "@tanstack/react-table";
 import axios from "axios";
-import Pagination from "@/components/longnt/articles/Pagination"; // Import component phân trang
+import Pagination from "@/components/longnt/articles/Pagination";
 
 const apiURL = process.env.NEXT_PUBLIC_API_URL;
 const GET_ARTICLES = "/articles/filtered";
 
-// Hàm fetch dữ liệu từ API
 async function getArticles(
-  type: string,
-  startDate: string,
-  page: number,
-  pageSize: number
+  type?: string,
+  startDate?: string,
+  page: number = 1,
+  pageSize: number = 7
 ) {
-  const endDate = new Date().toISOString();
-  const res = await axios.get(apiURL + GET_ARTICLES, {
+  const params: Record<string, string | number> = { page, pageSize };
+
+  if (type) params.type = type;
+  if (startDate) params.startDate = startDate;
+
+  console.log("📌 Params sent to API:", params);
+
+  const res = await axios.get(`${apiURL}${GET_ARTICLES}`, {
     headers: { "Content-Type": "application/json" },
-    params: {
-      type: type || "all" ? type : undefined,
-      startDate: startDate || undefined,
-      endDate,
-      page,
-      pageSize,
-    },
+    params,
   });
-  console.log("End Date:", endDate);
-  console.log("Params:", { type, startDate, endDate });
-  console.log("Fetched articles:", res.data.articles);
-  console.log("Total pages:", res.data.totalPages);
+
+  console.log("✅ API Response:", res.data);
   return res.data;
 }
 
@@ -52,50 +49,50 @@ const ContentListTable = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [filterType, setFilterType] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("");
   const [filterDate, setFilterDate] = useState<string>("");
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const currentPage = Number(searchParams.get("page") || 1);
 
-  // Cập nhật URL khi bấm "Tìm kiếm"
-  const handleSearch = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", "1");
-    if (filterType !== "all") {
-      params.set("type", filterType);
-    } else {
-      params.delete("type");
-    }
-    if (filterDate) {
-      params.set("startDate", filterDate);
-    } else {
-      params.delete("startDate");
-    }
-    router.push(`?${params.toString()}`, { scroll: false });
-  };
-
-  // Fetch dữ liệu khi searchParams thay đổi
-  const fetchArticles = async () => {
+  //Hàm fetch dữ liệu khi load trang hoặc khi filter thay đổi
+  const fetchArticles = useCallback(async () => {
     setIsLoading(true);
     try {
-      const type = searchParams.get("type") || "all";
-      const startDate = searchParams.get("startDate") || "";
+      //Kiểm tra nếu có filter thì lấy, nếu không thì để undefined
+      const type = searchParams.get("type") || undefined;
+      const startDate = searchParams.get("startDate") || undefined;
       const page = Number(searchParams.get("page") || 1);
+
+      console.log("📌 Fetching with params:", { type, startDate, page });
+
       const res = await getArticles(type, startDate, page, 7);
+
       setArticles(res.articles);
       setTotalPages(res.totalPages);
+
+      console.log("Total pages from API:", res.totalPages);
     } catch (error) {
       console.error("Error fetching articles:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [searchParams]);
 
   useEffect(() => {
     fetchArticles();
-  }, [searchParams]);
+  }, [fetchArticles]);
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+
+    params.set("page", "1");
+    if (filterType) params.set("type", filterType);
+    if (filterDate) params.set("startDate", filterDate);
+
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   return (
     <div className="py-10">
@@ -111,7 +108,7 @@ const ContentListTable = () => {
             setFilterType={setFilterType}
             filterDate={filterDate}
             setFilterDate={setFilterDate}
-            onSearch={handleSearch} // Gửi hàm tìm kiếm xuống component con
+            onSearch={handleSearch}
             columns={articleColumns}
             data={articles}
             fetchData={fetchArticles}

@@ -3,23 +3,35 @@ package dev.chinhcd.backend.controllers.duclm;
 import dev.chinhcd.backend.dtos.response.QuestionsResponse;
 import dev.chinhcd.backend.dtos.response.duclm.ExamDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
-import dev.chinhcd.backend.models.duclm.*;
-import dev.chinhcd.backend.repository.duclm.*;
+import dev.chinhcd.backend.models.duclm.Answer;
+import dev.chinhcd.backend.models.duclm.Exam;
+import dev.chinhcd.backend.models.duclm.ExamQuestion;
+import dev.chinhcd.backend.models.duclm.Question;
+import dev.chinhcd.backend.repository.duclm.IAnswerRepository;
+import dev.chinhcd.backend.repository.duclm.IExamQuestionRepository;
+import dev.chinhcd.backend.repository.duclm.IExamRepository;
+import dev.chinhcd.backend.repository.duclm.IQuestionRepository;
 import jakarta.transaction.Transactional;
-import org.apache.poi.ss.usermodel.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,18 +39,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 
 @RestController
 @RequestMapping("/exam")
 @RequiredArgsConstructor
 public class ExamController {
 
+    private final IExamRepository iExamRepository;
     private final IExamRepository examRepository;
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
@@ -53,6 +60,7 @@ public class ExamController {
         }
         return ResponseEntity.ok(nextExam);
     }
+
 
     @GetMapping("/get-all")
     public ResponseEntity<Map<String, Object>> getAll(

@@ -10,8 +10,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div>
-      <Practice
-      />
+      <Practice />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface ITestResultRepository extends JpaRepository<TestResult, Long> {
 
     Optional<TestResult> findByUserIdAndSmallPractice_SmallPracticeId(Long userId, Integer smallPracticeId);
+
     TestResult findTestResultBySmallPractice_SmallPracticeId(Integer smallPracticeId);
 
     @Modifying

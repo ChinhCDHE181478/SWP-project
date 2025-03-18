@@ -4,6 +4,7 @@ import dev.chinhcd.backend.dtos.response.duclm.TestResultResponse;
 import dev.chinhcd.backend.services.duclm.ITestResultService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +28,6 @@ public class TestResultController {
             List<TestResultResponse> result = testResultService.getTestResults(userId, currentLevel);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.status(500).body(List.of());
         }
     }

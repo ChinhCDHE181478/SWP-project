@@ -7,23 +7,22 @@ import dev.chinhcd.backend.enums.ArticlesType;
 import dev.chinhcd.backend.models.Articles;
 import dev.chinhcd.backend.repository.IArticlesRepository;
 import dev.chinhcd.backend.services.IArticlesService;
+import dev.chinhcd.backend.services.longnt.ICloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class ArticlesService implements IArticlesService {
 
     private final IArticlesRepository articlesRepository;
+    private final ICloudinaryService cloudinaryService;
 
     @Override
     public Optional<Articles> getArticlesById(long id) {
@@ -34,23 +33,21 @@ public class ArticlesService implements IArticlesService {
     public PaginateArticlesResponse getPaginatedArticles(String type, int page, int pageSize) {
         ArticlesType articlesType;
         try {
-            articlesType = ArticlesType.valueOf(type.toUpperCase()); // Chuyển String thành Enum
+            articlesType = ArticlesType.valueOf(type.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid article type: " + type);
         }
-        // Tạo đối tượng Pageable với pageNumber và pageSize
+
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
         Page<Articles> articlesPage = articlesRepository.findAllArticlesByType(articlesType, pageable);
 
-        // Trả về dữ liệu phân trang
         return new PaginateArticlesResponse(
-                articlesPage.getContent(),  // Dữ liệu bài viết
-                articlesPage.getTotalPages(),  // Tổng số trang
-                articlesPage.getTotalElements(),  // Tổng số bài viết
-                articlesPage.getNumber() + 1, // Trang hiện tại
-                pageSize
-        );
+                articlesPage.getContent(),
+                articlesPage.getTotalPages(),
+                articlesPage.getTotalElements(),
+                articlesPage.getNumber() + 1,
+                pageSize);
     }
 
     @Override
@@ -71,6 +68,11 @@ public class ArticlesService implements IArticlesService {
 
     @Override
     public PaginateArticlesResponse getArticlesByFilters(String type, Date startDate, Date endDate, int page, int pageSize) {
+
+        if (endDate == null) {
+            endDate = new Date();
+        }
+
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
         ArticlesType articlesType = null;
@@ -80,7 +82,6 @@ public class ArticlesService implements IArticlesService {
 
         Page<Articles> articlesPage = articlesRepository.findArticlesByFilters(articlesType, startDate, endDate, pageable);
 
-        // Chuyển đổi định dạng ngày của các bài viết
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         articlesPage.getContent().forEach(article -> {
             if (article.getDate() != null) {
@@ -94,7 +95,6 @@ public class ArticlesService implements IArticlesService {
 
     @Override
     public Articles addArticle(AddArticleDTO articleDTO) {
-
         if (articleDTO.getTitle() == null || articleDTO.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Title cannot be null or empty.");
         }
@@ -103,18 +103,17 @@ public class ArticlesService implements IArticlesService {
             throw new IllegalArgumentException("Content cannot be null or empty.");
         }
 
-        // Lọc nội dung TinyMCE để tránh XSS (Chỉ giữ lại các thẻ an toàn)
-        String safeContent = articleDTO.getContent().replaceAll("(?i)<script.*?>.*?</script>", "");
-
-        // Tạo entity Articles từ DTO
         Articles article = new Articles();
         article.setTitle(articleDTO.getTitle());
-        article.setContent(safeContent);
+        article.setContent(articleDTO.getContent());
         article.setSummaryContent(articleDTO.getSummaryContent());
         article.setArticlesType(articleDTO.getArticlesType());
-        article.setImageUrl(articleDTO.getImageUrl());
 
-        // Thiết lập ngày hiện tại nếu không có ngày
+        if (articleDTO.getImageFile() != null && !articleDTO.getImageFile().isEmpty()) {
+            String imageUrl = cloudinaryService.uploadImage(articleDTO.getImageFile()); // Upload ảnh lên Cloudinary
+            article.setImageUrl(imageUrl); // Cập nhật URL ảnh vào bài viết
+        }
+
         article.setDate(articleDTO.getDate() != null ? articleDTO.getDate() : new Date());
 
         return articlesRepository.save(article);
@@ -127,10 +126,8 @@ public class ArticlesService implements IArticlesService {
 
     @Override
     public Articles updateArticle(Long id, UpdateArticleRequest updateArticleRequest) {
-        Articles existingArticle = articlesRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Article not found"));
+        Articles existingArticle = articlesRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Article not found"));
 
-        // Cập nhật các trường hợp lệ
         if (updateArticleRequest.getTitle() != null) {
             existingArticle.setTitle(updateArticleRequest.getTitle());
         }

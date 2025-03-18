@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -7,7 +8,7 @@ import ArticlesHeader from "./ArticlesHeader";
 import axios from "axios";
 
 const ArticlesPageNumber = () => {
-  const { id } = useParams(); // Lấy id từ URL params
+  const { id } = useParams();
   const [data, setData] = useState<Articles | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -20,13 +21,15 @@ const ArticlesPageNumber = () => {
     return res.data as Articles;
   }
 
+  const articleId = Array.isArray(id) ? id[0] : id;
+
   useEffect(() => {
-    if (!id) return;
+    if (!articleId) return;
 
     const fetchArticleDetail = async () => {
       setLoading(true);
       try {
-        const data = await getArticleDetail(id);
+        const data = await getArticleDetail(articleId);
         setData(data);
       } catch (err: any) {
         console.error("Error fetching article detail:", err);
@@ -37,7 +40,7 @@ const ArticlesPageNumber = () => {
     };
 
     fetchArticleDetail();
-  }, [id]);
+  }, [articleId]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;

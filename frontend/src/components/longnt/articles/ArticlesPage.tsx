@@ -31,7 +31,7 @@ export default function ArticlesPage() {
     if (shouldUpdate) {
       router.replace(`?${newParams.toString()}`);
     }
-  }, [param, router]);
+  }, [param, type, router]);
 
   return (
     <div className="flex flex-col">

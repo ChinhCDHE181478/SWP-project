@@ -1,6 +1,14 @@
 package dev.chinhcd.backend.controllers;
 
 import dev.chinhcd.backend.dtos.request.FeedbackRequest;
+import dev.chinhcd.backend.dtos.response.longnt.PaginateFeedbackResponse;
+import dev.chinhcd.backend.models.Feedback;
+import dev.chinhcd.backend.services.IFeedbackService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import dev.chinhcd.backend.services.IFeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,4 +29,16 @@ public class FeedbackController {
     public ResponseEntity<Boolean> sendFeedback(@RequestBody FeedbackRequest feedback) {
         return ResponseEntity.ok(feedbackService.sendFeedback(feedback));
     }
+
+    @GetMapping("/filtered")
+    public ResponseEntity<PaginateFeedbackResponse> getFeedbacks(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int pageSize,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) Integer rating
+    ) {
+        PaginateFeedbackResponse response = feedbackService.getPaginatedFeedbacks(page, pageSize, username, rating);
+        return ResponseEntity.ok(response);
+    }
+
 }
