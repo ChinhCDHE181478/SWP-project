@@ -6,12 +6,12 @@ import { LifeBuoy, LogOut } from "lucide-react";
 const items = [
   {
     title: "Support Requests",
-    url: "/manager/support-manager?content=Support", 
+    url: "/management/support-management?content=Support", 
     icon: LifeBuoy,
   },
   {
     title: "Feedback",
-    url: "/manager/support-manager?content=Feedback", 
+    url: "/management/support-management?content=Feedback", 
     icon: LifeBuoy,
   },
 ];

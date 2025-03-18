@@ -103,6 +103,7 @@ const ContentListTable = () => {
       {isLoading && <div>Loading...</div>}
       {!isLoading && (
         <>
+          <div className="text-[15px] text-red-500">*Lọc từ ngày chọn đến hiện tại</div>
           <ContentDataTable
             filterType={filterType}
             setFilterType={setFilterType}
