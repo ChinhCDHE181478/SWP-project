@@ -27,7 +27,7 @@ const Course: React.FC = () => {
       price: "99.000 đ/năm",
       details: [
         "Truy cập vào toàn bộ kỳ thi",
-        "Thi thử 3 lần",
+        "Thi thử 5 lần trong 1 tháng",
         "Ôn luyện và đánh giá hiệu quả toàn diện",
       ],
       amount: 99000,
@@ -55,6 +55,10 @@ const Course: React.FC = () => {
       });
       router.push("/auth/login");
     } else {
+      if(type === "FREE_COURSE") {
+        return;
+      }
+
       try {
         const response = await API.post(
           `${process.env.NEXT_PUBLIC_API_URL}/payment/create`,

@@ -33,6 +33,6 @@ public interface IUserExamRepository extends JpaRepository<UserExam, Integer> {
 //    List<UserExam> findUserExamByExam_ExamNameAndAndExam_GradeAndUser_ProvinceOrderByScoreDesc(String examName, String examGrade, String userProvince);
 
     @Query("select ue from UserExam ue where ue.user.id=:userId and ue.exam.examId=:examId")
-    UserExam findUserExamByUserIdAndExamId(Long userId, Long examId);
+    List<UserExam> findUserExamByUserIdAndExamId(Long userId, Long examId);
 
 }
