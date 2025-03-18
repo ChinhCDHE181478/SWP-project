@@ -21,6 +21,7 @@ const HomeInformation: React.FC = () => {
         console.error("Error fetching max level:", error);
       });
   }, []);
+  
 
   return (
     <div className="w-full h-full">

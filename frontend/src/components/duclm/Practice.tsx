@@ -92,6 +92,27 @@ const Practice: React.FC = () => {
         checkCompletion();
     }, [currentLevel, maxLevel, user.data?.id]);
 
+    useEffect(() => {
+        const checkUserResult = async () => {
+            if (!user.data?.id || currentLevel === null) return;
+
+            try {
+                const response = await API.get(`/practice/check-result/${user.data.id}/${currentLevel}`);
+                console.log(user.data.id);
+                if (response.data.hasResult) {
+                    console.log("User has already completed this level.");
+                    window.location.reload();
+                } else {
+                    console.log("User has not completed this level yet.");
+                }
+            } catch (error) {
+                console.error("Error checking user result:", error);
+            }
+        };
+
+        checkUserResult();
+    }, [user.data?.id, currentLevel]);
+
     // Fetch max level from backend
     useEffect(() => {
         const fetchMaxLevel = async () => {
@@ -123,6 +144,7 @@ const Practice: React.FC = () => {
 
                 const data = await response.data;
                 setTestResults(data);
+                
             } catch (error) {
                 console.error("Error fetching test results:", error);
             }
@@ -131,7 +153,6 @@ const Practice: React.FC = () => {
         fetchTestResults();
     }, [user.data?.id, currentLevel]);
 
-    // Fetch user results from backend
     useEffect(() => {
         if (!user.data?.id) return;
 
@@ -152,7 +173,7 @@ const Practice: React.FC = () => {
     const totalTimeSpent = testResults.reduce((acc, result) => acc + convertToSeconds(result.timeSpent), 0);
 
     const allCompleted = testResults.every(result => result.status === "Hoàn thành");
-    const scoreThreshold = 75 / 100 * 300; // 75% of 300
+    const scoreThreshold = 75 / 100 * 0; // 75% of 300
 
     const handleCompleteRound = async () => {
         try {
@@ -250,10 +271,26 @@ const Practice: React.FC = () => {
                                     {testResults.map((result, index) => (
                                         <tr key={index} className="bg-white hover:bg-gray-50">
                                             <td className="px-6 py-4">{index + 1}</td>
-                                            <td className="px-6 py-4">{result.testName}</td>
-                                            <td className="px-6 py-4">{result.attempts || 0}</td>
-                                            <td className="px-6 py-4">{result.score || 0}</td>
-                                            <td className="px-6 py-4">{convertToSeconds(result.timeSpent) || 0}</td>
+                                            <td className="px-6 py-4">
+                                                {result.status === "Chưa thi" ? (
+                                                    <a
+                                                        href={`/test/practice/${result.smallpracticeID}/${result.testName}`}
+                                                        className="bg-orange-300 text-white px-4 py-2 rounded hover:bg-orange-400 transition duration-300"
+                                                    >
+                                                        Làm {result.testName}
+                                                    </a>
+                                                ) : result.status === "Hoàn thành" ? (
+                                                    <span className="text-orange-500 font-bold">
+                                                        {result.testName} Hoàn thành
+                                                    </span>
+                                                ) : (
+                                                    result.testName
+                                                )}
+                                            </td>
+
+                                            <td className="px-6 py-4">{result.attempts === 0 ? "0" : result.attempts}</td>
+                                            <td className="px-6 py-4">{result.attempts === 0 ? "0" : result.score}</td>
+                                            <td className="px-6 py-4">{result.attempts === 0 ? "0" : convertToSeconds(result.timeSpent)}</td>
                                         </tr>
                                     ))}
                                     <tr className="bg-gray-50 hover:bg-gray-100">
@@ -267,10 +304,11 @@ const Practice: React.FC = () => {
                             </table>
                         </div>
 
-
                         {/* Action Buttons */}
                         <div className="flex justify-center mt-6">
-                            {totalScore < scoreThreshold ? (
+                            {totalScore === 0 && totalTimeSpent === 0 ? (
+                                <p className="text-gray-400"></p>
+                            ) : totalScore < scoreThreshold ? (
                                 <button
                                     onClick={handleRetryRound}
                                     className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
@@ -289,32 +327,37 @@ const Practice: React.FC = () => {
                             )}
                         </div>
 
-                        {/* New User Results Table */}
                         <h3 className="text-lg font-semibold mt-4 mb-4">Kết quả hoàn thành các vòng thi</h3>
-                        <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
-                            <table className="min-w-full text-sm text-left text-gray-500">
-                                <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                                    <tr>
-                                        <th className="px-6 py-3 text-center">ID</th>
-                                        <th className="px-6 py-3 text-center">Tên Người Dùng</th>
-                                        <th className="px-6 py-3 text-center">Mức Thi</th>
-                                        <th className="px-6 py-3 text-center">Điểm Tổng</th>
-                                        <th className="px-6 py-3 text-center">Thời Gian</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="text-center">
-                                    {userResults.map((result) => (
-                                        <tr key={result.id} className="bg-white hover:bg-gray-50">
-                                            <td className="px-6 py-4">{result.id}</td>
-                                            <td className="px-6 py-4">{result.user.name}</td>
-                                            <td className="px-6 py-4">{result.practice.practiceLevel}</td>
-                                            <td className="px-6 py-4">{result.totalScore}</td>
-                                            <td className="px-6 py-4">{result.totalTime}</td>
+                        
+                            {userResults.length === 0 ? (
+                                <p className="text-left text-gray-400 mt-4">Bạn chưa tham gia bất kỳ vòng tự luyện nào</p>
+                            ) : (
+                                <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
+                                <table className="min-w-full text-sm text-left text-gray-500">
+                                    <thead className="text-xs text-gray-700 uppercase bg-gray-200">
+                                        <tr>
+                                            <th className="px-6 py-3 text-center">ID</th>
+                                            <th className="px-6 py-3 text-center">Tên Người Dùng</th>
+                                            <th className="px-6 py-3 text-center">Mức Thi</th>
+                                            <th className="px-6 py-3 text-center">Điểm Tổng</th>
+                                            <th className="px-6 py-3 text-center">Thời Gian</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody className="text-center">
+                                        {userResults.map((result) => (
+                                            <tr key={result.id} className="bg-white hover:bg-gray-50">
+                                                <td className="px-6 py-4">{result.id}</td>
+                                                <td className="px-6 py-4">{result.user.name}</td>
+                                                <td className="px-6 py-4">{result.practice.practiceLevel}</td>
+                                                <td className="px-6 py-4">{result.totalScore}</td>
+                                                <td className="px-6 py-4">{result.totalTime}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                                </div>
+                            )}
+                        
 
                     </div>
 

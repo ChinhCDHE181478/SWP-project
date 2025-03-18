@@ -24,5 +24,10 @@ public interface IUserPracticeRepository extends JpaRepository<UserPractice, Int
     @Query("SELECT MAX(p.practiceLevel) FROM UserPractice up JOIN up.practice p WHERE up.user.id = :userId")
     Optional<Integer> findMaxPracticeLevelByUserId(@Param("userId") Long userId);
 
+
     List<UserPractice> findAllByUserId(Long userId);
+
+    Optional<UserPractice> findFirstByUserId(Long userId);
+
+    List<UserPractice> findAllByUserIdAndPractice_PracticeLevel(Long userId, Integer practiceLevel);
 }

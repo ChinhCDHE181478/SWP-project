@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Time;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -67,10 +68,13 @@ public class UserPracticeController {
     @PostMapping("/user-practice/add")
     public ResponseEntity<?> addUserPractice(@RequestBody UserPracticeRequest request) {
         try {
-            UserPractice userPractices = userPracticeService.getResult(request.userId()).getFirst();
+            if (userPracticeService.getLevelResult(request.userId(), request.level()) != null) {
+            UserPractice userPractices = userPracticeService.getLevelResult(request.userId(), request.level()).getFirst();
             userPracticeService.saveUserPractice(request.userId(), request.level());
             userPracticeRespository.delete(userPractices);
-            return ResponseEntity.ok().body("Hoàn tất vòng thi thành công!");
+            return ResponseEntity.ok().body("Hoàn tất vòng thi thành công!");}
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi hoàn tất vòng thi!");
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi hoàn tất vòng thi!");
@@ -117,12 +121,22 @@ public class UserPracticeController {
     @GetMapping("/get-result/{userId}")
     public List<UserPractice> getResult(@PathVariable Long userId) {
         List<UserPractice> userPractices = userPracticeService.getResult(userId);
-        for(UserPractice userPractice : userPractices) {
-            if(userPractice.getTotalScore() == 0){
-                userPractices.remove(userPractice);
+
+        Iterator<UserPractice> iterator = userPractices.iterator();
+        while (iterator.hasNext()) {
+            UserPractice userPractice = iterator.next();
+            if (userPractice.getTotalScore() == 0) {
+                iterator.remove();
             }
         }
+
         return userPractices;
+    }
+
+    @GetMapping("/check-result/{userId}/{level}")
+    public ResponseEntity<?> checkUserResult(@PathVariable Long userId, @PathVariable Integer level) {
+        boolean hasResult = userPracticeService.checkUserResult(userId, level);
+        return ResponseEntity.ok().body(Map.of("hasResult", hasResult));
     }
 
     @GetMapping("/latest-result/{userId}")
