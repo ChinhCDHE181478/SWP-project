@@ -49,7 +49,7 @@ const ContentListTable = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [filterType, setFilterType] = useState<string>(""); 
+  const [filterType, setFilterType] = useState<string>("");
   const [filterDate, setFilterDate] = useState<string>("");
 
   const searchParams = useSearchParams();
@@ -80,16 +80,14 @@ const ContentListTable = () => {
     }
   }, [searchParams]);
 
- 
   useEffect(() => {
     fetchArticles();
   }, [fetchArticles]);
 
-  
   const handleSearch = () => {
     const params = new URLSearchParams();
 
-    params.set("page", "1"); 
+    params.set("page", "1");
     if (filterType) params.set("type", filterType);
     if (filterDate) params.set("startDate", filterDate);
 

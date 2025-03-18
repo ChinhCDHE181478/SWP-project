@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Articles } from "@/types/type";
 
 const ArticleDetailItem: React.FC<{ data: Articles }> = ({ data }) => {
+  // Định dạng ngày
   const formattedDate = new Date(data.date as string).toLocaleDateString(
     "vi-VN",
     {

@@ -39,19 +39,19 @@ export interface Schedule {
 }
 
 export interface SupportRequest {
-  id: number;                      
-  name: string;                     
-  email: string;                   
-  issueCategory: string;            
-  detail: string;                 
-  dateCreated: string;             
-  supportAnswer: string;          
-  status: "open" | "close";                          
+  id: number;
+  name: string;
+  email: string;
+  issueCategory: string;
+  detail: string;
+  dateCreated: string;
+  supportAnswer: string;
+  status: "open" | "close";
 }
 
 export interface Feedback {
-  id: number;                       
-  rating: number;                   
-  comment: string;                  
-  user_id: number;                       
+  id: number;
+  rating: number;
+  comment: string;
+  user_id: number;
 }

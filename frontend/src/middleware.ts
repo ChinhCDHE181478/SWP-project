@@ -15,8 +15,11 @@ const guestPath = [
   "/api/auth/token",
   "/support",
   "/support/account-support",
+  "/support/payment-support",
   "/articles",
   "/articles/number",
+  "/payment-status",
+  "/get-ranking",
 ];
 
 // Các route chỉ dành cho khách (người chưa đăng nhập)
@@ -28,7 +31,7 @@ const onlyGuestPath = [
 
 // Phân quyền theo role
 const rolePaths: Record<string, string[]> = {
-  USER: [
+  STUDENT: [
     "/profile",
     "/update-profile",
     "/about-us",
@@ -42,6 +45,7 @@ const rolePaths: Record<string, string[]> = {
     "/email-service/delete-email",
     "/support",
     "/support/account-support",
+    "/support/payment-support",
     "/support/send-support-request",
     "/articles",
     "/articles/number",
@@ -49,9 +53,12 @@ const rolePaths: Record<string, string[]> = {
     "/practice",
     "/mockexam",
     "/schedule",
+    "/test",
+    "/payment-status",
+    "/get-ranking",
   ],
   ADMIN: [
-    "/manager/account-manager",
+    "/management/account-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -59,15 +66,19 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
   ],
   QUIZ_MANAGER: [
-    "/manager/quiz-manager",
+    "/management/quiz-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
     "/api/auth/refresh",
     "/api/auth/token",
+    "/management/quiz-management/practice",
+    "/management/quiz-management/exam",
+    "/management/quiz-management/mock-exam",
+    "/management/quiz-management/test",
   ],
   SUPPORT_MANAGER: [
-    "/manager/support-manager",
+    "/management/support-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -75,7 +86,7 @@ const rolePaths: Record<string, string[]> = {
     "/api/auth/token",
   ],
   CONTENT_MANAGER: [
-    "/manager/content-manager",
+    "/management/content-management",
     "/access-denied",
     "/not-found",
     "/api/auth/logout",
@@ -100,10 +111,18 @@ const normalizeArticlePath = (pathname: string): string => {
   return pathname; // Giữ nguyên nếu không phải "/articles/{id}"
 };
 
+const normalizeTestPath = (pathname: string): string => {
+  if (pathname.startsWith("/test")) {
+    return "/test";
+  }
+  return pathname;
+};
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const currentPath = normalizeArticlePath(pathname);
+  let currentPath = normalizeArticlePath(pathname);
+  currentPath = normalizeTestPath(pathname);
 
   if (currentPath.startsWith("/_next/")) {
     return NextResponse.next();
@@ -111,13 +130,9 @@ export async function middleware(request: NextRequest) {
 
   if (
     currentPath.match(
-      /\.(png|jpg|jpeg|gif|svg|webp|ico|mp4|mp3|woff2?|ttf|otf|eot|json)$/
+      /\.(png|jpg|jpeg|gif|svg|webp|ico|mp4|mp3|woff2?|ttf|otf|eot|json|avif)$/
     )
   ) {
-    return NextResponse.next();
-  }
-
-  if (currentPath.match(/^\/(login|home)\/.+/)) {
     return NextResponse.next();
   }
 

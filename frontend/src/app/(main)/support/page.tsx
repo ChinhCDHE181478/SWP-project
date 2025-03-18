@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import SupportPage from "@/app/(main)/support/SupportPage";
+import SupportPage from "@/components/SupportPage";
 
 export const metadata: Metadata = {
   title: "Support",

@@ -37,8 +37,8 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   fetchData: () => void;
-  filterType: string; 
-  setFilterType: (type: string) => void; 
+  filterType: string;
+  setFilterType: (type: string) => void;
   filterDate: string;
   setFilterDate: (date: string) => void;
   onSearch: () => void;
@@ -124,7 +124,7 @@ export function ContentDataTable<TData, TValue>({
           className: "text-white bg-green-500",
         });
 
-        fetchData(); 
+        fetchData();
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
@@ -215,7 +215,6 @@ export function ContentDataTable<TData, TValue>({
                     >
                       Xóa
                     </button>
-
                     <button
                       type="button"
                       className="p-2  bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
@@ -283,7 +282,6 @@ export function ContentDataTable<TData, TValue>({
           <div className="space-y-4">
             {detailData ? (
               <>
-                
                 {detailData.imageUrl && (
                   <div className="w-full flex justify-center">
                     <Image

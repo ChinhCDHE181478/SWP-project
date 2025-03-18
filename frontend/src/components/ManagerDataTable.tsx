@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  SortingState,
+  getSortedRowModel,
   ColumnDef,
   ColumnFiltersState,
   flexRender,
@@ -42,6 +44,7 @@ export function DataTable<TData, TValue>({
   data,
   fetchData,
 }: DataTableProps<TData, TValue>) {
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -51,7 +54,10 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
     state: {
+      sorting,
       columnFilters,
     },
   });

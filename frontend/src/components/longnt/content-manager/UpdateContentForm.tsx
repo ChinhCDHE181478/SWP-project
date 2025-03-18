@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Form, FormField } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
-import { Input, Textarea} from "@nextui-org/react";
+import { Input, Textarea } from "@nextui-org/react";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { Articles } from "@/types/type";
@@ -63,7 +63,6 @@ const UpdateContentForm = ({
 
   const handleUpdateArticle = async (data: z.infer<typeof articleSchema>) => {
     try {
-      
       const response = await axios.put(
         `${apiURL}/articles/${initialData.id}`,
         data,
@@ -78,13 +77,11 @@ const UpdateContentForm = ({
         throw new Error("Lỗi khi cập nhật bài viết.");
       }
 
-      
       toast({
         title: "Bài viết đã được cập nhật!",
         className: "text-white bg-green-500",
       });
 
-      
       onSuccess(data);
       onClose();
     } catch (error) {

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Builder
 @Entity
@@ -42,4 +43,5 @@ public class SupportRequest {
 
     @Column(name = "status", columnDefinition = "NVARCHAR(MAX)")
     private String status;
+
 }

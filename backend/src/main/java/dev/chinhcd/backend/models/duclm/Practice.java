@@ -24,4 +24,7 @@ public class Practice {
     @Column
     private int grade;
 
+    @Column
+    private String status;
+
 }

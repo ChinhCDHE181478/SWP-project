@@ -18,7 +18,7 @@ export function SidebarContent() {
     <div className="flex flex-col px-5 pt-10">
       <div className="mb-10 text-xl px-2">Quản lý nội dung</div>
       {items.map((item, index) => {
-        const Icon = item.icon; 
+        const Icon = item.icon;
         return (
           <a
             key={index}

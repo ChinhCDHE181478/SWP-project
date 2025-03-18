@@ -7,18 +7,18 @@ import { Articles } from "@/types/type";
 import axios from "axios";
 
 interface Props {
-  type: string; 
+  type: string;
 }
 
 // Hàm lấy dữ liệu gợi ý bài viết theo type
 async function getSuggestedArticles(type: string): Promise<Articles[]> {
   const API_URL = `http://localhost:8080/api/v1/articles/suggestions`;
-  
-  console.log("Fetching articles with type:", type); 
+
+  console.log("Fetching articles with type:", type);
 
   const res = await axios.get(API_URL, {
     headers: { "Content-Type": "application/json" },
-    params: { type: type.toUpperCase()},
+    params: { type: type.toUpperCase() },
   });
   return res.data as Articles[];
 }
@@ -30,7 +30,7 @@ const SuggestionArticles: React.FC<Props> = ({ type }) => {
 
   const fetchArticles = useCallback(async () => {
     setLoading(true);
-    setError("");  
+    setError("");
     try {
       const data = await getSuggestedArticles(type);
       setSuggestedArticles(data);
@@ -40,11 +40,11 @@ const SuggestionArticles: React.FC<Props> = ({ type }) => {
     } finally {
       setLoading(false);
     }
-  }, [type]); 
+  }, [type]);
 
   useEffect(() => {
     if (type) {
-      fetchArticles(); 
+      fetchArticles();
     }
   }, [type, fetchArticles]);
 
@@ -82,7 +82,7 @@ const SuggestionArticles: React.FC<Props> = ({ type }) => {
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="rounded-md opacity-80 object-cover"
-                  priority={index === 0} 
+                  priority={index === 0}
                 />
               </div>
               <div className="flex justify-center mt-2">

@@ -2,48 +2,43 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import ManagerListTable from "../../../components/ManagerListTable";
-import { SidebarAdmin } from "../../../components/SidebarAdmin";
-import UserListTable from "../../../components/UserListTable";
+
 import LogoIcon from "@/components/LogoIcon";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { useAuth } from "@/app/AuthProvider";
 
+import { SidebarContent } from "@/components/longnt/content-manager/SidebarContent";
+import ContentListTable from "@/components/longnt/content-manager/ContentListTable";
+
 const validContents = [
-  "User",
-  "Quiz_Manager",
-  "Content_Manager",
-  "Support_Manager",
+  "Articles",
+  // "Schedule",
 ];
 
-const AdminPage = () => {
+const ContentManagerPage = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   const user = useCurrentUser();
   const { isLoading } = useAuth();
 
-  const content = searchParams.get("content") || "User";
+  const content = searchParams.get("content") || "Articles";
 
   useEffect(() => {
     if (!validContents.includes(content)) {
-      const newUrl = `${pathname}?content=User`;
+      const newUrl = `${pathname}?content=Articles`;
       router.replace(newUrl);
     }
   }, [content, pathname, router]);
 
   const renderContent = () => {
     switch (content) {
-      case "User":
-        return <UserListTable role={content} />;
-      case "Quiz_Manager":
-        return <ManagerListTable role={content} />;
-      case "Content_Manager":
-        return <ManagerListTable role={content} />;
-      case "Support_Manager":
-        return <ManagerListTable role={content} />;
+      case "Articles":
+        return <ContentListTable role={content} />;
+      //   case "Schedule":
+      //     return <ManagerListTable role={content} />;
       default:
-        return <UserListTable role={content} />;
+        return <ContentListTable role="Articles" />;
     }
   };
 
@@ -55,12 +50,14 @@ const AdminPage = () => {
           <div className="font-bold text-[27px]">EduTest</div>
         </div>
         <div className="flex w-[85%] p-2 pr-10 justify-end items-center border-l-2 border-gray-300/50 border-b-2 shadow-sm">
-          {!isLoading && <div className="text-[20px]">Tài khoản: {user.data?.username}</div>}
+          {!isLoading && (
+            <div className="text-[20px]">Tài khoản: {user.data?.username}</div>
+          )}
         </div>
       </div>
       <div className="flex min-h-screen">
         <div className="flex bg-[#FCB314] opacity-90 w-[15%] border-r-2 border-gray-300/50 shadow-lg">
-          <SidebarAdmin />
+          <SidebarContent />
         </div>
         <div className="px-40 w-[85%] border-l-2 border-gray-300/50 shadow-sm">
           {renderContent()}
@@ -70,4 +67,4 @@ const AdminPage = () => {
   );
 };
 
-export default AdminPage;
+export default ContentManagerPage;

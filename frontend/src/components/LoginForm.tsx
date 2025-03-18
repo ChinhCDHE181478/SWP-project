@@ -23,7 +23,7 @@ const LoginForm = () => {
   const router = useRouter();
 
   const routes: Record<string, string> = {
-    USER: "/",
+    STUDENT: "/",
     ADMIN: "/manager/account-manager",
     QUIZ_MANAGER: "/manager/quiz-manager",
     SUPPORT_MANAGER: "/manager/support-manager",
@@ -43,13 +43,13 @@ const LoginForm = () => {
       const { data: isNewUser } = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/user/is-new-user`,
         {
-          params: { username: data.username }, 
-          headers: { 
+          params: { username: data.username },
+          headers: {
             "Content-Type": "application/json",
           },
         }
       );
-      
+
       const res = await fetch("/api/auth/token");
       const { accessToken } = await res.json();
       const decoded = jwtDecode<{ scope?: string }>(accessToken);
@@ -93,9 +93,7 @@ const LoginForm = () => {
             const error = form.formState.errors?.username;
             return (
               <>
-                <label htmlFor="Username">
-                  Tài khoản
-                </label>
+                <label htmlFor="Username">Tài khoản</label>
                 <Input
                   type="text"
                   placeholder="username"
@@ -121,9 +119,7 @@ const LoginForm = () => {
             const error = form.formState.errors?.password;
             return (
               <>
-                <label htmlFor="Password">
-                  Mật khẩu
-                </label>
+                <label htmlFor="Password">Mật khẩu</label>
                 <Input
                   type="password"
                   placeholder="password"

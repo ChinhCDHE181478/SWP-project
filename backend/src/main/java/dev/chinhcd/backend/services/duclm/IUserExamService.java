@@ -6,7 +6,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IUserExamService {
-    public Optional<UserExam> getUserExamResult(Long userId, String examName);
+    Optional<UserExam> getUserExamResult(Long userId, String examName);
 
-    public List<UserExam> getUserExamList(String examName, int limit);
+    List<UserExam> getUserExamList(String examName, int limit);
+
+    Double getScore(Long uexamId, Long time);
+
+    Long addUserExam(Long userId, Long examId);
+
+    List<UserExam> searchResults(String province, Integer grade,String examName);
 }

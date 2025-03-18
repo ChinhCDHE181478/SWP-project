@@ -57,31 +57,54 @@ const UserListTable = ({ role }: { role: string }) => {
   const searchParams = useSearchParams();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const pageSize = 20;
+  const pageSize = 10;
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [totalStudents, setTotalStudents] = useState<number>(0);
   const page = parseInt(searchParams.get("page") || "1", 10);
   const username = searchParams.get("username") || "";
   const email = searchParams.get("email") || "";
-  const [searchParam, setSearchParam] = useState<string[]>([username, email]);
+  const accountType = searchParams.get("accountType") || "";
+  const sort = searchParams.get("sort") || "";
+  const [searchParam, setSearchParam] = useState<string[]>([
+    username,
+    email,
+    accountType,
+    sort,
+  ]);
 
   useEffect(() => {
-    setSearchParam([username, email]);
-  }, [username, email]);
+    setSearchParam([username, email, accountType, sort]);
+  }, []);
 
-  const updateSearchParam = (username1: string, email1: string) => {
-    setSearchParam([username1, email1]);
+  const updateSearchParam = (
+    username1: string,
+    email1: string,
+    accountType1: string,
+    sort1: string
+  ) => {
+    setSearchParam([username1, email1, accountType1, sort1]);
     const params = new URLSearchParams(searchParams.toString());
     params.set("username", username1);
     params.set("email", email1);
-    router.push(`?${params.toString()}`, { scroll: false });
+    params.set("accountType", accountType1);
+    params.set("sort", sort1);
+    router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await getUser(page, pageSize, searchParam[0], searchParam[1]);
+      const res = await getUser(
+        page,
+        pageSize,
+        searchParam[0],
+        searchParam[1],
+        searchParam[2],
+        searchParam[3]
+      );
       setUsers(res.users);
       setTotalPages(res.totalPages);
+      setTotalStudents(res.totalItems);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -102,8 +125,12 @@ const UserListTable = ({ role }: { role: string }) => {
 
   return (
     <div className="py-10">
+      <div className="flex">
+        <p>Tổng số lượng tài khoản Student: {totalStudents}</p>
+      </div>
+
       <div className="my-5">
-        {role === "User" && (
+        {role === "Student" && (
           <AddUserForm role={role} onSuccess={() => fetchUsers()} />
         )}
       </div>

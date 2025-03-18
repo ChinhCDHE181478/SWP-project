@@ -61,8 +61,8 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (file) {
-      form.setValue("imageFile", file); 
-      const imageUrl = URL.createObjectURL(file); 
+      form.setValue("imageFile", file);
+      const imageUrl = URL.createObjectURL(file);
       setPreviewImage(imageUrl);
     }
   };
@@ -214,7 +214,6 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
                   <div>
                     <Label htmlFor="imageFile">Chọn hình ảnh</Label>
                     <div className="items-center grid grid-cols-4 mb-4">
-                      
                       <div className="h-full flex items-start">
                         <label
                           htmlFor="imageFile"
@@ -224,7 +223,6 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
                         </label>
                       </div>
 
-                     
                       <div className="col-span-3 flex-grow min-w-[150px] border border-gray-400 px-3 py-1 rounded-md text-gray-600">
                         {previewImage
                           ? previewImage

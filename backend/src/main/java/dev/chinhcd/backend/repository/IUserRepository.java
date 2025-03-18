@@ -1,5 +1,6 @@
 package dev.chinhcd.backend.repository;
 
+import dev.chinhcd.backend.enums.AccountType;
 import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,7 +25,10 @@ public interface IUserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.role = :role " +
             "AND (:username IS NULL OR u.username LIKE %:username%) " +
-            "AND (:email IS NULL OR u.email LIKE %:email%)")
-    Page<User> getUsersByRole(Role role, Pageable pageable, String username, String email);
+            "AND (:email IS NULL OR u.email LIKE %:email%)" +
+            "AND (:accountType IS NULL OR u.accountType = :accountType)")
+    Page<User> getUsersByRole(Role role, Pageable pageable, String username, String email, AccountType accountType);
+
+    Long countByRole(Role role);
 
 }
