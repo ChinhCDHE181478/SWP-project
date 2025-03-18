@@ -20,6 +20,7 @@ const guestPath = [
   "/articles/number",
   "/payment-status",
   "/get-ranking",
+  "/schedule"
 ];
 
 // Các route chỉ dành cho khách (người chưa đăng nhập)

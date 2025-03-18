@@ -26,6 +26,7 @@ public class SupportService implements ISupportService {
     public Boolean sendSupportRequest(SupportRequestRequest request) {
         User user = userService.getUserByUsername(request.username());
         SupportRequest sr = new SupportRequest();
+        sr.setStatus("close");
         sr.setUser(user);
         sr.setName(request.name());
         sr.setEmail(request.email());

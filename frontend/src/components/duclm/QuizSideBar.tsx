@@ -6,22 +6,22 @@ import { BarChart, FileText, FileSpreadsheet, LogOut, BookOpenCheck, ScrollText 
 const quizItems = [
   {
     title: "Trang chủ",
-    url: "/manager/quiz-manager",
+    url: "/management/quiz-management",
     icon: BarChart,
   },
   {
     title: "Tự luyện",
-    url: "/manager/quiz-manager/practice",
+    url: "/management/quiz-management/practice",
     icon: ScrollText,
   },
   {
     title: "Thi thử",
-    url: "/manager/quiz-manager/mock-exam",
+    url: "/management/quiz-management/mock-exam",
     icon: BookOpenCheck,
   },
   {
     title: "Thi Chính Thức",
-    url: "/manager/quiz-manager/exam",
+    url: "/management/quiz-management/exam",
     icon: BookOpenCheck,
   },
 ];

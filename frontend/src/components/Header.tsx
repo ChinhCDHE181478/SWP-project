@@ -84,7 +84,7 @@ const Header = () => {
                 <Link href={"/articles?type=tips&page=1"}>English Tips</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Link href={"/"}>Lịch thi</Link>
+                <Link href={"/schedule"}>Lịch thi</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

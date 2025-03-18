@@ -62,7 +62,9 @@ const FeedbackListTable = () => {
       console.log(res);
 
       setFeedbacks(res.userFeedbackResponses);
-      setAverageScore(res.averageScore);
+      if (averageScore === 0 || (filterRating === "")) {
+        setAverageScore(res.averageScore);
+      }
       setTotalPages(res.totalPages);
     } catch (error) {
       console.error("Error fetching feedbacks:", error);
@@ -71,7 +73,6 @@ const FeedbackListTable = () => {
     }
   }, [searchParams]);
 
- 
   useEffect(() => {
     fetchFeedbacks();
   }, [fetchFeedbacks]);
@@ -82,14 +83,14 @@ const FeedbackListTable = () => {
     params.set("page", "1");
 
     if (filterUserName) {
-      params.set("username", filterUserName); 
+      params.set("username", filterUserName);
     } else {
-      params.delete("username"); 
+      params.delete("username");
     }
-    if (filterRating && filterRating !== 'All★') {
+    if (filterRating && filterRating !== "All★") {
       params.set("rating", filterRating);
     } else {
-      params.delete("rating");  
+      params.delete("rating");
     }
 
     router.push(`?${params.toString()}`, { scroll: false });
@@ -100,6 +101,11 @@ const FeedbackListTable = () => {
       {isLoading && <div>Loading...</div>}
       {!isLoading && (
         <>
+          <div className="">
+            <span className="font-bold text-xl">Average Rating: </span>
+            <span>{averageScore.toFixed(2)}/5</span>
+          </div>
+
           <FeedbackDataTable
             columns={feedbackColumns}
             data={feedbacks}
@@ -109,7 +115,6 @@ const FeedbackListTable = () => {
             filterRating={filterRating}
             setFilterRating={setFilterRating}
             onSearch={handleSearch}
-            averageScore={averageScore} 
           />
 
           <Pagination

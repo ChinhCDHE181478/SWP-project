@@ -149,7 +149,6 @@ const Exam: React.FC = () => {
 
       console.log("User List: ", userList);
       console.log("Current User ID: ", userId);
-
       // Kiểm tra nếu user không nằm trong danh sách đủ điều kiện
       if (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

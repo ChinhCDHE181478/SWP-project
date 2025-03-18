@@ -151,7 +151,6 @@ export function ContentDataTable<TData, TValue>({
           value={filterType}
           onChange={(event) => {
             setFilterType(event.target.value);
-            fetchData();
           }}
           className="w-[200px] max-w-sm border border-gray-300 rounded-sm"
         >
