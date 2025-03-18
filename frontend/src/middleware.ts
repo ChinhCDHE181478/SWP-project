@@ -47,7 +47,8 @@ const rolePaths: Record<string, string[]> = {
     "/articles/number",
     "/exam",
     "/practice",
-    "/mockexam"
+    "/mockexam",
+    "/schedule",
   ],
   ADMIN: [
     "/manager/account-manager",

@@ -24,5 +24,4 @@ public class Practice {
     @Column
     private int grade;
 
-
 }

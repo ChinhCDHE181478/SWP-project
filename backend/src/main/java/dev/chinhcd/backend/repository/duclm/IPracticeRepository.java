@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +15,7 @@ public interface IPracticeRepository extends JpaRepository<Practice, Long>  {
     Optional<Integer> findMaxLevel();
 
     Optional<Practice> findByPracticeLevelAndGrade(int practiceLevel, int grade);
+
+    @Query("SELECT p FROM Practice p WHERE p.practiceLevel = :level ORDER BY p.practiceDate ASC")
+    List<Practice> getPracticeByLevel(int level);
 }

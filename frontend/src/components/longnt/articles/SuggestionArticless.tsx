@@ -1,20 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Articles } from "@/types/type";
 import axios from "axios";
 
 interface Props {
-  type: string; // news hoặc tips
+  type: string; 
 }
 
 // Hàm lấy dữ liệu gợi ý bài viết theo type
 async function getSuggestedArticles(type: string): Promise<Articles[]> {
   const API_URL = `http://localhost:8080/api/v1/articles/suggestions`;
+  
+  console.log("Fetching articles with type:", type); 
+
   const res = await axios.get(API_URL, {
     headers: { "Content-Type": "application/json" },
-    params: { type: type.toUpperCase() },
+    params: { type: type.toUpperCase()},
   });
   return res.data as Articles[];
 }
@@ -24,22 +28,25 @@ const SuggestionArticles: React.FC<Props> = ({ type }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  const fetchArticles = async () => {
+  const fetchArticles = useCallback(async () => {
     setLoading(true);
+    setError("");  
     try {
       const data = await getSuggestedArticles(type);
       setSuggestedArticles(data);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error fetching suggested articles:", err);
-      setError(err.message);
+      setError("Error fetching articles.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [type]); 
+
   useEffect(() => {
-    fetchArticles();
-  }, [type]);
+    if (type) {
+      fetchArticles(); 
+    }
+  }, [type, fetchArticles]);
 
   if (loading || error) {
     return (
@@ -75,7 +82,7 @@ const SuggestionArticles: React.FC<Props> = ({ type }) => {
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="rounded-md opacity-80 object-cover"
-                  priority={index === 0} // chỉ ưu tiên ảnh đầu tiên
+                  priority={index === 0} 
                 />
               </div>
               <div className="flex justify-center mt-2">

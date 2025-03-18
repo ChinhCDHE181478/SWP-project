@@ -1,12 +1,12 @@
 package dev.chinhcd.backend.dtos.response.longnt;
 
-import dev.chinhcd.backend.models.longnt.Schedule;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import dev.chinhcd.backend.models.duclm.Exam;
+import dev.chinhcd.backend.models.duclm.Practice;
+
 import java.util.List;
 
-@Data
-@AllArgsConstructor
-public class ScheduleResponse {
-    private List<Schedule> schedule;
+public record ScheduleResponse(
+        List<Practice> practices,
+        List<Exam> exams
+) {
 }

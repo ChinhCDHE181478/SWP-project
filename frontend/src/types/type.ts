@@ -23,7 +23,7 @@ export interface LoginResponse {
 }
 
 export interface Articles {
-  id: number;
+  id?: number;
   date?: string;
   title: string;
   content: string;
@@ -36,4 +36,22 @@ export interface Schedule {
   id: number;
   roundName: string;
   examDate: string;
+}
+
+export interface SupportRequest {
+  id: number;                      
+  name: string;                     
+  email: string;                   
+  issueCategory: string;            
+  detail: string;                 
+  dateCreated: string;             
+  supportAnswer: string;          
+  status: "open" | "close";                          
+}
+
+export interface Feedback {
+  id: number;                       
+  rating: number;                   
+  comment: string;                  
+  user_id: number;                       
 }
