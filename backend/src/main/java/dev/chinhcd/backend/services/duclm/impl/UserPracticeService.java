@@ -57,7 +57,7 @@ public class UserPracticeService implements IUserPracticeService {
         List<TestResult> results = new ArrayList<>();
 
         for (SmallPractice smallPractice : smallPractices) {
-            TestResult testResult = testResultRepository.findTestResultBySmallPractice_SmallPracticeId(smallPractice.getSmallPracticeId());
+            TestResult testResult = testResultRepository.findTestResultBySmallPractice_SmallPracticeIdAndUserId(smallPractice.getSmallPracticeId(), userId);
             results.add(testResult);
         }
 
@@ -103,6 +103,36 @@ public class UserPracticeService implements IUserPracticeService {
             userPractice.setUser(user);
         }
         return userPractices;
+    }
+
+    @Override
+    public List<UserPractice> getLevelResult(Long userId, Integer practiceLevel) {
+        List<UserPractice> userPractices = userPracticeRepository.findAllByUserIdAndPractice_PracticeLevel(userId, practiceLevel);
+        for(UserPractice userPractice : userPractices) {
+            User user = new User();
+            user.setId(userPractice.getUser().getId());
+            user.setGrade(userPractice.getUser().getGrade());
+            user.setName(userPractice.getUser().getName());
+            userPractice.setUser(user);
+        }
+        return userPractices;
+    }
+
+    @Override
+    public boolean checkUserResult(Long userId, Integer level) {
+        UserPractice userPractice = userPracticeRepository.findAllByUserIdAndPractice_PracticeLevel(userId, level).get(0);
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        if(userPractice.getTotalScore() != 0 && level < practiceRepository.findMaxLevel().get()){
+            UserPractice userPractice1 = new UserPractice();
+            userPractice1.setUser(user);
+            Practice practice = practiceRepository.findByPracticeLevelAndGrade(level+1, user.getGrade()).get();
+            userPractice1.setPractice(practice);
+            userPractice1.setTotalTime(Time.valueOf(LocalTime.of(0, 0, 0)));
+            userPractice1.setTotalScore(0);
+            userPracticeRepository.save(userPractice1);
+            return true;
+        }
+        return false;
     }
 
     public Integer getMaxPracticeLevelByUserId(Long userId) {

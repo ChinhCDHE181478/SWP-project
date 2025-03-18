@@ -8,4 +8,7 @@ public interface IUserPracticeService {
     Integer getPracticeInfoByUserId(Long id);
     void saveUserPractice(Long userId, Integer practiceLevel);
     List<UserPractice> getResult(Long userId);
+    List<UserPractice> getLevelResult(Long userId, Integer practiceLevel);
+
+    boolean checkUserResult(Long userId, Integer level);
 }
