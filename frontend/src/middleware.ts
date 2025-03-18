@@ -20,6 +20,7 @@ const guestPath = [
   "/articles/number",
   "/payment-status",
   "/get-ranking",
+  "/schedule"
 ];
 
 // Các route chỉ dành cho khách (người chưa đăng nhập)
@@ -52,6 +53,7 @@ const rolePaths: Record<string, string[]> = {
     "/exam",
     "/practice",
     "/mockexam",
+    "/schedule",
     "/test",
     "/payment-status",
     "/get-ranking",
@@ -74,7 +76,7 @@ const rolePaths: Record<string, string[]> = {
     "/management/quiz-management/practice",
     "/management/quiz-management/exam",
     "/management/quiz-management/mock-exam",
-    "/management/quiz-management/test"
+    "/management/quiz-management/test",
   ],
   SUPPORT_MANAGER: [
     "/management/support-management",
@@ -113,10 +115,9 @@ const normalizeArticlePath = (pathname: string): string => {
 const normalizeTestPath = (pathname: string): string => {
   if (pathname.startsWith("/test")) {
     return "/test";
-}
+  }
   return pathname;
 };
-
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

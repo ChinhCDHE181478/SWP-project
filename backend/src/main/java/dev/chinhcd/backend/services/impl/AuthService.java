@@ -8,6 +8,7 @@ import dev.chinhcd.backend.dtos.response.LoginResponse;
 import dev.chinhcd.backend.dtos.response.RefreshTokenResponse;
 import dev.chinhcd.backend.dtos.response.RegisterResponse;
 import dev.chinhcd.backend.enums.ErrorCode;
+import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.exception.ServiceException;
 import dev.chinhcd.backend.repository.IUserRepository;
 import dev.chinhcd.backend.services.IAuthService;

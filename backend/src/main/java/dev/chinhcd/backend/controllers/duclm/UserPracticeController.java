@@ -8,6 +8,8 @@ import dev.chinhcd.backend.models.duclm.UserPractice;
 import dev.chinhcd.backend.repository.IUserRepository;
 import dev.chinhcd.backend.repository.duclm.IPracticeRepository;
 import dev.chinhcd.backend.repository.duclm.IUserPracticeRepository;
+import dev.chinhcd.backend.services.duclm.impl.UserPracticeService;
+import lombok.RequiredArgsConstructor;
 import dev.chinhcd.backend.services.duclm.IPracticeService;
 import dev.chinhcd.backend.services.duclm.ITestResultService;
 import dev.chinhcd.backend.services.duclm.impl.UserPracticeService;
@@ -48,7 +50,6 @@ public class UserPracticeController {
             userPractice.setTotalScore(0);
             userPractice.setTotalTime(Time.valueOf("00:00:00"));
             userPracticeRespository.save(userPractice);
-
             // Gọi lại chính API này để lấy level lớn nhất sau khi tạo
             return getPracticeInfo(id);
         }

@@ -20,7 +20,7 @@ export async function getUser(
       username: username,
       email: email,
       accountType: accountType,
-      sort: sort
+      sort: sort,
     },
   });
   const data = await res.data;

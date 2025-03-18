@@ -26,4 +26,5 @@ public interface IUserMockExamRepository extends JpaRepository<UserMockExam, Lon
 
     @Query("select ume from UserMockExam ume where ume.user.id=:userId and ume.mockExam.mockExamId=:mockExamId")
     List<UserMockExam> findUserMockExamByUserIdAndExamId(Long userId, Long examId);
+
 }

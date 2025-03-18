@@ -3,6 +3,7 @@ package dev.chinhcd.backend.controllers;
 import dev.chinhcd.backend.dtos.request.*;
 import dev.chinhcd.backend.dtos.response.PaginateUserResponse;
 import dev.chinhcd.backend.dtos.response.UserResponse;
+import dev.chinhcd.backend.dtos.response.longnt.PaginateArticlesResponse;
 import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.services.IUserService;
 import lombok.RequiredArgsConstructor;

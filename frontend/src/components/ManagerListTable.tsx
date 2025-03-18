@@ -60,7 +60,9 @@ const ManagerListTable = ({ role }: { role: string }) => {
   return (
     <div className="py-10">
       <div className="flex">
-        <p>Tổng số lượng tài khoản {role}: {totalManagers}</p>
+        <p>
+          Tổng số lượng tài khoản {role}: {totalManagers}
+        </p>
       </div>
 
       <div className="my-5">

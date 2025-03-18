@@ -6,23 +6,28 @@ import { User, FileText, HelpCircle, LifeBuoy, LogOut } from "lucide-react";
 const items = [
   {
     title: "Student",
-    url: "/manager/account-manager?content=Student",
+    url: "/management/account-management?content=Student",
     icon: User,
   },
   {
     title: "Content manager",
-    url: "/manager/account-manager?content=Content_Manager",
+    url: "/management/account-management?content=Content_Manager",
     icon: FileText,
   },
   {
     title: "Quiz manager",
-    url: "/manager/account-manager?content=Quiz_Manager",
+    url: "/management/account-management?content=Quiz_Manager",
     icon: LifeBuoy,
   },
   {
     title: "Support manager",
-    url: "/manager/account-manager?content=Support_Manager",
+    url: "/management/account-management?content=Support_Manager",
     icon: HelpCircle,
+  },
+  {
+    title: "Feedback",
+    url: "/management/account-management?content=Feedback",
+    icon: LifeBuoy,
   },
 ];
 

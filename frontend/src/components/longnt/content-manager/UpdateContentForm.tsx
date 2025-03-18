@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { z } from "zod";
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -13,10 +13,16 @@ import {
 } from "@/components/ui/dialog";
 import { Form, FormField } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
-import { Input, Textarea, Select, SelectItem } from "@nextui-org/react";
+import { Input, Textarea } from "@nextui-org/react";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { Articles } from "@/types/type";
+import dynamic from "next/dynamic";
+
+const Editor = dynamic(
+  () => import("@tinymce/tinymce-react").then((mod) => mod.Editor),
+  { ssr: false }
+);
 
 // Schema kiểm tra dữ liệu nhập vào
 const articleSchema = z.object({
@@ -57,7 +63,6 @@ const UpdateContentForm = ({
 
   const handleUpdateArticle = async (data: z.infer<typeof articleSchema>) => {
     try {
-      // Gửi yêu cầu PUT với ID bài viết
       const response = await axios.put(
         `${apiURL}/articles/${initialData.id}`,
         data,
@@ -72,13 +77,11 @@ const UpdateContentForm = ({
         throw new Error("Lỗi khi cập nhật bài viết.");
       }
 
-      // Hiển thị thông báo thành công nếu phản hồi thành công
       toast({
         title: "Bài viết đã được cập nhật!",
         className: "text-white bg-green-500",
       });
 
-      // Gọi callback để làm mới danh sách hoặc cập nhật trạng thái
       onSuccess(data);
       onClose();
     } catch (error) {
@@ -91,7 +94,7 @@ const UpdateContentForm = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] z-[999] bg-white">
+      <DialogContent className="sm:max-w-[600px] z-[999] bg-white max-h-[80vh] overflow-y-auto">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleUpdateArticle)}>
             <DialogHeader>
@@ -124,10 +127,23 @@ const UpdateContentForm = ({
                 render={({ field, fieldState }) => (
                   <div>
                     <Label htmlFor="content">Nội dung</Label>
-                    <Textarea
-                      {...field}
-                      placeholder="Nhập nội dung bài viết"
-                      maxLength={5000}
+                    <Editor
+                      apiKey="ce3avywx69xjyfijnj2tt0t5vuf56s6wfxwfjw9oa48c8pvz"
+                      value={field.value}
+                      onEditorChange={(content) => {
+                        field.onChange(content);
+                      }}
+                      init={{
+                        height: 400,
+                        menubar: true,
+                        plugins:
+                          "advlist autolink lists link image charmap code fullscreen media",
+                        toolbar:
+                          "undo redo | bold italic | bullist numlist | link image",
+                        content_style:
+                          "body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 14px; }",
+                        branding: false,
+                      }}
                     />
                     {fieldState.error && (
                       <span className="text-red-500 text-sm">

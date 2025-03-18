@@ -1,13 +1,13 @@
 "use client";
 
 import { useAuth } from "@/app/AuthProvider";
-import { User, FileText, HelpCircle, LifeBuoy, LogOut } from "lucide-react";
+import { LifeBuoy, LogOut } from "lucide-react";
 
 const items = [
   {
     title: "Articles",
     url: "/content-manager?content=Articles",
-    icon: FileText,
+    icon: LifeBuoy,
   },
 ];
 
@@ -18,7 +18,7 @@ export function SidebarContent() {
     <div className="flex flex-col px-5 pt-10">
       <div className="mb-10 text-xl px-2">Quản lý nội dung</div>
       {items.map((item, index) => {
-        const Icon = item.icon; // Lấy icon từ item
+        const Icon = item.icon;
         return (
           <a
             key={index}

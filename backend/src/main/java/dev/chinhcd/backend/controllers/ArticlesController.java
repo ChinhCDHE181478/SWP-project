@@ -1,16 +1,24 @@
 package dev.chinhcd.backend.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.chinhcd.backend.dtos.request.longnt.AddArticleDTO;
 import dev.chinhcd.backend.dtos.request.longnt.UpdateArticleRequest;
 import dev.chinhcd.backend.dtos.response.longnt.PaginateArticlesResponse;
 import dev.chinhcd.backend.enums.ArticlesType;
 import dev.chinhcd.backend.models.Articles;
 import dev.chinhcd.backend.services.IArticlesService;
+import dev.chinhcd.backend.services.longnt.ICloudinaryService;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -21,6 +29,7 @@ import java.util.List;
 public class ArticlesController {
 
     private final IArticlesService articlesService;
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Articles> getArticleById(@PathVariable Long id) {
@@ -69,9 +78,22 @@ public class ArticlesController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping
-    public ResponseEntity<Articles> addArticle(@RequestBody AddArticleDTO addArticleDTO) {
-        Articles savedArticle = articlesService.addArticle(addArticleDTO);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Articles> addArticle(
+            @RequestParam("article") String articleJson,
+            @RequestPart(value = "imageFile", required = false) MultipartFile imageFile) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        AddArticleDTO articleDTO;
+        try {
+            articleDTO = objectMapper.readValue(articleJson, AddArticleDTO.class);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
+        articleDTO.setImageFile(imageFile);
+
+        Articles savedArticle = articlesService.addArticle(articleDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedArticle);
     }
 

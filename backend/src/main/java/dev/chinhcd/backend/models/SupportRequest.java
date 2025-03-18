@@ -24,11 +24,12 @@ public class SupportRequest {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String name;
 
     private String email;
 
-    @Column(name = "issue-category")
+    @Column(name = "issue-category", columnDefinition = "NVARCHAR(MAX)")
     private String issueCategory;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
@@ -39,5 +40,8 @@ public class SupportRequest {
 
     @Column(name = "support_answer", columnDefinition = "NVARCHAR(MAX)")
     private String supportAnswer;
+
+    @Column(name = "status", columnDefinition = "NVARCHAR(MAX)")
+    private String status;
 
 }

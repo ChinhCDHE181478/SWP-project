@@ -1,5 +1,11 @@
 package dev.chinhcd.backend.controllers.duclm;
 
+import dev.chinhcd.backend.services.duclm.IPracticeService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import dev.chinhcd.backend.dtos.response.duclm.PracticeDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.SmallPracticeDetailResponse;
