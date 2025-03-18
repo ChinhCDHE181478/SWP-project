@@ -24,10 +24,10 @@ const LoginForm = () => {
 
   const routes: Record<string, string> = {
     STUDENT: "/",
-    ADMIN: "/manager/account-manager",
-    QUIZ_MANAGER: "/manager/quiz-manager",
-    SUPPORT_MANAGER: "/manager/support-manager",
-    CONTENT_MANAGER: "/manager/content-manager",
+    ADMIN: "/management/account-management",
+    QUIZ_MANAGER: "/management/quiz-management",
+    SUPPORT_MANAGER: "/management/support-management",
+    CONTENT_MANAGER: "/management/content-management",
   };
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {

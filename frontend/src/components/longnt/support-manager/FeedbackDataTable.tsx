@@ -30,7 +30,6 @@ interface DataTableProps<TData, TValue> {
   filterRating: string;
   setFilterRating: (rating: string) => void;
   onSearch: () => void;
-  averageScore: number;
 }
 
 export function FeedbackDataTable<TData, TValue>({
@@ -41,8 +40,7 @@ export function FeedbackDataTable<TData, TValue>({
   setFilterUserName,
   filterRating,
   setFilterRating,
-  onSearch,
-  averageScore,
+  onSearch
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
@@ -55,12 +53,7 @@ export function FeedbackDataTable<TData, TValue>({
   });
 
   return (
-    <div className="py-10">
-      {/* Hiển thị Average Rating ở trên ô nhập tên tài khoản */}
-      <div className="mb-4">
-        <span className="font-bold text-xl">Average Rating: </span>
-        <span>{averageScore}</span>
-      </div>
+    <div className="">
 
       {/* Bộ lọc */}
       <div className="w-full flex justify-start my-5 gap-4">
@@ -76,7 +69,6 @@ export function FeedbackDataTable<TData, TValue>({
           value={filterRating}
           onChange={(event) => {
             setFilterRating(event.target.value);
-            fetchData();
           }}
           className="w-[200px] max-w-sm border border-gray-300 rounded-sm"
         >

@@ -163,7 +163,7 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
           value={filterStatus}
           onChange={(event) => {
             setFilterStatus(event.target.value);
-            fetchData();
+            
           }}
           className="w-[200px] max-w-sm border border-gray-300 rounded-sm"
         >
@@ -176,7 +176,7 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
           value={filterIssueCategory}
           onChange={(event) => {
             setFilterIssueCategory(event.target.value);
-            fetchData();
+            
           }}
           className="w-[200px] max-w-sm border border-gray-300 rounded-sm"
         >

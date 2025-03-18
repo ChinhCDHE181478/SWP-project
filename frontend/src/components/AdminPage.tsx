@@ -2,18 +2,20 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import ManagerListTable from "../../../components/ManagerListTable";
-import { SidebarAdmin } from "../../../components/SidebarAdmin";
-import UserListTable from "../../../components/UserListTable";
+import ManagerListTable from "./ManagerListTable";
+import UserListTable from "./UserListTable";
 import LogoIcon from "@/components/LogoIcon";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { useAuth } from "@/app/AuthProvider";
+import { SidebarAdmin } from './SidebarAdmin';
+import FeedbackListTable from "./longnt/support-manager/FeedbackListTable";
 
 const validContents = [
   "Student",
   "Quiz_Manager",
   "Content_Manager",
   "Support_Manager",
+  "Feedback"
 ];
 
 const AdminPage = () => {
@@ -42,6 +44,8 @@ const AdminPage = () => {
         return <ManagerListTable role={content} />;
       case "Support_Manager":
         return <ManagerListTable role={content} />;
+      case "Feedback":
+        return <FeedbackListTable />
       default:
         return <UserListTable role={content} />;
     }
