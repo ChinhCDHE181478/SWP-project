@@ -50,7 +50,7 @@ public class ExamController {
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
     private final IExamQuestionRepository examQuestionRepository;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams";
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\exams\\";
 
     @GetMapping("/next")
     public ResponseEntity<?> getNextExam() {

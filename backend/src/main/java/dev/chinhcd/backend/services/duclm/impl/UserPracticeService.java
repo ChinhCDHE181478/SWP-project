@@ -135,6 +135,11 @@ public class UserPracticeService implements IUserPracticeService {
         return false;
     }
 
+    @Override
+    public List<UserPractice> getByPractice(Practice practice) {
+        return userPracticeRepository.findByPractice(practice);
+    }
+
     public Integer getMaxPracticeLevelByUserId(Long userId) {
         return userPracticeRepository.findMaxPracticeLevelByUserId(userId)
                 .orElse(null); // Nếu không có thì trả về null

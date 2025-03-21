@@ -1,6 +1,7 @@
 package dev.chinhcd.backend.repository.duclm;
 
 import dev.chinhcd.backend.dtos.response.duclm.PracticeLevelReportResponse;
+import dev.chinhcd.backend.models.duclm.Practice;
 import dev.chinhcd.backend.models.duclm.UserPractice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -30,4 +31,6 @@ public interface IUserPracticeRepository extends JpaRepository<UserPractice, Int
     Optional<UserPractice> findFirstByUserId(Long userId);
 
     List<UserPractice> findAllByUserIdAndPractice_PracticeLevel(Long userId, Integer practiceLevel);
+
+    List<UserPractice> findByPractice(Practice practice);
 }

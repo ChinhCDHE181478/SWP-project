@@ -1,6 +1,7 @@
 package dev.chinhcd.backend.controllers.duclm;
 
 import dev.chinhcd.backend.services.duclm.IPracticeService;
+import dev.chinhcd.backend.services.duclm.impl.UserPracticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,7 +51,8 @@ public class PracticeController {
     private final ISmallPracticeRepository smallPracticeRepository;
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\exams";
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\practices\\";
+    private final UserPracticeService userPracticeService;
 
     @GetMapping("/max-level")
     public ResponseEntity<Integer> getMaxLevel() {
@@ -149,7 +151,7 @@ public class PracticeController {
         }
 
         // Kiểm tra xem Practice đã tồn tại chưa
-        if (practiceRepository.findByPracticeLevelAndGrade(practiceLevel, grade).isPresent()) {
+        if (practiceRepository.findByPracticeLevelAndGrade(practiceLevel, grade).isPresent() && practiceRepository.findByPracticeLevelAndGrade(practiceLevel, grade).get().getStatus() == "on") {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Dữ liệu đã tồn tại trong hệ thống");
         }
 
@@ -260,10 +262,12 @@ public class PracticeController {
     public ResponseEntity<String> deletePractice(@PathVariable Long practiceId) {
         try {
             Optional<Practice> practiceOptional = practiceRepository.findById(practiceId);
+            List<UserPractice> userPractices = userPracticeService.getByPractice(practiceOptional.get());
+
             if (practiceOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy bài thực hành!");
             }
-
+            if(userPractices.isEmpty()){
             Practice practice = practiceOptional.get();
 
             List<Question> questionsToDelete = questionRepository.findByPracticeId(practiceId);
@@ -277,6 +281,14 @@ public class PracticeController {
             practiceRepository.delete(practice);
 
             return ResponseEntity.ok("Xóa thành công bài thực hành và tất cả dữ liệu liên quan!");
+            }
+            else{
+                Practice practice = practiceOptional.get();
+                practice.setStatus("off");
+                practiceRepository.save(practice);
+            }
+            return ResponseEntity.ok("Đã tắt bài thực hành!");
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
