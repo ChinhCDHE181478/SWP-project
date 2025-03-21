@@ -3,6 +3,8 @@ import SideBarProfile from "@/components/SideBarProfile";
 import UserInformationProfile from "@/components/UserInformationProfile";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import PurchaseHistory from "./PurchaseHistory";
+import Achievements from "./Achievements";
 
 const ProfilePageContent = () => {
   const searchParams = useSearchParams();
@@ -22,7 +24,9 @@ const ProfilePageContent = () => {
       case "UserInfo":
         return <UserInformationProfile user={user} />;
       case "Achievements":
+        return <Achievements />;
       case "PurchaseHistory":
+        return <PurchaseHistory user={user} />;
       default:
         return <UserInformationProfile user={user} />;
     }
@@ -34,7 +38,7 @@ const ProfilePageContent = () => {
         <SideBarProfile user={user} setContent={setContent} />
       </div>
 
-      <div className="ml-[5%] p-7 bg-white border rounded-lg shadow-lg w-[75%]">
+      <div className="ml-[5%] bg-white w-[75%]">
         {renderContent()}
       </div>
     </div>

@@ -4,7 +4,7 @@ import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const SideBarProfile = ({ user, setContent }: any) => {
   return (
-    <div className="flex flex-col pb-10 items-center w-full shadow-lg bg-[#F8AD2D] border rounded-lg">
+    <div className="flex flex-col pb-10 items-center w-full shadow-lg bg-[#F8AD2D] border rounded-sm">
       <div>
         <LogoIcon />
       </div>
