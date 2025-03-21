@@ -1,8 +1,12 @@
 package dev.chinhcd.backend.services.duclm;
 
 import dev.chinhcd.backend.models.duclm.Practice;
+import dev.chinhcd.backend.dtos.response.UserExamResponse;
+import dev.chinhcd.backend.dtos.response.UserPracticeResponse;
+
 import dev.chinhcd.backend.models.duclm.UserPractice;
 
+import java.sql.Time;
 import java.util.List;
 
 public interface IUserPracticeService {
@@ -13,5 +17,7 @@ public interface IUserPracticeService {
 
     boolean checkUserResult(Long userId, Integer level);
 
+
     List<UserPractice> getByPractice(Practice practice);
+
 }

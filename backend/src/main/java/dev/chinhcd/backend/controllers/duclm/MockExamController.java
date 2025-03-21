@@ -1,6 +1,7 @@
 package dev.chinhcd.backend.controllers.duclm;
 
 import dev.chinhcd.backend.dtos.response.QuestionsResponse;
+import dev.chinhcd.backend.dtos.response.UserResponse;
 import dev.chinhcd.backend.dtos.response.duclm.MockExamDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
 import dev.chinhcd.backend.enums.AccountType;
@@ -489,8 +490,8 @@ public class MockExamController {
     }
 
     @GetMapping("/allow-do-exam")
-    public ResponseEntity<Boolean> doExam(@RequestParam Long userId) {
-        User user = userService.getUserById(userId);
+    public ResponseEntity<Boolean> doExam() {
+        User user = userService.getCurrentUser();
         if (user.getAccountType().equals(AccountType.FREE_COURSE)) {
             return ResponseEntity.ok(false);
         } else if (user.getAccountType().equals(AccountType.COMBO_COURSE)) {
@@ -498,7 +499,7 @@ public class MockExamController {
         }
 
         int month = LocalDate.now().getMonthValue();
-        if (userMockExamRepository.findByMonthAndUserId(month, userId).size() < 5) {
+        if (userMockExamRepository.findByMonthAndUserId(month, user.getId()).size() < 5) {
             return ResponseEntity.ok(true);
         }
 

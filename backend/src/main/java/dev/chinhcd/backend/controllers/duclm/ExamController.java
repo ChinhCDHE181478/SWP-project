@@ -3,14 +3,14 @@ package dev.chinhcd.backend.controllers.duclm;
 import dev.chinhcd.backend.dtos.response.QuestionsResponse;
 import dev.chinhcd.backend.dtos.response.duclm.ExamDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
+import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.Answer;
 import dev.chinhcd.backend.models.duclm.Exam;
 import dev.chinhcd.backend.models.duclm.ExamQuestion;
 import dev.chinhcd.backend.models.duclm.Question;
-import dev.chinhcd.backend.repository.duclm.IAnswerRepository;
-import dev.chinhcd.backend.repository.duclm.IExamQuestionRepository;
-import dev.chinhcd.backend.repository.duclm.IExamRepository;
-import dev.chinhcd.backend.repository.duclm.IQuestionRepository;
+import dev.chinhcd.backend.repository.duclm.*;
+import dev.chinhcd.backend.services.IUserService;
+import dev.chinhcd.backend.services.duclm.impl.UserExamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -45,12 +45,16 @@ import java.util.zip.ZipInputStream;
 @RequiredArgsConstructor
 public class ExamController {
 
-    private final IExamRepository iExamRepository;
+    private final IUserExamRepository userExamRepository;
+    private final IUserService userService;
     private final IExamRepository examRepository;
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
     private final IExamQuestionRepository examQuestionRepository;
+
     private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\exams\\";
+    private final UserExamService userExamService;
+
 
     @GetMapping("/next")
     public ResponseEntity<?> getNextExam() {
@@ -497,6 +501,15 @@ public class ExamController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @GetMapping("/allow-do-exam")
+    public ResponseEntity<Boolean> allowDoExam(@RequestParam Long examId) {
+        User user = userService.getCurrentUser();
+        if(userExamRepository.findUserExamByUserIdAndExamId(user.getId(), examId).isEmpty()) {
+            return ResponseEntity.ok(true);
+        }
+        return ResponseEntity.ok(false);
     }
 
     @GetMapping("/get-question")

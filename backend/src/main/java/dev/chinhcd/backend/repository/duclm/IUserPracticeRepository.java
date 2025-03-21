@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,4 +35,25 @@ public interface IUserPracticeRepository extends JpaRepository<UserPractice, Int
     List<UserPractice> findAllByUserIdAndPractice_PracticeLevel(Long userId, Integer practiceLevel);
 
     List<UserPractice> findByPractice(Practice practice);
+    @Query(value = """
+                SELECT * FROM (
+                                  SELECT up.*, ROW_NUMBER() OVER (
+                                      PARTITION BY p.practice_level
+                                      ORDER BY up.total_score DESC, up.total_time ASC, up.id ASC
+                                      ) AS rnk
+                                  FROM user_practice up
+                                           JOIN practice p ON up.practice_id = p.practice_id
+                                  WHERE up.user_id = :userId AND p.grade = :grade
+                              ) ranked
+                WHERE rnk = 1
+            """, nativeQuery = true)
+    List<UserPractice> findBestPracticeByUserAndGrade(@Param("userId") Long userId, @Param("grade") int grade);
+
+    @Query(value = """
+                SELECT SUM(DATEDIFF(SECOND, CAST('00:00:00' AS TIME), ue.total_time))
+                FROM user_practice ue
+                JOIN practice e ON ue.practice_id = e.practice_id
+                WHERE ue.user_id = :userId AND e.grade = :grade;
+            """, nativeQuery = true)
+    Long getTotalPracticeTime(@Param("userId") Long userId, @Param("grade") int grade);
 }

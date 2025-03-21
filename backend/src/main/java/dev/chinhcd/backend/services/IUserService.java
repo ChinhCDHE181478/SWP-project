@@ -20,6 +20,8 @@ public interface IUserService {
 
     UserResponse getMe();
 
+    User getCurrentUser();
+
     UserResponse updateUser(UpdateUserRequest request);
 
     Boolean isNewUser(String username);
@@ -51,4 +53,6 @@ public interface IUserService {
     PaginateUserResponse getPaginatedUsers(int page, int pageSize, String username, String email, String accountType, String sort);
 
     void saveUser(User user);
+
+    AchievementResponse getAchievement();
 }
