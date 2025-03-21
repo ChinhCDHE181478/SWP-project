@@ -59,6 +59,14 @@ const Course: React.FC = () => {
         return;
       }
 
+      if(!user.data?.email) {
+        toast({
+          title: "Bạn phải thêm email cho tài khoản trước khi mua gói",
+          className: "text-white bg-orange-500",
+        });
+        return;
+      }
+
       try {
         const response = await API.post(
           `${process.env.NEXT_PUBLIC_API_URL}/payment/create`,
@@ -82,33 +90,33 @@ const Course: React.FC = () => {
   
 
   return (
-    <div className="w-full py-8 bg-[#F5BA3A]">
+    <div className="bg-[#F5BA3A] w-full py-8">
       <div className="max-w-screen-xl mx-auto px-4">
-        <h2 className="text-center font-bold text-2xl mb-8 text-white">
+        <h2 className="text-2xl text-center text-white font-bold mb-8">
           CÁC KHÓA HỌC EDUTEST
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 sm:grid-cols-2">
           {courseData.map((course, index) => (
             <div
               key={index}
-              className="bg-black bg-opacity-60 p-6 rounded-lg shadow-md w-full h-full flex flex-col justify-between backdrop-blur-lg"
+              className="flex flex-col bg-black bg-opacity-60 h-full justify-between p-6 rounded-lg shadow-md w-full backdrop-blur-lg"
             >
               {/* Title Row */}
               <div className="flex justify-center mb-2">
-                <h2 className="text-xl font-bold text-center text-white">
+                <h2 className="text-center text-white text-xl font-bold">
                   {course.title}
                 </h2>
               </div>
 
               {/* Price Row */}
               <div className="flex justify-center mb-4">
-                <p className="text-lg text-center text-white">{course.price}</p>
+                <p className="text-center text-lg text-white">{course.price}</p>
               </div>
 
               {/* Details Row */}
               <div className="flex-1">
-                <ul className="text-sm text-gray-300">
+                <ul className="text-gray-300 text-sm">
                   {course.details.map((detail, i) => (
                     <li key={i} className="flex items-center space-x-2">
                       <span>•</span>
@@ -124,7 +132,7 @@ const Course: React.FC = () => {
                   onClick={() =>
                     handlePurchaseClick(course.amount, course.type)
                   }
-                  className="w-full mt-4 py-2 bg-white text-orange-600 rounded-full hover:bg-orange-600 hover:text-white transition-all duration-300 text-center"
+                  className="bg-white rounded-full text-center text-orange-600 w-full duration-300 hover:bg-orange-600 hover:text-white mt-4 py-2 transition-all"
                 >
                   MUA GÓI NGAY
                 </button>
