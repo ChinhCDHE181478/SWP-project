@@ -51,8 +51,10 @@ public class ExamController {
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
     private final IExamQuestionRepository examQuestionRepository;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams";
+
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\exams\\";
     private final UserExamService userExamService;
+
 
     @GetMapping("/next")
     public ResponseEntity<?> getNextExam() {
@@ -195,7 +197,7 @@ public class ExamController {
                 // Lấy file âm thanh từ thư mục giải nén
                 String audioFileName = getStringCellValue(row.getCell(5));
                 if (audioFileName != null && !audioFileName.isEmpty()) {
-                    Path audioFilePath = targetDir.resolve(audioFileName);
+                    Path audioFilePath = Paths.get(folderPath, audioFileName);
                     if (Files.exists(audioFilePath)) {
                         question.setAudioFile(Files.readAllBytes(audioFilePath));
                     } else {
@@ -312,7 +314,7 @@ public class ExamController {
                     // Lưu tệp âm thanh nếu có
                     String audioFileName = getStringCellValue(row.getCell(5));
                     if (audioFileName != null && !audioFileName.isEmpty()) {
-                        Path audioFilePath = targetDir.resolve(audioFileName);
+                        Path audioFilePath = Paths.get(folderPath, audioFileName);
                         if (Files.exists(audioFilePath)) {
                             question.setAudioFile(Files.readAllBytes(audioFilePath));
                         } else {
@@ -389,16 +391,18 @@ public class ExamController {
             }
 
             Exam exam = examOptional.get();
+            if(userExamRepository.findAllByExam(exam).isEmpty()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Lỗi khi xóa kỳ thi, kì thi đã có người thi ");
+            } else {
+                List<Question> questionsToDelete = questionRepository.findByExamId(examId);
+                if (!questionsToDelete.isEmpty()) {
+                    questionRepository.deleteAll(questionsToDelete);
+                }
 
-            // Xóa tất cả câu hỏi liên quan đến kỳ thi
-            List<Question> questionsToDelete = questionRepository.findByExamId(examId);
-            if (!questionsToDelete.isEmpty()) {
-                questionRepository.deleteAll(questionsToDelete);
+                examRepository.delete(exam);
+                return ResponseEntity.ok("Xóa kỳ thi và tất cả dữ liệu liên quan thành công!");
             }
-
-            examRepository.delete(exam);
-
-            return ResponseEntity.ok("Xóa kỳ thi và tất cả dữ liệu liên quan thành công!");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

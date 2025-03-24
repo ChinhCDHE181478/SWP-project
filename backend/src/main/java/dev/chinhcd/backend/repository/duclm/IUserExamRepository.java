@@ -1,5 +1,6 @@
 package dev.chinhcd.backend.repository.duclm;
 
+import dev.chinhcd.backend.models.duclm.Exam;
 import dev.chinhcd.backend.models.duclm.UserExam;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -59,4 +60,6 @@ public interface IUserExamRepository extends JpaRepository<UserExam, Integer> {
                 WHERE ue.user_id = :userId AND e.grade = :grade;
             """, nativeQuery = true)
     Long getTotalExamTime(@Param("userId") Long userId, @Param("grade") int grade);
+
+    List<Exam> findAllByExam(Exam exam);
 }

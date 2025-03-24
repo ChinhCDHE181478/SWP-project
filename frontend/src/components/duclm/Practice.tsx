@@ -46,6 +46,7 @@ const Practice: React.FC = () => {
         const [hours, minutes, seconds] = time.split(":").map(Number);
         return hours * 3600 + minutes * 60 + seconds;
     };
+    
 
     useEffect(() => {
         if (!user.isLoading && !user.data?.name) {
@@ -60,7 +61,6 @@ const Practice: React.FC = () => {
         }
     }, [user.data?.name, user.isLoading]);
 
-    // Fetch current level from backend
     useEffect(() => {
         if (!user.data?.id) return;
 
@@ -131,6 +131,47 @@ const Practice: React.FC = () => {
         fetchMaxLevel();
     }, []);
 
+    useEffect(() => {
+        const fetchPracticeStatus = async () => {
+            if (!user.data?.id) return; // Kiểm tra nếu user ID tồn tại
+    
+            try {
+                // Gọi API để lấy thông tin practice status cho user
+                const response = await API.get(`http://localhost:8080/api/v1/practice/status/${user.data.id}`, {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+    
+                const practiceData = response.data; // Dữ liệu practice trả về
+    
+                // Kiểm tra nếu practiceData không phải là null
+                if (practiceData) {
+                    // Kiểm tra trạng thái practice
+                    if (practiceData.status === "off") {
+                        toast({
+                            title: "Vòng tự luyện đang được bảo trì, vui lòng vào lại sau!",
+                            className: "text-white bg-yellow-500",
+                        });
+    
+                        setTimeout(() => {
+                            router.push("/");
+                        }, 500);
+                    }
+                }
+                // Nếu practiceData là null, không làm gì cả
+            } catch (error) {
+                console.error("Error fetching practice status:", error);
+                toast({
+                    title: "Có lỗi khi lấy trạng thái bài tập!",
+                    className: "text-white bg-red-500",
+                });
+            }
+        };
+    
+        fetchPracticeStatus();
+    }, [user.data?.id]);
+
     // Fetch test results from backend
     useEffect(() => {
         if (!user.data?.id || !currentLevel) return;
@@ -168,12 +209,15 @@ const Practice: React.FC = () => {
         fetchUserResults();
     }, [user.data?.id]);
 
+    
+
+
     // Calculate total score and time spent
     const totalScore = testResults.reduce((acc, result) => acc + result.score, 0);
     const totalTimeSpent = testResults.reduce((acc, result) => acc + convertToSeconds(result.timeSpent), 0);
 
     const allCompleted = testResults.every(result => result.status === "Hoàn thành");
-    const scoreThreshold = 75 / 100 * 0; // 75% of 300
+    const scoreThreshold = 75 / 100 * 300;
 
     const handleCompleteRound = async () => {
         try {
@@ -201,6 +245,19 @@ const Practice: React.FC = () => {
     };
 
     if (!user.data?.name) return null;
+
+    useEffect(() => {
+        if (!user.isLoading && user.data?.accountType === "FREE_COURSE" &&  currentLevel !== null && currentLevel > 5) {
+            toast({
+                title: "Bạn cần mua khóa học để tham gia tiếp tự luyện!",
+                className: "text-white bg-yellow-500",
+            });
+    
+            setTimeout(() => {
+                router.push("/"); // Chuyển về trang chính
+            },  3000); // Thay đổi thời gian nếu cần
+        }
+    }, [user.isLoading, user.data?.accountType, currentLevel]);
 
     return (
         <div className="bg-gray-50">

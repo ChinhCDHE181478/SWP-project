@@ -148,8 +148,8 @@ const UpdatePracticeModal: React.FC<UpdatePracticeModalProps> = ({
                         <label className="block mb-1">Khối</label>
                         <select
                             value={grade}
-                            onChange={(e) => setGrade(e.target.value)}
-                            className="border rounded p-2 w-full"
+                            onChange={(e) => setGrade(e.target.value)} // Chuyển đổi giá trị sang kiểu number
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
                         >
                             <option value="" disabled>Chọn khối</option> {/* Option mặc định không thể chọn */}
