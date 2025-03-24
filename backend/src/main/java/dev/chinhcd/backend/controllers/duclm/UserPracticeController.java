@@ -23,6 +23,7 @@ import java.sql.Time;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/practice")
@@ -42,7 +43,7 @@ public class UserPracticeController {
 
         if (maxPracticeLevel == null) {
             User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-            Practice practice = practiceRepository.findByPracticeLevelAndGrade(1, user.getGrade())
+            Practice practice = practiceRepository.findByPracticeLevelAndGradeAndStatus(1, user.getGrade(), "on")
                     .orElseThrow(() -> new RuntimeException("Practice level 1 not found"));
 
             UserPractice userPractice = new UserPractice();
@@ -146,6 +147,13 @@ public class UserPracticeController {
             return false;
         }
         return true;
+    }
+
+    @GetMapping("/status/{userId}")
+    public Practice getPracticeStatus(@PathVariable Long userId) {
+        Integer maxPracticeLevel = userPracticeService.getMaxPracticeLevelByUserId(userId);
+        Optional<Practice> practiceOptional = practiceRepository.findByPracticeLevelAndGrade(maxPracticeLevel, userRepository.findById(userId).get().getGrade());
+        return practiceOptional.get();
     }
 
 

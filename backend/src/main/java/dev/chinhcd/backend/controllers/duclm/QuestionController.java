@@ -27,8 +27,7 @@ public class QuestionController {
         if (questionOpt.isPresent()) {
             Question question = questionOpt.get();
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=audiofile.mp3")
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_TYPE, "audio/mpeg")
                     .body(new ByteArrayResource(question.getAudioFile()));
         } else {
             return ResponseEntity.notFound().build();

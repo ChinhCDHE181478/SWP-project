@@ -12,9 +12,7 @@ import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.SmallPracticeDetailResponse;
 import dev.chinhcd.backend.models.duclm.*;
 import dev.chinhcd.backend.repository.duclm.*;
-import dev.chinhcd.backend.services.duclm.IPracticeService;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -24,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,7 +55,6 @@ public class PracticeController {
     public ResponseEntity<Integer> getMaxLevel() {
         return ResponseEntity.ok(practiceService.getMaxLevel());
     }
-
     @GetMapping("/get-all")
     public ResponseEntity<Map<String, Object>> getAll(
             @RequestParam(defaultValue = "1") int page,
@@ -151,7 +147,7 @@ public class PracticeController {
         }
 
         // Kiểm tra xem Practice đã tồn tại chưa
-        if (practiceRepository.findByPracticeLevelAndGrade(practiceLevel, grade).isPresent() && practiceRepository.findByPracticeLevelAndGrade(practiceLevel, grade).get().getStatus() == "on") {
+        if (practiceRepository.findByPracticeLevelAndGradeAndStatus(practiceLevel, grade, "on").isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Dữ liệu đã tồn tại trong hệ thống");
         }
 
@@ -214,7 +210,7 @@ public class PracticeController {
 
                     String audioFileName = getStringCellValue(row.getCell(8));
                     if (audioFileName != null && !audioFileName.isEmpty()) {
-                        Path audioFilePath = targetDir.resolve(audioFileName);
+                        Path audioFilePath = Paths.get(folderPath, audioFileName);
                         question.setAudioFile(Files.exists(audioFilePath) ? Files.readAllBytes(audioFilePath) : null);
                     }
 
@@ -287,7 +283,7 @@ public class PracticeController {
                 practice.setStatus("off");
                 practiceRepository.save(practice);
             }
-            return ResponseEntity.ok("Đã tắt bài thực hành!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Đã tắt bài thực hành!");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -312,94 +308,98 @@ public class PracticeController {
             if (practiceOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy bài thực hành!");
             }
-
-
-            ResponseEntity<String> validationResponse = validateExcelFile(file);
-            if (!validationResponse.getStatusCode().equals(HttpStatus.OK)) {
-                return validationResponse;
-            }
-
-            Practice practice = practiceOptional.get();
-            practice.setPracticeDate(Date.valueOf(practiceDate));
-            practice.setGrade(grade);
-            practice.setPracticeLevel(practiceLevel);
-            practice.setStatus(status);
-            practiceRepository.save(practice); // Cập nhật Practice
-
-            String folderPath = BASE_FOLDER_PATH + practice.getPracticeId(); // Sử dụng biến đường dẫn
-
-            Path targetDir = Paths.get(folderPath);
-            if (!Files.exists(targetDir)) {
-                Files.createDirectories(targetDir);
-            }
-
-            // Lưu file Excel
-            Path excelFilePath = targetDir.resolve("exam_" + practice.getPracticeId() + ".xlsx");
-            Files.copy(file.getInputStream(), excelFilePath, StandardCopyOption.REPLACE_EXISTING);
-
-            // Nếu có file ZIP, lưu và giải nén
-            if (audioZip != null && !audioZip.isEmpty()) {
-                Path zipFilePath = targetDir.resolve("audio_" + practice.getPracticeId() + ".zip");
-                Files.copy(audioZip.getInputStream(), zipFilePath, StandardCopyOption.REPLACE_EXISTING);
-                unzipFile(zipFilePath.toString(), folderPath);
-            }
-
-            // Xóa câu hỏi cũ nhưng giữ lại SmallPractice
-            List<Question> questionsToDelete = questionRepository.findByPracticeId(practiceId);
-            questionRepository.deleteAll(questionsToDelete);
-
-            // Tạo danh sách SmallPractice có sẵn
-            Map<String, SmallPractice> smallPracticeMap = new HashMap<>();
-            List<SmallPractice> existingSmallPractices = smallPracticeRepository.findByPractice(practice);
-            for (SmallPractice sp : existingSmallPractices) {
-                smallPracticeMap.put(sp.getTestName(), sp);
-            }
-
-            // Xử lý file Excel
-            try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
-                Sheet sheet = workbook.getSheetAt(0);
-
-                for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
-                    Row row = sheet.getRow(i);
-                    if (row == null) continue;
-
-                    String testName = getStringCellValue(row.getCell(1));
-                    SmallPractice smallPractice = smallPracticeMap.get(testName);
-
-                    if (smallPractice == null) { // Nếu chưa có, tạo mới
-                        smallPractice = new SmallPractice();
-                        smallPractice.setTestName(testName);
-                        smallPractice.setTestDate(row.getCell(0).getDateCellValue());
-                        smallPractice.setPractice(practice);
-                        smallPracticeRepository.save(smallPractice);
-                        smallPracticeMap.put(testName, smallPractice);
-                    }
-
-                    // Tạo câu hỏi mới
-                    Question question = new Question();
-                    question.setQuestionText(getStringCellValue(row.getCell(2)));
-                    question.setChoice1(getStringCellValue(row.getCell(3)));
-                    question.setChoice2(getStringCellValue(row.getCell(4)));
-                    question.setChoice3(getStringCellValue(row.getCell(5)));
-                    question.setChoice4(getStringCellValue(row.getCell(6)));
-
-                    questionRepository.save(question);
-
-                    // Liên kết Question với SmallPractice
-                    SmallPracticeQuestion smallPracticeQuestion = new SmallPracticeQuestion();
-                    smallPracticeQuestion.setSmallPractice(smallPractice);
-                    smallPracticeQuestion.setQuestion(question);
-                    smallPracticeQuestionRepository.save(smallPracticeQuestion);
-
-                    // Tạo Answer mới
-                    Answer answer = new Answer();
-                    answer.setCorrectAnswer(getStringCellValue(row.getCell(7)));
-                    answer.setQuestion(question);
-                    answerRepository.save(answer);
+                ResponseEntity<String> validationResponse = validateExcelFile(file);
+                if (!validationResponse.getStatusCode().equals(HttpStatus.OK)) {
+                    return validationResponse;
                 }
-            }
 
-            return ResponseEntity.ok("Cập nhật thành công!");
+                Practice practice = practiceOptional.get();
+                practice.setPracticeDate(Date.valueOf(practiceDate));
+                practice.setGrade(grade);
+                practice.setPracticeLevel(practiceLevel);
+                practice.setStatus(status);
+                practiceRepository.save(practice);
+
+                String folderPath = BASE_FOLDER_PATH + practice.getPracticeId();
+
+                Path targetDir = Paths.get(folderPath);
+                if (!Files.exists(targetDir)) {
+                    Files.createDirectories(targetDir);
+                }
+
+                // Lưu file Excel
+                Path excelFilePath = targetDir.resolve("exam_" + practice.getPracticeId() + ".xlsx");
+                Files.copy(file.getInputStream(), excelFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // Nếu có file ZIP, lưu và giải nén
+                if (audioZip != null && !audioZip.isEmpty()) {
+                    Path zipFilePath = targetDir.resolve("audio_" + practice.getPracticeId() + ".zip");
+                    Files.copy(audioZip.getInputStream(), zipFilePath, StandardCopyOption.REPLACE_EXISTING);
+                    unzipFile(zipFilePath.toString(), folderPath);
+                }
+
+                // Xóa câu hỏi cũ nhưng giữ lại SmallPractice
+                List<Question> questionsToDelete = questionRepository.findByPracticeId(practiceId);
+                questionRepository.deleteAll(questionsToDelete);
+
+                // Tạo danh sách SmallPractice có sẵn
+                Map<String, SmallPractice> smallPracticeMap = new HashMap<>();
+                List<SmallPractice> existingSmallPractices = smallPracticeRepository.findByPractice(practice);
+                for (SmallPractice sp : existingSmallPractices) {
+                    smallPracticeMap.put(sp.getTestName(), sp);
+                }
+
+                // Xử lý file Excel
+                try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+                    Sheet sheet = workbook.getSheetAt(0);
+
+                    for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+                        Row row = sheet.getRow(i);
+                        if (row == null) continue;
+
+                        String testName = getStringCellValue(row.getCell(1));
+                        SmallPractice smallPractice = smallPracticeMap.get(testName);
+
+                        if (smallPractice == null) { // Nếu chưa có, tạo mới
+                            smallPractice = new SmallPractice();
+                            smallPractice.setTestName(testName);
+                            smallPractice.setTestDate(row.getCell(0).getDateCellValue());
+                            smallPractice.setPractice(practice);
+                            smallPracticeRepository.save(smallPractice);
+                            smallPracticeMap.put(testName, smallPractice);
+                        }
+
+                        // Tạo câu hỏi mới
+                        Question question = new Question();
+                        question.setQuestionText(getStringCellValue(row.getCell(2)));
+                        question.setChoice1(getStringCellValue(row.getCell(3)));
+                        question.setChoice2(getStringCellValue(row.getCell(4)));
+                        question.setChoice3(getStringCellValue(row.getCell(5)));
+                        question.setChoice4(getStringCellValue(row.getCell(6)));
+                        String audioFileName = getStringCellValue(row.getCell(8));
+                        if (audioFileName != null && !audioFileName.isEmpty()) {
+                            Path audioFilePath = Paths.get(folderPath, audioFileName);
+                            question.setAudioFile(Files.exists(audioFilePath) ? Files.readAllBytes(audioFilePath) : null);
+                        }
+                        questionRepository.save(question);
+
+                        // Liên kết Question với SmallPractice
+                        SmallPracticeQuestion smallPracticeQuestion = new SmallPracticeQuestion();
+                        smallPracticeQuestion.setSmallPractice(smallPractice);
+                        smallPracticeQuestion.setQuestion(question);
+                        smallPracticeQuestionRepository.save(smallPracticeQuestion);
+
+                        // Tạo Answer mới
+                        Answer answer = new Answer();
+                        answer.setCorrectAnswer(getStringCellValue(row.getCell(7)));
+                        answer.setQuestion(question);
+                        answerRepository.save(answer);
+                    }
+                }
+
+                return ResponseEntity.ok("Cập nhật thành công!");
+
+
 
         } catch (Exception e) {
             e.printStackTrace();

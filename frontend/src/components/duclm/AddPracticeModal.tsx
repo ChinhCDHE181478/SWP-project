@@ -114,8 +114,8 @@ const AddPracticeModal: React.FC<AddPracticeModalProps> = ({ isOpen, onClose, re
                             required
                         >
                             <option value="">Chọn khối</option> {/* Option mặc định */}
-                            {[...Array(10)].map((_, index) => {
-                                const gradeValue = index + 3; // Tạo các giá trị từ 3 đến 12
+                            {[...Array(7)].map((_, index) => {
+                                const gradeValue = index + 3;
                                 return (
                                     <option key={gradeValue} value={gradeValue}>
                                         {gradeValue}

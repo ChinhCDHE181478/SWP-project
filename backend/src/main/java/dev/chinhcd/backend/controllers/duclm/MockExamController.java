@@ -184,7 +184,7 @@ public class MockExamController {
                 question.setChoice4(getStringCellValue(row.getCell(4))); // Lựa chọn 4
                 String audioFileName = getStringCellValue(row.getCell(5)); // Giả sử cột âm thanh ở vị trí 5
                 if (audioFileName != null && !audioFileName.isEmpty()) {
-                    Path audioFilePath = targetDir.resolve(audioFileName);
+                    Path audioFilePath = Paths.get(folderPath, audioFileName);
                     if (Files.exists(audioFilePath)) {
                         question.setAudioFile(Files.readAllBytes(audioFilePath)); // Lưu tệp âm thanh
                     } else {
@@ -289,7 +289,7 @@ public class MockExamController {
                     // Lưu tệp âm thanh nếu có
                     String audioFileName = getStringCellValue(row.getCell(5)); // Giả sử cột âm thanh ở vị trí 5
                     if (audioFileName != null && !audioFileName.isEmpty()) {
-                        Path audioFilePath = targetDir.resolve(audioFileName);
+                        Path audioFilePath = Paths.get(folderPath, audioFileName);
                         if (Files.exists(audioFilePath)) {
                             question.setAudioFile(Files.readAllBytes(audioFilePath)); // Lưu tệp âm thanh
                         } else {

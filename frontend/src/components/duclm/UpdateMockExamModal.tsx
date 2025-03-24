@@ -164,7 +164,7 @@ const UpdateMockExamModal: React.FC<UpdateMockExamModalProps> = ({ isOpen, onClo
                             className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
                         >
-                            <option value="" disabled>Chọn khối</option> {/* Option mặc định không thể chọn */}
+                           <option value="" disabled>Chọn khối</option>
                             {[...Array(7)].map((_, index) => {
                                 const gradeValue = index + 3; // Tạo các giá trị từ 3 đến 9
                                 return (
