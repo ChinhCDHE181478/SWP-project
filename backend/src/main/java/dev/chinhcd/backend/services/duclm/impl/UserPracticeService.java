@@ -1,5 +1,7 @@
 package dev.chinhcd.backend.services.duclm.impl;
 
+import dev.chinhcd.backend.dtos.response.UserExamResponse;
+import dev.chinhcd.backend.dtos.response.UserPracticeResponse;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.Practice;
 import dev.chinhcd.backend.models.duclm.SmallPractice;
@@ -20,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,13 +54,12 @@ public class UserPracticeService implements IUserPracticeService {
         LocalTime totalTime = LocalTime.of(0, 0, 0); // Start with zero time
 
 
-
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         List<SmallPractice> smallPractices = smallPracticeRepository.findByPractice_PracticeLevelAndPractice_Grade(practiceLevel, user.getGrade());
         List<TestResult> results = new ArrayList<>();
 
         for (SmallPractice smallPractice : smallPractices) {
-            TestResult testResult = testResultRepository.findTestResultBySmallPractice_SmallPracticeId(smallPractice.getSmallPracticeId());
+            TestResult testResult = testResultRepository.findTestResultBySmallPractice_SmallPracticeIdAndUserId(smallPractice.getSmallPracticeId(), userId);
             results.add(testResult);
         }
 
@@ -79,10 +81,10 @@ public class UserPracticeService implements IUserPracticeService {
         testResult.setPractice(practiceRepository.findByPracticeLevelAndGrade(practiceLevel, user.getGrade()).get());
         userPracticeRepository.save(testResult);
         // Convert totalTime back to String if needed
-        if(practiceLevel < practiceRepository.findMaxLevel().get()){
+        if (practiceLevel < practiceRepository.findMaxLevel().get()) {
             UserPractice userPractice = new UserPractice();
             userPractice.setUser(user);
-            Practice practice = practiceRepository.findByPracticeLevelAndGrade(practiceLevel+1, user.getGrade()).get();
+            Practice practice = practiceRepository.findByPracticeLevelAndGrade(practiceLevel + 1, user.getGrade()).get();
             userPractice.setPractice(practice);
             userPractice.setTotalTime(Time.valueOf(LocalTime.of(0, 0, 0)));
             userPractice.setTotalScore(0);
@@ -95,7 +97,7 @@ public class UserPracticeService implements IUserPracticeService {
     @Override
     public List<UserPractice> getResult(Long userId) {
         List<UserPractice> userPractices = userPracticeRepository.findAllByUserId(userId);
-        for(UserPractice userPractice : userPractices) {
+        for (UserPractice userPractice : userPractices) {
             User user = new User();
             user.setId(userPractice.getUser().getId());
             user.setGrade(userPractice.getUser().getGrade());
@@ -103,6 +105,41 @@ public class UserPracticeService implements IUserPracticeService {
             userPractice.setUser(user);
         }
         return userPractices;
+    }
+
+    @Override
+    public List<UserPractice> getLevelResult(Long userId, Integer practiceLevel) {
+        List<UserPractice> userPractices = userPracticeRepository.findAllByUserIdAndPractice_PracticeLevel(userId, practiceLevel);
+        for (UserPractice userPractice : userPractices) {
+            User user = new User();
+            user.setId(userPractice.getUser().getId());
+            user.setGrade(userPractice.getUser().getGrade());
+            user.setName(userPractice.getUser().getName());
+            userPractice.setUser(user);
+        }
+        return userPractices;
+    }
+
+    @Override
+    public boolean checkUserResult(Long userId, Integer level) {
+        UserPractice userPractice = userPracticeRepository.findAllByUserIdAndPractice_PracticeLevel(userId, level).get(0);
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        if (userPractice.getTotalScore() != 0 && level < practiceRepository.findMaxLevel().get()) {
+            UserPractice userPractice1 = new UserPractice();
+            userPractice1.setUser(user);
+            Practice practice = practiceRepository.findByPracticeLevelAndGrade(level + 1, user.getGrade()).get();
+            userPractice1.setPractice(practice);
+            userPractice1.setTotalTime(Time.valueOf(LocalTime.of(0, 0, 0)));
+            userPractice1.setTotalScore(0);
+            userPracticeRepository.save(userPractice1);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public List<UserPractice> getByPractice(Practice practice) {
+        return userPracticeRepository.findByPractice(practice);
     }
 
     public Integer getMaxPracticeLevelByUserId(Long userId) {

@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { API } from "@/helper/axios";
 import DoExam from "@/components/duclm/DoExam";
+import { useRouter } from "next/navigation";
+import { useToast } from "./ui/use-toast";
 
 interface Question {
   questionId: number;
@@ -21,6 +23,33 @@ const ExamPage = () => {
   const wsUrl = "http://localhost:8080/api/v1/ws";
   const params = useSearchParams();
   const name = params.get("name") || "";
+  const router = useRouter();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const checkAllowDoExam = async () => {
+      try {
+        const response = await API.get(`/${type}/allow-do-exam`, {
+          headers: { "Content-Type": "application/json" },
+          params: {
+            examId: id,
+          },
+        });
+        if (response.data === false) {
+          throw new Error();
+        }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        router.push("/");
+        toast({
+          title: "Bạn chưa đủ điều kiện tham gia kỳ thi",
+          className: "text-white bg-yellow-500",
+        });
+      }
+    };
+
+    checkAllowDoExam();
+  }, []);
 
   useEffect(() => {
     const fetchQuizData = async () => {

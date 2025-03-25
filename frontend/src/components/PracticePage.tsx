@@ -18,7 +18,7 @@ interface Question {
 }
 
 const PracticePage: React.FC = () => {
-    const { id, name } = useParams(); // Lấy cả id và name từ URL
+    const { id, name } = useParams();
     const [questions, setQuestions] = useState<Question[]>([]);
     const [initialScore, setInitialScore] = useState(0);
     const [loading, setLoading] = useState(true);

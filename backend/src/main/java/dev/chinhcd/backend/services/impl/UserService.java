@@ -3,19 +3,22 @@ package dev.chinhcd.backend.services.impl;
 import dev.chinhcd.backend.dtos.request.*;
 import dev.chinhcd.backend.dtos.request.classDTO.EmailInforDTO;
 import dev.chinhcd.backend.dtos.request.classDTO.UserInforDTO;
-import dev.chinhcd.backend.dtos.response.PaginateUserResponse;
-import dev.chinhcd.backend.dtos.response.RegisterResponse;
-import dev.chinhcd.backend.dtos.response.UserResponse;
+import dev.chinhcd.backend.dtos.response.*;
 import dev.chinhcd.backend.enums.AccountType;
 import dev.chinhcd.backend.enums.ErrorCode;
 import dev.chinhcd.backend.enums.Role;
 import dev.chinhcd.backend.exception.ServiceException;
-import dev.chinhcd.backend.models.Articles;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.repository.IUserRepository;
+import dev.chinhcd.backend.repository.duclm.IUserExamRepository;
+import dev.chinhcd.backend.repository.duclm.IUserMockExamRepository;
+import dev.chinhcd.backend.repository.duclm.IUserPracticeRepository;
 import dev.chinhcd.backend.services.IJwtService;
 import dev.chinhcd.backend.services.IRefreshTokenService;
 import dev.chinhcd.backend.services.IUserService;
+import dev.chinhcd.backend.services.duclm.IUserExamService;
+import dev.chinhcd.backend.services.duclm.IUserMockExamService;
+import dev.chinhcd.backend.services.duclm.IUserPracticeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,6 +30,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +45,9 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final IJwtService jwtService;
     private final IRefreshTokenService refreshTokenService;
+    private final IUserExamRepository userExamService;
+    private final IUserMockExamRepository userMockExamService;
+    private final IUserPracticeRepository userPracticeService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
 
@@ -88,6 +97,14 @@ public class UserService implements IUserService {
         var user = userRepository.findByUsername(name)
                 .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
         return mapResponse(user);
+    }
+
+    @Override
+    public User getCurrentUser() {
+        var context = SecurityContextHolder.getContext();
+        String name = context.getAuthentication().getName();
+        return userRepository.findByUsername(name)
+                .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
@@ -286,6 +303,24 @@ public class UserService implements IUserService {
     @Override
     public void saveUser(User user) {
         userRepository.save(user);
+    }
+
+    @Override
+    public AchievementResponse getAchievement() {
+        User user = getCurrentUser();
+        List<UserExamResponse> examList = userExamService.findArchieves(user.getGrade(), user.getId()).stream().map(a -> {
+            return new UserExamResponse(a.getExamName(), a.getScore(), a.getTotalTime());
+        }).collect(Collectors.toList());
+        List<UserExamResponse> mockExamList = userMockExamService.findArchieves(user.getGrade(), user.getId()).stream().map(a -> {
+            return new UserExamResponse(a.getExamName(), a.getScore(), a.getTotalTime());
+        }).collect(Collectors.toList());
+        List<UserPracticeResponse> practiceList = userPracticeService.findBestPracticeByUserAndGrade(user.getId(), user.getGrade()).stream().map(a -> {
+            return new UserPracticeResponse("Bài " + a.getPractice().getPracticeLevel(), a.getTotalScore()*0.0d, a.getTotalTime());
+        }).collect(Collectors.toList());
+        Long totalExam = userExamService.getTotalExamTime(user.getId(), user.getGrade());
+        Long totalMock = userMockExamService.getTotalExamTime(user.getId(), user.getGrade());
+        Long totalPractice = userPracticeService.getTotalPracticeTime(user.getId(), user.getGrade());
+        return new AchievementResponse(examList, mockExamList, practiceList, totalExam, totalMock, totalPractice);
     }
 
     public UserResponse mapResponse(User user) {

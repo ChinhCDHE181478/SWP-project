@@ -96,7 +96,7 @@ const UserInformationProfile = ({ user }: any) => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col gap-7">
+    <div className="w-full h-full flex flex-col rounded-sm border p-7 gap-7">
       <div className="w-full grid grid-cols-3">
         <div className="flex justify-between px-3">
           <div>Tên: {user.data?.name}</div>

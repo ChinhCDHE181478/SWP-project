@@ -54,7 +54,7 @@ const LoginForm = () => {
       const { accessToken } = await res.json();
       const decoded = jwtDecode<{ scope?: string }>(accessToken);
       const scope = decoded?.scope;
-      if (isNewUser === true && scope === "USER") {
+      if (isNewUser === true && scope === "STUDENT") {
         router.push("/update-profile");
         return toast({
           title: "Đăng nhập thành công!",

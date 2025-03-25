@@ -1,6 +1,7 @@
 package dev.chinhcd.backend.services.duclm.impl;
 
 
+import dev.chinhcd.backend.dtos.response.UserExamResponse;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.Exam;
 import dev.chinhcd.backend.models.duclm.MockExam;
@@ -17,6 +18,7 @@ import java.sql.Time;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

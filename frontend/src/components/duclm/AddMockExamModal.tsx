@@ -43,11 +43,18 @@ const AddMockExamModal: React.FC<AddMockExamModalProps> = ({ isOpen, onClose, re
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        // Kiểm tra nếu grade chưa được chọn
+        if (grade === 0) {
+            toast({ title: "Vui lòng chọn khối!", className: "text-white bg-red-500" });
+            return;
+        }
+
         try {
             if (!file) {
                 toast({ title: "Vui lòng chọn tệp Excel!", className: "text-white bg-red-500" });
                 return;
             }
+
             const formData = new FormData();
             formData.append("examName", examName);
             formData.append("examDate", examDate);
@@ -55,7 +62,7 @@ const AddMockExamModal: React.FC<AddMockExamModalProps> = ({ isOpen, onClose, re
             formData.append("type", type);
             formData.append("status", status);
             formData.append("file", file);
-            if (audioFile) formData.append("audioZip", audioFile); // Thêm tệp âm thanh vào formData
+            if (audioFile) formData.append("audioZip", audioFile);
 
             const response = await API.post("/mock-exam/upload-mock-exam", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -107,12 +114,12 @@ const AddMockExamModal: React.FC<AddMockExamModalProps> = ({ isOpen, onClose, re
                     <div className="mb-4">
                         <label className="block mb-1">Khối</label>
                         <select
-                            value={grade}
-                            onChange={(e) => setGrade(Number(e.target.value))} // Chuyển đổi giá trị sang kiểu number
+                            value={grade !== null ? grade : ""}
+                            onChange={(e) => setGrade(Number(e.target.value))}
                             className="w-full p-2 border border-gray-300 rounded-md focus:outline-orange-500"
                             required
                         >
-                            <option value="" disabled>Chọn khối</option> {/* Option mặc định không thể chọn */}
+                            <option value="">Chọn khối</option>
                             {[...Array(7)].map((_, index) => {
                                 const gradeValue = index + 3; // Tạo các giá trị từ 3 đến 9
                                 return (

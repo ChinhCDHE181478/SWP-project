@@ -3,14 +3,14 @@ package dev.chinhcd.backend.controllers.duclm;
 import dev.chinhcd.backend.dtos.response.QuestionsResponse;
 import dev.chinhcd.backend.dtos.response.duclm.ExamDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
+import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.models.duclm.Answer;
 import dev.chinhcd.backend.models.duclm.Exam;
 import dev.chinhcd.backend.models.duclm.ExamQuestion;
 import dev.chinhcd.backend.models.duclm.Question;
-import dev.chinhcd.backend.repository.duclm.IAnswerRepository;
-import dev.chinhcd.backend.repository.duclm.IExamQuestionRepository;
-import dev.chinhcd.backend.repository.duclm.IExamRepository;
-import dev.chinhcd.backend.repository.duclm.IQuestionRepository;
+import dev.chinhcd.backend.repository.duclm.*;
+import dev.chinhcd.backend.services.IUserService;
+import dev.chinhcd.backend.services.duclm.impl.UserExamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -45,12 +45,16 @@ import java.util.zip.ZipInputStream;
 @RequiredArgsConstructor
 public class ExamController {
 
-    private final IExamRepository iExamRepository;
+    private final IUserExamRepository userExamRepository;
+    private final IUserService userService;
     private final IExamRepository examRepository;
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
     private final IExamQuestionRepository examQuestionRepository;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams";
+
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams\\";
+    private final UserExamService userExamService;
+
 
     @GetMapping("/next")
     public ResponseEntity<?> getNextExam() {
@@ -193,7 +197,7 @@ public class ExamController {
                 // Lấy file âm thanh từ thư mục giải nén
                 String audioFileName = getStringCellValue(row.getCell(5));
                 if (audioFileName != null && !audioFileName.isEmpty()) {
-                    Path audioFilePath = targetDir.resolve(audioFileName);
+                    Path audioFilePath = Paths.get(folderPath, audioFileName);
                     if (Files.exists(audioFilePath)) {
                         question.setAudioFile(Files.readAllBytes(audioFilePath));
                     } else {
@@ -310,7 +314,7 @@ public class ExamController {
                     // Lưu tệp âm thanh nếu có
                     String audioFileName = getStringCellValue(row.getCell(5));
                     if (audioFileName != null && !audioFileName.isEmpty()) {
-                        Path audioFilePath = targetDir.resolve(audioFileName);
+                        Path audioFilePath = Paths.get(folderPath, audioFileName);
                         if (Files.exists(audioFilePath)) {
                             question.setAudioFile(Files.readAllBytes(audioFilePath));
                         } else {
@@ -387,16 +391,18 @@ public class ExamController {
             }
 
             Exam exam = examOptional.get();
+            if(userExamRepository.findAllByExam(exam).isEmpty()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Lỗi khi xóa kỳ thi, kì thi đã có người thi ");
+            } else {
+                List<Question> questionsToDelete = questionRepository.findByExamId(examId);
+                if (!questionsToDelete.isEmpty()) {
+                    questionRepository.deleteAll(questionsToDelete);
+                }
 
-            // Xóa tất cả câu hỏi liên quan đến kỳ thi
-            List<Question> questionsToDelete = questionRepository.findByExamId(examId);
-            if (!questionsToDelete.isEmpty()) {
-                questionRepository.deleteAll(questionsToDelete);
+                examRepository.delete(exam);
+                return ResponseEntity.ok("Xóa kỳ thi và tất cả dữ liệu liên quan thành công!");
             }
-
-            examRepository.delete(exam);
-
-            return ResponseEntity.ok("Xóa kỳ thi và tất cả dữ liệu liên quan thành công!");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -497,6 +503,15 @@ public class ExamController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @GetMapping("/allow-do-exam")
+    public ResponseEntity<Boolean> allowDoExam(@RequestParam Long examId) {
+        User user = userService.getCurrentUser();
+        if(userExamRepository.findUserExamByUserIdAndExamId(user.getId(), examId).isEmpty()) {
+            return ResponseEntity.ok(true);
+        }
+        return ResponseEntity.ok(false);
     }
 
     @GetMapping("/get-question")

@@ -1,6 +1,7 @@
 package dev.chinhcd.backend.controllers;
 
 import dev.chinhcd.backend.dtos.request.*;
+import dev.chinhcd.backend.dtos.response.AchievementResponse;
 import dev.chinhcd.backend.dtos.response.PaginateUserResponse;
 import dev.chinhcd.backend.dtos.response.UserResponse;
 import dev.chinhcd.backend.dtos.response.longnt.PaginateArticlesResponse;
@@ -126,6 +127,11 @@ public class UserController {
             @RequestParam(name = "accountType", defaultValue = "") String accountType,
             @RequestParam String sort) {
         return ResponseEntity.ok(userService.getPaginatedUsers(page, pageSize, username, email, accountType, sort));
+    }
+
+    @GetMapping("/get-achievements")
+    public ResponseEntity<AchievementResponse> getAchievements() {
+        return ResponseEntity.ok().body(userService.getAchievement());
     }
 
 }

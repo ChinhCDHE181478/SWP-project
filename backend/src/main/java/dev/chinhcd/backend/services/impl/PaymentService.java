@@ -3,6 +3,7 @@ package dev.chinhcd.backend.services.impl;
 import dev.chinhcd.backend.config.VNPayConfig;
 import dev.chinhcd.backend.dtos.request.PaymentRequest;
 import dev.chinhcd.backend.dtos.request.PaymentSuccessRequest;
+import dev.chinhcd.backend.dtos.response.PurchaseHistoryResponse;
 import dev.chinhcd.backend.models.Payment;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.repository.IPaymentRepository;
@@ -18,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -73,5 +76,16 @@ public class PaymentService implements IPaymentService {
         payment.setIsPaid(true);
         payment.setCompletedAt(request.completedAt());
         paymentRepository.save(payment);
+    }
+
+    @Override
+    public List<PurchaseHistoryResponse> purchaseHistory() {
+        User user = userService.getCurrentUser();
+        List<Payment> p = paymentRepository.getByUserId(user.getId());
+        return p.stream().map(pm -> {
+            return new PurchaseHistoryResponse(pm.getAccountType().name(),
+                    pm.getVnp_TxnRef(), pm.getVnp_BankTranNo(), pm.getVnp_TransactionNo(),
+                    pm.getCompletedAt(), pm.getAmount());
+        }).collect(Collectors.toList());
     }
 }

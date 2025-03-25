@@ -138,15 +138,15 @@ const Practice3: React.FC<Game3Props> = ({ questions, initialScore, smallpractic
 
     const handleAudioPlay = async () => {
         const currentQuestionId = questions[currentQuestionIndex].questionId;
-
+    
         try {
             const response = await API.get(`/question/${currentQuestionId}`, {
                 responseType: 'blob', // Đảm bảo nhận dữ liệu dưới dạng blob
             });
-
+    
             const audioBlob = response.data; // Lấy blob từ response
             const url = URL.createObjectURL(audioBlob); // Tạo URL từ blob
-
+    
             const audio = new Audio(url);
             audio.play().catch(error => console.error("Error playing audio:", error));
         } catch (error) {

@@ -1,6 +1,7 @@
 package dev.chinhcd.backend.controllers.duclm;
 
 import dev.chinhcd.backend.dtos.response.QuestionsResponse;
+import dev.chinhcd.backend.dtos.response.UserResponse;
 import dev.chinhcd.backend.dtos.response.duclm.MockExamDetailResponse;
 import dev.chinhcd.backend.dtos.response.duclm.QuestionDetailResponse;
 import dev.chinhcd.backend.enums.AccountType;
@@ -53,7 +54,7 @@ public class MockExamController {
     private final IMockExamQuestionRepository examQuestionRepository;
     private final IUserService userService;
     private final IUserMockExamRepository userMockExamRepository;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams";
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\mockexams\\";
     private final MockExamService mockExamService;
 
     @GetMapping("/get-all")
@@ -183,7 +184,7 @@ public class MockExamController {
                 question.setChoice4(getStringCellValue(row.getCell(4))); // Lựa chọn 4
                 String audioFileName = getStringCellValue(row.getCell(5)); // Giả sử cột âm thanh ở vị trí 5
                 if (audioFileName != null && !audioFileName.isEmpty()) {
-                    Path audioFilePath = targetDir.resolve(audioFileName);
+                    Path audioFilePath = Paths.get(folderPath, audioFileName);
                     if (Files.exists(audioFilePath)) {
                         question.setAudioFile(Files.readAllBytes(audioFilePath)); // Lưu tệp âm thanh
                     } else {
@@ -288,7 +289,7 @@ public class MockExamController {
                     // Lưu tệp âm thanh nếu có
                     String audioFileName = getStringCellValue(row.getCell(5)); // Giả sử cột âm thanh ở vị trí 5
                     if (audioFileName != null && !audioFileName.isEmpty()) {
-                        Path audioFilePath = targetDir.resolve(audioFileName);
+                        Path audioFilePath = Paths.get(folderPath, audioFileName);
                         if (Files.exists(audioFilePath)) {
                             question.setAudioFile(Files.readAllBytes(audioFilePath)); // Lưu tệp âm thanh
                         } else {
@@ -489,8 +490,8 @@ public class MockExamController {
     }
 
     @GetMapping("/allow-do-exam")
-    public ResponseEntity<Boolean> doExam(@RequestParam Long userId) {
-        User user = userService.getUserById(userId);
+    public ResponseEntity<Boolean> doExam() {
+        User user = userService.getCurrentUser();
         if (user.getAccountType().equals(AccountType.FREE_COURSE)) {
             return ResponseEntity.ok(false);
         } else if (user.getAccountType().equals(AccountType.COMBO_COURSE)) {
@@ -498,7 +499,7 @@ public class MockExamController {
         }
 
         int month = LocalDate.now().getMonthValue();
-        if (userMockExamRepository.findByMonthAndUserId(month, userId).size() < 5) {
+        if (userMockExamRepository.findByMonthAndUserId(month, user.getId()).size() < 5) {
             return ResponseEntity.ok(true);
         }
 
