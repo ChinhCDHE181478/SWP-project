@@ -69,13 +69,12 @@ const Course: React.FC = () => {
         if (response.data) {
           window.location.href = response.data;
         }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         //handle exception
       }
     }
   };
-  
 
   return (
     <div className="w-full py-8 bg-[#F5BA3A]">

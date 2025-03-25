@@ -2,6 +2,8 @@ package dev.chinhcd.backend.services.impl;
 
 import dev.chinhcd.backend.dtos.request.SupportRequestRequest;
 import dev.chinhcd.backend.dtos.response.longnt.PaginateSupportResponse;
+import dev.chinhcd.backend.dtos.response.longnt.SupportRequestDTO;
+import dev.chinhcd.backend.dtos.response.longnt.PaginateSupportUser;
 import dev.chinhcd.backend.models.SupportRequest;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.repository.ISupportRequestRepository;
@@ -10,11 +12,14 @@ import dev.chinhcd.backend.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -75,4 +80,40 @@ public class SupportService implements ISupportService {
                 pageSize
         );
     }
+
+
+    @Override
+    public PaginateSupportUser getSupportRequestsByUserId(Long userId, int page, int pageSize) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("Invalid userId: " + userId);
+        }
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Page<SupportRequest> supportRequestPage = supportRequestRepository.findByUserId(userId, pageable);
+
+        List<SupportRequestDTO> supportRequestDTOs = supportRequestPage.getContent().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        return new PaginateSupportUser(
+                supportRequestDTOs,
+                supportRequestPage.getTotalPages(),
+                (int) supportRequestPage.getTotalElements(),
+                supportRequestPage.getNumber() + 1,
+                supportRequestPage.getSize()
+        );
+    }
+
+    private SupportRequestDTO convertToDTO(SupportRequest supportRequest) {
+        return new SupportRequestDTO(
+                supportRequest.getId(),
+                supportRequest.getDetail(),
+                supportRequest.getIssueCategory(),
+                supportRequest.getSupportAnswer(),
+                supportRequest.getDateCreated() != null
+                        ? supportRequest.getDateCreated().toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                        : null,
+                supportRequest.getStatus()
+        );
+    }
+
 }

@@ -6,7 +6,6 @@ import { LifeBuoy, LogOut } from "lucide-react";
 const items = [
   {
     title: "Articles",
-    url: "/content-manager?content=Articles",
     icon: LifeBuoy,
   },
 ];

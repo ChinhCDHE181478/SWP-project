@@ -6,6 +6,7 @@ public enum Role {
     CONTENT_MANAGER("content_manager"),
     SUPPORT_MANAGER("support_manager"),
     ADMIN("admin");
+
     private String role;
 
     Role(String role) {

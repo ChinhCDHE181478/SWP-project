@@ -3,6 +3,7 @@ package dev.chinhcd.backend.controllers;
 import dev.chinhcd.backend.dtos.request.NewSupportAnswer;
 import dev.chinhcd.backend.dtos.request.SupportRequestRequest;
 import dev.chinhcd.backend.dtos.response.longnt.PaginateSupportResponse;
+import dev.chinhcd.backend.dtos.response.longnt.PaginateSupportUser;
 import dev.chinhcd.backend.services.ISupportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import dev.chinhcd.backend.dtos.request.SupportRequestRequest;
 import dev.chinhcd.backend.services.ISupportService;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +66,17 @@ public class SupportController {
             response.put("error", "Yêu cầu hỗ trợ không tồn tại!");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+    }
+
+    @PreAuthorize("hasAnyAuthority('STUDENT')")
+    @GetMapping("/user/requests")
+    public ResponseEntity<PaginateSupportUser> getSupportRequestsByUser(
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int pageSize
+    ) {
+        PaginateSupportUser response = supportService.getSupportRequestsByUserId(userId, page, pageSize);
+        return ResponseEntity.ok(response);
     }
 }
 

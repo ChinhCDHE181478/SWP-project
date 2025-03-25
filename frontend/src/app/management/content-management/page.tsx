@@ -12,7 +12,6 @@ import ContentListTable from "@/components/longnt/content-manager/ContentListTab
 
 const validContents = [
   "Articles",
-  // "Schedule",
 ];
 
 const ContentManagerPage = () => {
@@ -34,11 +33,9 @@ const ContentManagerPage = () => {
   const renderContent = () => {
     switch (content) {
       case "Articles":
-        return <ContentListTable role={content} />;
-      //   case "Schedule":
-      //     return <ManagerListTable role={content} />;
+        return <ContentListTable/>;
       default:
-        return <ContentListTable role="Articles" />;
+        return <ContentListTable/>;
     }
   };
 
