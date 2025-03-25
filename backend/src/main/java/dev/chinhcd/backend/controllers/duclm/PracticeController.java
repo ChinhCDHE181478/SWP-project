@@ -48,7 +48,7 @@ public class PracticeController {
     private final ISmallPracticeRepository smallPracticeRepository;
     private final IQuestionRepository questionRepository;
     private final IAnswerRepository answerRepository;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\practices\\";
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\practices\\";
     private final UserPracticeService userPracticeService;
 
     @GetMapping("/max-level")

@@ -54,7 +54,7 @@ public class MockExamController {
     private final IMockExamQuestionRepository examQuestionRepository;
     private final IUserService userService;
     private final IUserMockExamRepository userMockExamRepository;
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\mockexams\\";
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\mockexams\\";
     private final MockExamService mockExamService;
 
     @GetMapping("/get-all")
