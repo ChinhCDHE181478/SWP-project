@@ -52,7 +52,7 @@ public class ExamController {
     private final IAnswerRepository answerRepository;
     private final IExamQuestionRepository examQuestionRepository;
 
-    private static final String BASE_FOLDER_PATH = "C:\\Users\\Minh Duc\\Desktop\\exams\\";
+    private static final String BASE_FOLDER_PATH = "C:\\Users\\Chinh\\OneDrive\\Desktop\\exams\\";
     private final UserExamService userExamService;
 
 
