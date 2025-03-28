@@ -391,7 +391,7 @@ public class ExamController {
             }
 
             Exam exam = examOptional.get();
-            if(userExamRepository.findAllByExam(exam).isEmpty()) {
+            if(!userExamRepository.findAllByExam(exam).isEmpty()) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("Lỗi khi xóa kỳ thi, kì thi đã có người thi ");
             } else {
