@@ -25,13 +25,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import React from "react";
 import { Input } from "@nextui-org/react";
 import { Articles } from "@/types/type";
 import UpdateContentForm from "./UpdateContentForm";
 import Image from "next/image";
+import { API } from "@/helper/axios";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -74,7 +74,7 @@ export function ContentDataTable<TData, TValue>({
 
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(
+      await API.delete(
         `${process.env.NEXT_PUBLIC_API_URL}${"/articles"}/${id}`,
         {
           headers: { "Content-Type": "application/json" },
@@ -110,31 +110,13 @@ export function ContentDataTable<TData, TValue>({
     setDetailModalOpen(true);
   };
 
-  const handleUpdate = async (updatedData: Articles) => {
-    try {
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/articles/${updatedData.id}`,
-        updatedData,
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      if (response.status === 200) {
-        toast({
-          title: "Cập nhật bài viết thành công!",
-          className: "text-white bg-green-500",
-        });
-
-        fetchData();
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      toast({
-        title: "Cập nhật bài viết thất bại!",
-        className: "text-white bg-red-500",
-      });
-    } finally {
-      setEditModalOpen(false);
-    }
+  const handleUpdate = async () => {
+    toast({
+      title: "Cập nhật bài viết thành công!",
+      className: "text-white bg-green-500",
+    });
+    fetchData();
+    setEditModalOpen(false);
   };
 
   return (
@@ -274,7 +256,9 @@ export function ContentDataTable<TData, TValue>({
       </Dialog>
 
       <Dialog open={detailModalOpen} onOpenChange={setDetailModalOpen}>
-        <DialogContent className="sm:max-w-[900px] z-[999] bg-white max-h-[90vh] overflow-y-auto p-6">
+        <DialogContent 
+        className="sm:max-w-[1000px] z-[999] bg-white max-h-[80vh] overflow-y-auto p-6"
+        >
           <DialogHeader>
             <DialogTitle>Chi tiết Bài Viết</DialogTitle>
           </DialogHeader>
@@ -306,7 +290,7 @@ export function ContentDataTable<TData, TValue>({
                 <div>
                   <strong>Nội dung:</strong>
                   <div
-                    className="mt-2 overflow-y-auto max-h-[75vh] break-all whitespace-pre-line p-4 border border-gray-300 rounded-md"
+                    className="mt-2 overflow-y-auto max-h-[60vh] break-words whitespace-pre-line p-4 border border-gray-300 rounded-md text-gray-800 text-base leading-relaxed"
                     dangerouslySetInnerHTML={{
                       __html: detailData.content || "Không có nội dung",
                     }}
@@ -320,7 +304,7 @@ export function ContentDataTable<TData, TValue>({
           <DialogFooter>
             <button
               type="button"
-              className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 hover:scale-105 transition-all duration-300 ease-in-out"
+              className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
               onClick={() => setDetailModalOpen(false)}
             >
               Đóng

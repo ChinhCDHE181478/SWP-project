@@ -13,6 +13,7 @@ import dev.chinhcd.backend.repository.IUserRepository;
 import dev.chinhcd.backend.repository.duclm.IUserExamRepository;
 import dev.chinhcd.backend.repository.duclm.IUserMockExamRepository;
 import dev.chinhcd.backend.repository.duclm.IUserPracticeRepository;
+import dev.chinhcd.backend.services.IEmailService;
 import dev.chinhcd.backend.services.IJwtService;
 import dev.chinhcd.backend.services.IRefreshTokenService;
 import dev.chinhcd.backend.services.IUserService;
@@ -49,6 +50,7 @@ public class UserService implements IUserService {
     private final IUserMockExamRepository userMockExamService;
     private final IUserPracticeRepository userPracticeService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final IEmailService emailService;
 
 
     @Override
@@ -258,6 +260,11 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
+        if(!user.getEmail().isBlank() && user.getEmail() != null) {
+            String subject = "Mail tạo tài khoản";
+            String content = "Mật khẩu mới của bạn là: " + request.newPassword();
+            emailService.sendMail(user.getEmail(), subject, content);
+        }
         return true;
     }
 
@@ -315,7 +322,7 @@ public class UserService implements IUserService {
             return new UserExamResponse(a.getExamName(), a.getScore(), a.getTotalTime());
         }).collect(Collectors.toList());
         List<UserPracticeResponse> practiceList = userPracticeService.findBestPracticeByUserAndGrade(user.getId(), user.getGrade()).stream().map(a -> {
-            return new UserPracticeResponse("Bài " + a.getPractice().getPracticeLevel(), a.getTotalScore()*0.0d, a.getTotalTime());
+            return new UserPracticeResponse("Bài " + a.getPractice().getPracticeLevel(), a.getTotalScore()*1.0d, a.getTotalTime());
         }).collect(Collectors.toList());
         Long totalExam = userExamService.getTotalExamTime(user.getId(), user.getGrade());
         Long totalMock = userMockExamService.getTotalExamTime(user.getId(), user.getGrade());

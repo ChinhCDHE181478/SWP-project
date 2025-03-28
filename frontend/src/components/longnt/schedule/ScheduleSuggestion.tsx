@@ -7,18 +7,18 @@ import { Articles } from "@/types/type";
 import axios from "axios";
 
 interface Props {
-  type: string; 
+  type: string;
 }
 
 // Hàm lấy dữ liệu gợi ý bài viết theo type
 async function getSuggestedArticles(type: string): Promise<Articles[]> {
   const API_URL = `http://localhost:8080/api/v1/articles/suggestions`;
-  
-  console.log("Fetching articles with type:", type); 
+
+  console.log("Fetching articles with type:", type);
 
   const res = await axios.get(API_URL, {
     headers: { "Content-Type": "application/json" },
-    params: { type: type.toUpperCase()},
+    params: { type: type.toUpperCase() },
   });
   return res.data as Articles[];
 }
@@ -30,7 +30,7 @@ const SuggestionArticles: React.FC<Props> = ({ type }) => {
 
   const fetchArticles = useCallback(async () => {
     setLoading(true);
-    setError("");  
+    setError("");
     try {
       const data = await getSuggestedArticles(type);
       setSuggestedArticles(data);
@@ -40,11 +40,11 @@ const SuggestionArticles: React.FC<Props> = ({ type }) => {
     } finally {
       setLoading(false);
     }
-  }, [type]); 
+  }, [type]);
 
   useEffect(() => {
     if (type) {
-      fetchArticles(); 
+      fetchArticles();
     }
   }, [type, fetchArticles]);
 
@@ -62,8 +62,8 @@ const SuggestionArticles: React.FC<Props> = ({ type }) => {
   return (
     <div className="max-w-screen-xl mx-auto w-[1050px] px-4">
       <div className="text-left mb-6">
-        <h2 className="text-2xl font-bold text-blue-500">
-          Có thể bạn quan tâm
+        <h2 className="inline-flex text-nowrap font-bold text-orange-500 bg-orange-100 border-l-4 border-orange-500 px-3 py-1">
+          TIN TỨC LIÊN QUAN
         </h2>
       </div>
 

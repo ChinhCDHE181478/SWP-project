@@ -20,14 +20,21 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ articles }) => {
           <div className="max-w-screen-xl mx-auto w-[1050px]">
             <div className="flex gap-6 p-6 rounded-lg mx-auto">
               <div className="relative w-96 h-56">
-                <Image
-                  src={article.imageUrl || ""}
-                  alt={article.title}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-md bg-gray-300"
-                  priority={index === 0}
-                />
+                {article.imageUrl ? (
+                  <Image
+                    src={article.imageUrl}
+                    alt={article.title || "Article Image"}
+                    fill={true} 
+                    objectFit="cover"
+                    className="rounded-md bg-gray-300"
+                    priority={index === 0}
+                    sizes="(max-width: 768px) 100vw, 33vw" 
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-300 rounded-md flex items-center justify-center">
+                    <span className="text-gray-500">No Image</span>
+                  </div>
+                )}
               </div>
               <div className="flex-1">
                 <h2 className="text-lg font-semibold">{article.title}</h2>

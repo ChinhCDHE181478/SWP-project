@@ -126,25 +126,32 @@ public class ArticlesService implements IArticlesService {
     }
 
     @Override
-    public Articles updateArticle(Long id, UpdateArticleRequest updateArticleRequest) {
-        Articles existingArticle = articlesRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Article not found"));
-
-        if (updateArticleRequest.getTitle() != null) {
-            existingArticle.setTitle(updateArticleRequest.getTitle());
-        }
-        if (updateArticleRequest.getContent() != null) {
-            existingArticle.setContent(updateArticleRequest.getContent());
-        }
-        if (updateArticleRequest.getSummaryContent() != null) {
-            existingArticle.setSummaryContent(updateArticleRequest.getSummaryContent());
-        }
-        if (updateArticleRequest.getImageUrl() != null) {
-            existingArticle.setImageUrl(updateArticleRequest.getImageUrl());
-        }
-        if (updateArticleRequest.getArticlesType() != null) {
-            existingArticle.setArticlesType(updateArticleRequest.getArticlesType());
+    public Articles updateArticle(UpdateArticleRequest updateArticleRequest) {
+        if (updateArticleRequest.id() == null) {
+            throw new IllegalArgumentException("Article ID cannot be null.");
         }
 
+        Articles existingArticle = articlesRepository.findById(updateArticleRequest.id())
+                .orElseThrow(() -> new IllegalArgumentException("Article not found"));
+
+        if (updateArticleRequest.title() != null && !updateArticleRequest.title().trim().isEmpty()) {
+            existingArticle.setTitle(updateArticleRequest.title());
+        }
+        if (updateArticleRequest.content() != null && !updateArticleRequest.content().trim().isEmpty()) {
+            existingArticle.setContent(updateArticleRequest.content());
+        }
+        if (updateArticleRequest.summaryContent() != null) {
+            existingArticle.setSummaryContent(updateArticleRequest.summaryContent());
+        }
+        if (updateArticleRequest.articlesType() != null) {
+            existingArticle.setArticlesType(updateArticleRequest.articlesType());
+        }
+        if (updateArticleRequest.imageFile() != null && !updateArticleRequest.imageFile().isEmpty()) {
+            String imageUrl = cloudinaryService.uploadImage(updateArticleRequest.imageFile());
+            existingArticle.setImageUrl(imageUrl);
+        } else if (updateArticleRequest.imageUrl() != null && !updateArticleRequest.imageUrl().trim().isEmpty()) {
+            existingArticle.setImageUrl(updateArticleRequest.imageUrl());
+        }
         return articlesRepository.save(existingArticle);
     }
 

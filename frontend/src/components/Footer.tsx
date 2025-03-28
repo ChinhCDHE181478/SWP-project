@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="w-[1050px] flex justify-between">
           <div className=" flex flex-col items-center justify-center pb-7">
             <LogoIcon />
-            <p className="font-bold">EDU TEST - Học tập trực tuyến</p>
+            <p className="font-bold">ENGLISH TEST - Học tập trực tuyến</p>
           </div>
           <div className=" flex items-center justify-center h-full">
             <div className="text-left flex flex-col gap-1">

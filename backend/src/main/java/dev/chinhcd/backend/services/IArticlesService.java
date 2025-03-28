@@ -28,5 +28,5 @@ public interface IArticlesService {
 
     void deleteArticleById(Long id);
 
-    Articles updateArticle(Long id, UpdateArticleRequest updateArticleRequest);
+    Articles updateArticle(UpdateArticleRequest updateArticleRequest);
 }

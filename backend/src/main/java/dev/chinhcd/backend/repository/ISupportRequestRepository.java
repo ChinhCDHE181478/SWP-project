@@ -23,5 +23,7 @@ public interface ISupportRequestRepository extends JpaRepository<SupportRequest,
             Pageable pageable
     );
 
+    Page<SupportRequest> findByUserId(@Param("userId") Long userId, Pageable pageable);
+
     Optional<SupportRequest> findById(Long id);
 }

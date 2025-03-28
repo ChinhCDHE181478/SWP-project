@@ -97,9 +97,28 @@ public class ArticlesController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedArticle);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Articles> updateArticle(@PathVariable Long id, @RequestBody UpdateArticleRequest request) {
-        Articles updatedArticle = articlesService.updateArticle(id, request);
-        return ResponseEntity.ok(updatedArticle);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Articles> updateArticle(
+            @PathVariable Long id,
+            @RequestParam("article") String articleJson,
+            @RequestPart(value = "imageFile", required = false) MultipartFile imageFile) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        UpdateArticleRequest updateArticleRequest;
+        try {
+            UpdateArticleRequest tempRequest = objectMapper.readValue(articleJson, UpdateArticleRequest.class);
+            updateArticleRequest = new UpdateArticleRequest(
+                    id,
+                    tempRequest.title(),
+                    tempRequest.content(),
+                    tempRequest.summaryContent(),
+                    tempRequest.imageUrl(),
+                    tempRequest.articlesType(),
+                    imageFile
+            );
+            Articles updatedArticle = articlesService.updateArticle(updateArticleRequest);
+            return ResponseEntity.ok(updatedArticle);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 }

@@ -66,4 +66,7 @@ public class User {
 
     @Column(columnDefinition = "BIT DEFAULT 0", nullable = false, name = "is_doing_exam")
     private Boolean isDoingExam;
+
+    @Column(nullable = true, name = "expired_date_package", columnDefinition = "DATE")
+    private Date expiredDatePackage;
 }
