@@ -13,10 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import dev.chinhcd.backend.dtos.request.SupportRequestRequest;
-import dev.chinhcd.backend.services.ISupportService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,7 +55,7 @@ public class SupportController {
         Boolean result = supportService.updateSupportAnswerAndStatus(id, newAnswer.newAnswer());
         if (result) {
             Map<String, String> response = new HashMap<>();
-            response.put("newAnswer", newAnswer.newAnswer());  // Trả về câu trả lời mới
+            response.put("newAnswer", newAnswer.newAnswer());
             return ResponseEntity.ok(response);
         } else {
             Map<String, String> response = new HashMap<>();

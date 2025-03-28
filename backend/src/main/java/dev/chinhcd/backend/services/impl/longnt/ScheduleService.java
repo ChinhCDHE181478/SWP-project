@@ -19,19 +19,6 @@ public class ScheduleService implements IScheduleService {
     private final IPracticeRepository practiceRepository;
     private final IExamRepository examRepository;
 
-    // Lấy practice theo level
-    @Override
-    public List<Practice> getPracticeByLevel(int level) {
-        return practiceRepository.getPracticeByLevel(level);
-    }
-
-    // Lấy exam theo examName
-    @Override
-    public List<Exam> getExamsByExamName(String examName) {
-        return examRepository.getExamsByExamName(examName);
-    }
-
-    // Kết hợp dữ liệu (lịch thi và practice)
     @Override
     public ScheduleResponse getSchedule() {
         List<Practice> practices = new ArrayList<>();
@@ -51,7 +38,6 @@ public class ScheduleService implements IScheduleService {
                 exams.add(exam);
             }
         }
-
         return new ScheduleResponse(practices, exams);
     }
 }

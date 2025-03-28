@@ -9,7 +9,6 @@ import dev.chinhcd.backend.repository.IArticlesRepository;
 import dev.chinhcd.backend.services.IArticlesService;
 import dev.chinhcd.backend.services.longnt.ICloudinaryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,11 +37,8 @@ public class ArticlesService implements IArticlesService {
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid article type: " + type);
         }
-
         Pageable pageable = PageRequest.of(page - 1, pageSize);
-
         Page<Articles> articlesPage = articlesRepository.findAllArticlesByType(articlesType, pageable);
-
         return new PaginateArticlesResponse(
                 articlesPage.getContent(),
                 articlesPage.getTotalPages(),
@@ -69,20 +65,15 @@ public class ArticlesService implements IArticlesService {
 
     @Override
     public PaginateArticlesResponse getArticlesByFilters(String type, Date startDate, Date endDate, int page, int pageSize) {
-
         if (endDate == null) {
             endDate = new Date();
         }
-
         Pageable pageable = PageRequest.of(page - 1, pageSize);
-
         ArticlesType articlesType = null;
         if (type != null && !type.equalsIgnoreCase("all")) {
             articlesType = ArticlesType.valueOf(type.toUpperCase());
         }
-
         Page<Articles> articlesPage = articlesRepository.findArticlesByFilters(articlesType, startDate, endDate, pageable);
-
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         articlesPage.getContent().forEach(article -> {
             if (article.getDate() != null) {
@@ -90,7 +81,6 @@ public class ArticlesService implements IArticlesService {
                 article.setDate(java.sql.Date.valueOf(formattedDate));
             }
         });
-
         return new PaginateArticlesResponse(articlesPage.getContent(), articlesPage.getTotalPages(), articlesPage.getTotalElements(), articlesPage.getNumber() + 1, pageSize);
     }
 
@@ -99,24 +89,19 @@ public class ArticlesService implements IArticlesService {
         if (articleDTO.getTitle() == null || articleDTO.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Title cannot be null or empty.");
         }
-
         if (articleDTO.getContent() == null || articleDTO.getContent().trim().isEmpty()) {
             throw new IllegalArgumentException("Content cannot be null or empty.");
         }
-
         Articles article = new Articles();
         article.setTitle(articleDTO.getTitle());
         article.setContent(articleDTO.getContent());
         article.setSummaryContent(articleDTO.getSummaryContent());
         article.setArticlesType(articleDTO.getArticlesType());
-
         if (articleDTO.getImageFile() != null && !articleDTO.getImageFile().isEmpty()) {
-            String imageUrl = cloudinaryService.uploadImage(articleDTO.getImageFile()); // Upload ảnh lên Cloudinary
-            article.setImageUrl(imageUrl); // Cập nhật URL ảnh vào bài viết
+            String imageUrl = cloudinaryService.uploadImage(articleDTO.getImageFile());
+            article.setImageUrl(imageUrl);
         }
-
         article.setDate(articleDTO.getDate() != null ? articleDTO.getDate() : new Date());
-
         return articlesRepository.save(article);
     }
 
@@ -126,25 +111,32 @@ public class ArticlesService implements IArticlesService {
     }
 
     @Override
-    public Articles updateArticle(Long id, UpdateArticleRequest updateArticleRequest) {
-        Articles existingArticle = articlesRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Article not found"));
-
-        if (updateArticleRequest.getTitle() != null) {
-            existingArticle.setTitle(updateArticleRequest.getTitle());
-        }
-        if (updateArticleRequest.getContent() != null) {
-            existingArticle.setContent(updateArticleRequest.getContent());
-        }
-        if (updateArticleRequest.getSummaryContent() != null) {
-            existingArticle.setSummaryContent(updateArticleRequest.getSummaryContent());
-        }
-        if (updateArticleRequest.getImageUrl() != null) {
-            existingArticle.setImageUrl(updateArticleRequest.getImageUrl());
-        }
-        if (updateArticleRequest.getArticlesType() != null) {
-            existingArticle.setArticlesType(updateArticleRequest.getArticlesType());
+    public Articles updateArticle(UpdateArticleRequest updateArticleRequest) {
+        if (updateArticleRequest.id() == null) {
+            throw new IllegalArgumentException("Article ID cannot be null.");
         }
 
+        Articles existingArticle = articlesRepository.findById(updateArticleRequest.id())
+                .orElseThrow(() -> new IllegalArgumentException("Article not found"));
+
+        if (updateArticleRequest.title() != null && !updateArticleRequest.title().trim().isEmpty()) {
+            existingArticle.setTitle(updateArticleRequest.title());
+        }
+        if (updateArticleRequest.content() != null && !updateArticleRequest.content().trim().isEmpty()) {
+            existingArticle.setContent(updateArticleRequest.content());
+        }
+        if (updateArticleRequest.summaryContent() != null) {
+            existingArticle.setSummaryContent(updateArticleRequest.summaryContent());
+        }
+        if (updateArticleRequest.articlesType() != null) {
+            existingArticle.setArticlesType(updateArticleRequest.articlesType());
+        }
+        if (updateArticleRequest.imageFile() != null && !updateArticleRequest.imageFile().isEmpty()) {
+            String imageUrl = cloudinaryService.uploadImage(updateArticleRequest.imageFile());
+            existingArticle.setImageUrl(imageUrl);
+        } else if (updateArticleRequest.imageUrl() != null && !updateArticleRequest.imageUrl().trim().isEmpty()) {
+            existingArticle.setImageUrl(updateArticleRequest.imageUrl());
+        }
         return articlesRepository.save(existingArticle);
     }
 

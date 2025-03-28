@@ -34,8 +34,8 @@ import axios from "axios";
 
 // Component hiển thị bảng dữ liệu yêu cầu hỗ trợ
 interface SupportDataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+  columns: ColumnDef<TData, TValue>[] | undefined;
+  data: TData[] | undefined; 
   fetchData: () => void;
   filterStatus: string;
   setFilterStatus: (status: string) => void;
@@ -59,14 +59,17 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
   const [detailData, setDetailData] = useState<SupportRequest | null>(null);
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<SupportRequest | null>(null);
-  const [newAnswer, setNewAnswer] = useState<string>(""); // Thêm state để lưu câu trả lời
+  const [newAnswer, setNewAnswer] = useState<string>("");
   const { toast } = useToast();
   const [sorting, setSorting] = useState<SortingState>([]);
 
+  // Đảm bảo data là mảng
+  const safeData = Array.isArray(data) ? data : [];
+
   // Cấu hình bảng từ react-table
   const table = useReactTable({
-    data,
-    columns,
+    data: safeData,
+    columns: columns || [],
     state: { columnFilters, sorting },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -85,10 +88,10 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
         typeof response.data === "object"
           ? JSON.stringify(response.data)
           : response.data;
-      setNewAnswer(answer); // Cập nhật câu trả lời vào state
+      setNewAnswer(answer);
     } catch (error) {
       console.error("Không thể lấy câu trả lời", error);
-      setNewAnswer("N/A"); // Nếu có lỗi thì set về N/A
+      setNewAnswer("N/A");
     }
   };
 
@@ -113,7 +116,7 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
           title: "Cập nhật yêu cầu hỗ trợ thành công!",
           className: "text-white bg-green-500",
         });
-        fetchData(); // Cập nhật lại bảng sau khi trả lời thành công
+        fetchData();
       } else {
         throw new Error("Không thể trả lời yêu cầu hỗ trợ.");
       }
@@ -123,37 +126,29 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
         className: "text-white bg-red-500",
       });
     } finally {
-      setOpen(false); // Đóng modal sau khi trả lời
+      setOpen(false);
     }
   };
 
-  // Mở modal trả lời yêu cầu hỗ trợ
   const openReplyModal = (rowData: SupportRequest) => {
     setSelectedRow(rowData);
-    fetchCurrentAnswer(rowData.id); // Đặt lại câu trả lời khi mở modal
-    setOpen(true); // Mở modal trả lời
+    fetchCurrentAnswer(rowData.id);
+    setOpen(true);
   };
 
   const handleSort = (columnId: string) => {
-    // Kiểm tra nếu columnId là "dateCreated" thì chỉ áp dụng sắp xếp cho cột này
     if (columnId === "dateCreated") {
       setSorting((prevSorting) => {
         const isAlreadySorted = prevSorting.some((sort) => sort.id === columnId);
-  
         if (!isAlreadySorted) {
           return [{ id: columnId, desc: false }];
         }
-    
-        // Nếu đã được sắp xếp, đổi chiều sắp xếp
         return prevSorting.map((sort) =>
-          sort.id === columnId
-            ? { ...sort, desc: !sort.desc }
-            : sort
+          sort.id === columnId ? { ...sort, desc: !sort.desc } : sort
         );
       });
     }
   };
-  
 
   return (
     <div className="py-10">
@@ -163,7 +158,6 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
           value={filterStatus}
           onChange={(event) => {
             setFilterStatus(event.target.value);
-            
           }}
           className="w-[200px] max-w-sm border border-gray-300 rounded-sm"
         >
@@ -176,7 +170,6 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
           value={filterIssueCategory}
           onChange={(event) => {
             setFilterIssueCategory(event.target.value);
-            
           }}
           className="w-[200px] max-w-sm border border-gray-300 rounded-sm"
         >
@@ -187,7 +180,6 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
           <option value="other">Khác</option>
         </select>
 
-        {/* Nút tìm kiếm */}
         <button
           onClick={onSearch}
           className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all"
@@ -225,7 +217,7 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table.getRowModel() && table.getRowModel().rows && table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
@@ -240,7 +232,7 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
                     <button
                       type="button"
                       className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
-                      onClick={() => openReplyModal(row.original)} 
+                      onClick={() => openReplyModal(row.original)}
                     >
                       Trả lời
                     </button>
@@ -250,7 +242,7 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={columns ? columns.length + 1 : 1}
                   className="h-24 text-center"
                 >
                   Không có kết quả.
@@ -270,8 +262,8 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
           </DialogHeader>
           <div className="p-4">
             <textarea
-              value={newAnswer} 
-              onChange={(e) => setNewAnswer(e.target.value)} 
+              value={newAnswer}
+              onChange={(e) => setNewAnswer(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Nhập nội dung trả lời..."
               rows={4}
@@ -287,7 +279,7 @@ export function SupportDataTable<TData extends SupportRequest, TValue>({
             <button
               onClick={() => {
                 if (selectedRow) {
-                  handleReply(selectedRow); 
+                  handleReply(selectedRow);
                 }
               }}
               className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"

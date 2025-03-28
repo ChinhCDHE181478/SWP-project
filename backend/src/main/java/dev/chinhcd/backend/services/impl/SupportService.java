@@ -12,7 +12,7 @@ import dev.chinhcd.backend.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -41,8 +41,7 @@ public class SupportService implements ISupportService {
         supportRequestRepository.save(sr);
         return true;
     }
-
-
+    
     @Override
     public String getSupportAnswer(Long id) {
         Optional<SupportRequest> supportRequestOptional = supportRequestRepository.findById(id);
@@ -87,11 +86,20 @@ public class SupportService implements ISupportService {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("Invalid userId: " + userId);
         }
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
-        Page<SupportRequest> supportRequestPage = supportRequestRepository.findByUserId(userId, pageable);
+        PageRequest pageRequest = PageRequest.of(page - 1, pageSize);
+        Page<SupportRequest> supportRequestPage = supportRequestRepository.findByUserId(userId, pageRequest);
 
         List<SupportRequestDTO> supportRequestDTOs = supportRequestPage.getContent().stream()
-                .map(this::convertToDTO)
+                .map(sr -> new SupportRequestDTO(
+                        sr.getId(),
+                        sr.getDetail(),
+                        sr.getIssueCategory(),
+                        sr.getSupportAnswer(),
+                        sr.getDateCreated() != null
+                                ? sr.getDateCreated().toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                                : null,
+                        sr.getStatus()
+                ))
                 .collect(Collectors.toList());
 
         return new PaginateSupportUser(
@@ -100,19 +108,6 @@ public class SupportService implements ISupportService {
                 (int) supportRequestPage.getTotalElements(),
                 supportRequestPage.getNumber() + 1,
                 supportRequestPage.getSize()
-        );
-    }
-
-    private SupportRequestDTO convertToDTO(SupportRequest supportRequest) {
-        return new SupportRequestDTO(
-                supportRequest.getId(),
-                supportRequest.getDetail(),
-                supportRequest.getIssueCategory(),
-                supportRequest.getSupportAnswer(),
-                supportRequest.getDateCreated() != null
-                        ? supportRequest.getDateCreated().toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE)
-                        : null,
-                supportRequest.getStatus()
         );
     }
 

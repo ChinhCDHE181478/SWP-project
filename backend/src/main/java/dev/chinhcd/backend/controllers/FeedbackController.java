@@ -2,16 +2,11 @@ package dev.chinhcd.backend.controllers;
 
 import dev.chinhcd.backend.dtos.request.FeedbackRequest;
 import dev.chinhcd.backend.dtos.response.longnt.PaginateFeedbackResponse;
-import dev.chinhcd.backend.models.Feedback;
 import dev.chinhcd.backend.services.IFeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import dev.chinhcd.backend.services.IFeedbackService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

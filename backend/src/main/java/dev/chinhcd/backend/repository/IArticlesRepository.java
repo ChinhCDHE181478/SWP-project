@@ -38,9 +38,6 @@ public interface IArticlesRepository extends JpaRepository<Articles, Long> {
             Pageable pageable
     );
 
-    @Query("SELECT a FROM Articles a ORDER BY a.date DESC")
-    Page<Articles> findAllByOrderByDateDesc(Pageable pageable);
-
     void deleteById(Long id);
 
 }

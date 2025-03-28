@@ -20,6 +20,8 @@ import dynamic from "next/dynamic";
 import React from "react";
 import Image from "next/image";
 import { API } from "@/helper/axios";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 // Import TinyMCE
 const Editor = dynamic(
@@ -29,12 +31,12 @@ const Editor = dynamic(
 
 // Schema kiểm tra dữ liệu nhập vào
 const articleSchema = z.object({
-  title: z.string().min(3, "Tiêu đề quá ngắn").max(100, "Tiêu đề quá dài"),
+  title: z.string().min(3, "Tiêu đề quá ngắn").max(200, "Tiêu đề quá dài"),
   content: z
     .string()
     .min(10, "Nội dung quá ngắn")
-    .max(20000, "Nội dung quá dài"),
-  summaryContent: z.string().min(5, "Mô tả quá ngắn").max(300, "Mô tả quá dài"),
+    .max(50000, "Nội dung quá dài"),
+  summaryContent: z.string().min(5, "Mô tả quá ngắn").max(500, "Mô tả quá dài"),
   imageFile: z.any().optional(),
   articlesType: z.enum(["NEWS", "TIPS"]),
   date: z.string(),
@@ -44,9 +46,11 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof articleSchema>>({
     resolver: zodResolver(articleSchema),
+    mode: "onSubmit",
     defaultValues: {
       title: "",
       content: "",
@@ -64,13 +68,17 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
       form.setValue("imageFile", file);
       const imageUrl = URL.createObjectURL(file);
       setPreviewImage(imageUrl);
+    } else {
+      form.setValue("imageFile", null);
+      setPreviewImage(null); 
     }
   };
 
   const handleAddArticle = async (data: z.infer<typeof articleSchema>) => {
+    setIsLoading(true);
     try {
       const formData = new FormData();
-      // Thêm dữ liệu bài viết dưới dạng JSON
+
       const articleData = {
         title: data.title,
         content: data.content,
@@ -78,9 +86,7 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
         articlesType: data.articlesType,
         date: new Date(data.date).toISOString(),
       };
-
       formData.append("article", JSON.stringify(articleData));
-
       if (data.imageFile) {
         formData.append("imageFile", data.imageFile);
       }
@@ -92,19 +98,22 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
       if (response.status !== 201) {
         throw new Error("Lỗi khi thêm bài viết.");
       }
-
       toast({
         title: "Bài viết đã được lưu!",
         className: "text-white bg-green-500",
       });
-      form.reset({
-        title: "",
-        content: "",
-        summaryContent: "",
-        articlesType: "NEWS",
-        date: new Date().toISOString().split("T")[0],
-        imageFile: null,
-      });
+      form.reset(
+        {
+          title: "",
+          content: "",
+          summaryContent: "",
+          articlesType: "NEWS",
+          date: new Date().toISOString().split("T")[0],
+          imageFile: null,
+        },
+        { keepErrors: false } // Xóa lỗi validation
+      );
+      setPreviewImage(null);
 
       onSuccess();
       setOpen(false);
@@ -114,11 +123,31 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
         title: "Có lỗi xảy ra khi kết nối tới máy chủ.",
         className: "text-white bg-red-500",
       });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) {
+      form.reset(
+        {
+          title: "",
+          content: "",
+          summaryContent: "",
+          articlesType: "NEWS",
+          date: new Date().toISOString().split("T")[0],
+          imageFile: null,
+        },
+        { keepErrors: false }
+      );
+      setPreviewImage(null);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <button
           type="button"
@@ -127,7 +156,7 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
           Thêm bài viết
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] z-[999] bg-white max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[1000px] z-[999] bg-white max-h-[80vh] overflow-y-auto">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleAddArticle)}>
             <DialogHeader>
@@ -143,8 +172,12 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
                     <Input
                       {...field}
                       placeholder="Nhập tiêu đề bài viết"
-                      maxLength={100}
+                      maxLength={200}
+                      className="w-full h-20 overflow-y-auto resize-vertical break-words border border-gray-300 rounded-md p"
                     />
+                    <div className="text-sm text-gray-500 mt-1">
+                      Đã nhập: {field.value?.length || 0}/200
+                    </div>
                     {fieldState.error && (
                       <span className="text-red-500 text-sm">
                         {fieldState.error.message}
@@ -170,9 +203,8 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
                         height: 400,
                         menubar: true,
                         plugins:
-                          "advlist autolink lists link image charmap code fullscreen media",
-                        toolbar:
-                          "undo redo | bold italic | bullist numlist | link image",
+                          "advlist autolink lists link image charmap code fullscreen media wordcount",
+                        toolbar: "undo redo | bold italic | bullist numlist",
                         content_style:
                           "body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 14px; }",
                         branding: false,
@@ -196,8 +228,21 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
                     <Textarea
                       {...field}
                       placeholder="Nhập mô tả ngắn của bài viết"
-                      maxLength={300}
+                      maxLength={500}
+                      className="w-full h-24 overflow-y-auto resize-vertical break-words border border-gray-300 rounded-md p  p-2"
+                      onChange={(e) => {
+                        field.onChange(e);
+                        if (e.target.value.length === 500) {
+                          toast({
+                            title: "Đã đạt giới hạn 500 ký tự!",
+                            className: "text-white bg-orange-500",
+                          });
+                        }
+                      }}
                     />
+                    <div className="text-sm text-gray-500 mt-1">
+                      Đã nhập: {field.value?.length || 0}/500
+                    </div>
                     {fieldState.error && (
                       <span className="text-red-500 text-sm">
                         {fieldState.error.message}
@@ -213,7 +258,7 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
                 render={({}) => (
                   <div>
                     <Label htmlFor="imageFile">Chọn hình ảnh</Label>
-                    <div className="items-center grid grid-cols-4 mb-4">
+                    <div className="items-center grid grid-cols-[auto_1fr] gap-2 mb-4">
                       <div className="h-full flex items-start">
                         <label
                           htmlFor="imageFile"
@@ -223,7 +268,7 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
                         </label>
                       </div>
 
-                      <div className="col-span-3 flex-grow min-w-[150px] border border-gray-400 px-3 py-1 rounded-md text-gray-600">
+                      <div className="flex-grow border border-gray-400 px-3 py-1 rounded-md text-gray-600 break-all">
                         {previewImage
                           ? previewImage
                           : "Chưa có tệp nào được chọn"}
@@ -243,7 +288,8 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
                         src={previewImage}
                         alt="Preview"
                         width={500}
-                        height={200}
+                        height={300}
+                        className="mt-2 w-full h-81 object-cover rounded-lg border"
                       />
                     )}
                   </div>
@@ -285,13 +331,20 @@ const AddContentForm = ({ onSuccess }: { onSuccess: () => void }) => {
               />
             </div>
             <DialogFooter>
-              <button
+              <Button
                 type="submit"
-                disabled={form.formState.isSubmitting}
                 className="p-2 mt-5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
+                disabled={isLoading}
               >
-                Thêm bài viết
-              </button>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang thêm...
+                  </>
+                ) : (
+                  "Thêm bài viết"
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

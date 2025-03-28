@@ -8,6 +8,7 @@ import { API } from "@/helper/axios";
 import Pagination from "@/components/longnt/articles/Pagination";
 import SupportTrackingDataTable from "./SupportTrackingDataTable";
 import Link from "next/link";
+import useCurrentUser from "@/hooks/useCurrentUser";
 
 const apiURL = process.env.NEXT_PUBLIC_API_URL;
 const GET_SUPPORT_REQUESTS = "/support/user/requests";
@@ -20,18 +21,21 @@ async function getSupportRequests(
 ) {
   const params: Record<string, string | number> = { userId, page, pageSize };
   const res = await API.get(`${apiURL}${GET_SUPPORT_REQUESTS}`, { params });
+  console.log("Fetched data:", res.data);
   return res.data;
 }
 
 // Định nghĩa cột
 const supportRequestColumns: ColumnDef<SupportRequest>[] = [
-  { accessorKey: "detail", header: "Yêu Cầu Hỗ Trợ Của Bạn",
-    size: 400, 
+  {
+    accessorKey: "detail",
+    header: "Yêu Cầu Hỗ Trợ Của Bạn",
+    size: 400,
     cell: ({ getValue }) => {
       const value = getValue() as string;
-      return value; 
+      return value;
     },
-   },
+  },
   { accessorKey: "issueCategory", header: "Loại Hỗ Trợ" },
   { accessorKey: "dateCreated", header: "Ngày Tạo" },
 ];
@@ -41,36 +45,50 @@ const SupportTrackingPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const { data: user } = useCurrentUser();
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const currentPage = Number(searchParams.get("page") || 1);
-  const userId = 2;
 
   const fetchSupportRequests = useCallback(async () => {
     setIsLoading(true);
     try {
+      const userId = user?.id || 0;
       const page = Number(searchParams.get("page") || 1);
-      const res = await getSupportRequests(userId, page, 5);
-
+      const pageSize = 5; // Kích thước trang được cố định, có thể lấy từ backend nếu cần
+      const res = await getSupportRequests(userId, page, pageSize);
+      console.log("Page:", page, "Data:", res.supportRequests);
       setSupportRequests(res.supportRequests);
       setTotalPages(res.totalPages);
       setTotalItems(res.totalItems);
+
+      // Nếu trang hiện tại lớn hơn totalPages, điều hướng về trang cuối cùng
+      if (page > res.totalPages && res.totalPages > 0) {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("page", String(res.totalPages));
+        router.push(`?${params.toString()}`, { scroll: false });
+      }
     } catch (error) {
       console.error("Error fetching support requests:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [searchParams, userId]);
+  }, [searchParams, user?.id, router]);
 
   useEffect(() => {
-    fetchSupportRequests();
-  }, [fetchSupportRequests]);
+    if (user?.id) {
+      fetchSupportRequests();
+    }
+  }, [fetchSupportRequests, user?.id]);
 
   const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", String(page));
-    router.push(`?${params.toString()}`, { scroll: false });
+    // Chỉ cho phép chuyển trang nếu trang hợp lệ
+    if (page >= 1 && page <= totalPages) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", String(page));
+      router.push(`?${params.toString()}`, { scroll: false });
+    }
   };
 
   return (
@@ -102,7 +120,7 @@ const SupportTrackingPage = () => {
         <div className="w-[1050px] flex min-h-[60vh] items-stretch">
           {/* Bên trái: Danh sách phiếu */}
           <div className="flex justify-center w-full">
-            <div className="w-full max-w-[350x] flex flex-col gap-4">
+            <div className="w-full max-w-[1050px] flex flex-col gap-4">
               {isLoading && (
                 <div className="flex justify-center items-center text-gray-500">
                   Loading...
@@ -113,8 +131,9 @@ const SupportTrackingPage = () => {
                   <SupportTrackingDataTable
                     columns={supportRequestColumns}
                     data={supportRequests}
-                    fetchData={fetchSupportRequests}
                     totalItems={totalItems}
+                    currentPage={currentPage}
+                    pageSize={5}
                   />
                   <Pagination
                     currentPage={currentPage}

@@ -50,7 +50,7 @@ public class FeedbackService implements IFeedbackService {
         AtomicLong count = new AtomicLong(0);
         List<UserFeedbackResponse> uf = feedbackPage.getContent().stream().map(f -> {
             count.addAndGet(f.getRating());
-            return new UserFeedbackResponse(f.getUser().getUsername(), f.getId(), f.getRating(), f.getComment());
+            return new UserFeedbackResponse(f.getUser().getName(), f.getId(), f.getRating(), f.getComment());
         }).collect(Collectors.toList());
         Double avg = uf.isEmpty() ? 0.0 : (double) count.get() / uf.size();
         return new PaginateFeedbackResponse(

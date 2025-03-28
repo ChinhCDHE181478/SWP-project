@@ -32,7 +32,7 @@ async function getFeedbacks(
 
 const feedbackColumns: ColumnDef<Feedback>[] = [
   { accessorKey: "id", header: "ID" },
-  { accessorKey: "username", header: "User Name" },
+  { accessorKey: "username", header: "Tên Người Dùng" },
   { accessorKey: "comment", header: "Bình luận" },
   { accessorKey: "rating", header: "Đánh giá sao" },
 ];

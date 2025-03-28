@@ -23,18 +23,7 @@ public interface ISupportRequestRepository extends JpaRepository<SupportRequest,
             Pageable pageable
     );
 
-    @Query("SELECT sr FROM SupportRequest sr " +
-            "WHERE (:status IS NULL OR sr.status = :status) AND " +
-            "(:issueCategory IS NULL OR sr.issueCategory = :issueCategory) AND " +
-            "(:userId IS NULL OR sr.user.id = :userId)")
-    Page<SupportRequest> FilteredSupportRequests(
-            @Param("status") String status,
-            @Param("issueCategory") String issueCategory,
-            @Param("userId") Long userId,
-            Pageable pageable
-    );
-
-    Page<SupportRequest> findByUserId(Long userId, Pageable pageable);
+    Page<SupportRequest> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
     Optional<SupportRequest> findById(Long id);
 }

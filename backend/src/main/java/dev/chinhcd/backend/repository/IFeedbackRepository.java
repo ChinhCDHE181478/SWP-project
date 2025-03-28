@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IFeedbackRepository extends JpaRepository<Feedback, Long> {
 
-    @Query("SELECT f FROM Feedback f WHERE f.user.username LIKE %:username% AND f.rating = :rating")
+    @Query("SELECT f FROM Feedback f WHERE LOWER(f.user.name) LIKE LOWER(CONCAT('%', :username, '%')) AND f.rating = :rating")
     Page<Feedback> findByUserNameAndRating(@Param("username") String username, @Param("rating") Integer rating, PageRequest pageRequest);
 
-    @Query("SELECT f FROM Feedback f WHERE f.user.username LIKE %:username%")
+    @Query("SELECT f FROM Feedback f WHERE LOWER(f.user.name) LIKE LOWER(CONCAT('%', :username, '%'))")
     Page<Feedback> findByUserName(@Param("username") String username, PageRequest pageRequest);
 
     @Query("SELECT f FROM Feedback f WHERE f.rating = :rating")
