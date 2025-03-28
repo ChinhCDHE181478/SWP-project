@@ -56,7 +56,7 @@ const AdminPage = () => {
       <div className="flex">
         <div className="flex w-[15%] bg-[#FCB314] opacity-90 p-2 items-center justify-start border-r-2 border-r-gray-300/50">
           <LogoIcon />
-          <div className="font-bold text-[27px]">EduTest</div>
+          <div className="font-bold text-[27px]">English Test</div>
         </div>
         <div className="flex w-[85%] p-2 pr-10 justify-end items-center border-l-2 border-gray-300/50 border-b-2 shadow-sm">
           {!isLoading && <div className="text-[20px]">Tài khoản: {user.data?.username}</div>}

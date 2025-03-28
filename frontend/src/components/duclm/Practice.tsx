@@ -244,8 +244,6 @@ const Practice: React.FC = () => {
         window.location.reload();
     };
 
-    if (!user.data?.name) return null;
-
     useEffect(() => {
         if (!user.isLoading && user.data?.accountType === "FREE_COURSE" &&  currentLevel !== null && currentLevel > 5) {
             toast({
@@ -258,6 +256,8 @@ const Practice: React.FC = () => {
             },  3000); // Thay đổi thời gian nếu cần
         }
     }, [user.isLoading, user.data?.accountType, currentLevel]);
+
+    if (!user.data?.name) return null;
 
     return (
         <div className="bg-gray-50">

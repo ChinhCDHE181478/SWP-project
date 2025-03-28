@@ -15,9 +15,13 @@ import { Form, FormField } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { Input, Textarea } from "@nextui-org/react";
 import { useToast } from "@/components/ui/use-toast";
-import axios from "axios";
 import { Articles } from "@/types/type";
 import dynamic from "next/dynamic";
+import Image from "next/image";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { API } from "@/helper/axios";
 
 const Editor = dynamic(
   () => import("@tinymce/tinymce-react").then((mod) => mod.Editor),
@@ -27,15 +31,14 @@ const Editor = dynamic(
 // Schema kiểm tra dữ liệu nhập vào
 const articleSchema = z.object({
   id: z.number().optional(),
-  title: z.string().min(3, "Tiêu đề quá ngắn").max(100, "Tiêu đề quá dài"),
+  title: z.string().min(3, "Tiêu đề quá ngắn").max(200, "Tiêu đề quá dài"),
   content: z
     .string()
     .min(10, "Nội dung quá ngắn")
-    .max(5000, "Nội dung quá dài"),
-  summaryContent: z.string().min(5, "Mô tả quá ngắn").max(300, "Mô tả quá dài"),
-  imageUrl: z.string().refine((url) => {
-    return url.startsWith("/") || url.startsWith("http");
-  }, "Hình ảnh phải là URL hợp lệ hoặc đường dẫn cục bộ"),
+    .max(50000, "Nội dung quá dài"),
+  summaryContent: z.string().min(5, "Mô tả quá ngắn").max(500, "Mô tả quá dài"),
+  imageUrl: z.string().optional(),
+  imageFile: z.any().optional(),
   articlesType: z.enum(["NEWS", "TIPS"]),
 });
 
@@ -54,25 +57,58 @@ const UpdateContentForm = ({
 }: UpdateContentFormProps) => {
   const { toast } = useToast();
 
+  const [previewImage, setPreviewImage] = useState<string | null>(
+    initialData.imageUrl || null
+  );
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof articleSchema>>({
     resolver: zodResolver(articleSchema),
-    defaultValues: initialData,
+    defaultValues: {
+      ...initialData,
+      imageFile: null,
+    },
   });
 
   const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file) {
+      form.setValue("imageFile", file);
+      form.setValue("imageUrl", ""); // Xóa imageUrl cũ khi chọn file mới
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewImage(previewUrl);
+    }
+  };
+
   const handleUpdateArticle = async (data: z.infer<typeof articleSchema>) => {
+    setIsLoading(true);
     try {
-      const response = await axios.put(
+      const formData = new FormData();
+      const articleData = {
+        title: data.title,
+        content: data.content,
+        summaryContent: data.summaryContent,
+        articlesType: data.articlesType,
+        imageUrl: data.imageUrl,
+      };
+      formData.append("article", JSON.stringify(articleData));
+      if (data.imageFile) {
+        formData.append("imageFile", data.imageFile);
+      }
+
+      const response = await API.put(
         `${apiURL}/articles/${initialData.id}`,
-        data,
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
+      console.log("Response:", response); // Log phản hồi từ API
       if (response.status !== 200) {
         throw new Error("Lỗi khi cập nhật bài viết.");
       }
@@ -82,19 +118,27 @@ const UpdateContentForm = ({
         className: "text-white bg-green-500",
       });
 
-      onSuccess(data);
+      onSuccess(response.data);
+      form.reset({
+        ...initialData,
+        imageFile: null,
+      });
+      setPreviewImage(initialData.imageUrl || null);
       onClose();
     } catch (error) {
+      console.error("Error:", error);
       toast({
         title: "Có lỗi xảy ra khi kết nối tới máy chủ.",
         className: "text-white bg-red-500",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] z-[999] bg-white max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[1000px] z-[999] bg-white max-h-[80vh] overflow-y-auto">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleUpdateArticle)}>
             <DialogHeader>
@@ -110,8 +154,12 @@ const UpdateContentForm = ({
                     <Input
                       {...field}
                       placeholder="Nhập tiêu đề bài viết"
-                      maxLength={100}
+                      maxLength={200}
+                      className="w-full h-20 overflow-y-auto resize-vertical break-words border border-gray-300 rounded-md p"
                     />
+                    <div className="text-sm text-gray-500 mt-1">
+                      Đã nhập: {field.value?.length || 0}/200
+                    </div>
                     {fieldState.error && (
                       <span className="text-red-500 text-sm">
                         {fieldState.error.message}
@@ -137,9 +185,9 @@ const UpdateContentForm = ({
                         height: 400,
                         menubar: true,
                         plugins:
-                          "advlist autolink lists link image charmap code fullscreen media",
+                          "advlist autolink lists link image charmap code fullscreen media wordcount",
                         toolbar:
-                          "undo redo | bold italic | bullist numlist | link image",
+                          "undo redo | bold italic | bullist numlist",
                         content_style:
                           "body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 14px; }",
                         branding: false,
@@ -163,8 +211,21 @@ const UpdateContentForm = ({
                     <Textarea
                       {...field}
                       placeholder="Nhập mô tả ngắn của bài viết"
-                      maxLength={300}
+                      maxLength={500}
+                      className="w-full h-24 overflow-y-auto resize-vertical break-words border border-gray-300 rounded-md p  p-2"
+                      onChange={(e) => {
+                        field.onChange(e);
+                        if (e.target.value.length === 500) {
+                          toast({
+                            title: "Đã đạt giới hạn 500 ký tự!",
+                            className: "text-white bg-orange-500",
+                          });
+                        }
+                      }}
                     />
+                    <div className="text-sm text-gray-500 mt-1">
+                      Đã nhập: {field.value?.length || 0}/500
+                    </div>
                     {fieldState.error && (
                       <span className="text-red-500 text-sm">
                         {fieldState.error.message}
@@ -176,35 +237,43 @@ const UpdateContentForm = ({
 
               <FormField
                 control={form.control}
-                name="imageUrl"
-                render={({ field, fieldState }) => (
+                name="imageFile"
+                render={({ field }) => (
                   <div>
-                    <Label htmlFor="imageUrl">URL hình ảnh</Label>
-                    <Input
-                      {...field}
-                      placeholder="Nhập đường dẫn hình ảnh"
-                      maxLength={300}
-                      onBlur={(e) => {
-                        const url = e.target.value;
-                        if (url.startsWith("http") || url.startsWith("/")) {
-                          form.setValue("imageUrl", url);
-                        }
-                      }}
+                    <Label htmlFor="imageFile">Chọn hình ảnh</Label>
+                    <div className="items-center grid grid-cols-[auto_1fr] gap-2 mb-4">
+                      <div className="h-full flex items-start">
+                        <label
+                          htmlFor="imageFile"
+                          className="px-4 py-2 bg-white text-gray-700 border border-gray-400 rounded-md cursor-pointer hover:bg-gray-100 transition w-fit"
+                        >
+                          📂 Chọn tệp
+                        </label>
+                      </div>
+
+                      <div className="flex-grow border border-gray-400 px-3 py-1 rounded-md text-gray-600 break-all">
+                        {previewImage
+                          ? previewImage
+                          : "Chưa có tệp nào được chọn"}
+                      </div>
+                    </div>
+
+                    {/* Input file (ẩn đi) */}
+                    <input
+                      id="imageFile"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
                     />
-                    {field.value &&
-                      (field.value.startsWith("http") ||
-                        field.value.startsWith("/")) && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={field.value}
-                          alt="Preview"
-                          className="mt-2 w-full h-40 object-cover rounded-lg border"
-                        />
-                      )}
-                    {fieldState.error && (
-                      <span className="text-red-500 text-sm">
-                        {fieldState.error.message}
-                      </span>
+                    {previewImage && (
+                      <Image
+                        src={previewImage}
+                        alt="Preview"
+                        width={500}
+                        height={300}
+                        className="mt-2 w-full h-81 object-cover rounded-lg border"
+                      />
                     )}
                   </div>
                 )}
@@ -229,12 +298,20 @@ const UpdateContentForm = ({
               />
             </div>
             <DialogFooter>
-              <button
+              <Button
                 type="submit"
                 className="p-2 mt-5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all duration-300 ease-in-out"
+                disabled={isLoading}
               >
-                Cập nhật bài viết
-              </button>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang cập nhật...
+                  </>
+                ) : (
+                  "Cập nhật bài viết"
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

@@ -88,7 +88,7 @@ const Header = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Link href={"/about-us"}>Về EduTest</Link>
+          <Link href={"/about-us"}>Về English Test</Link>
           <Link href={"/get-ranking"}>Kết quả thi</Link>
           <Link href={"/support"}>Hỗ trợ</Link>
         </div>

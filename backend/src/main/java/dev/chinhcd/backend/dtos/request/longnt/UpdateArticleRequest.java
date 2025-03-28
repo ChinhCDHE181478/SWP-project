@@ -1,17 +1,15 @@
 package dev.chinhcd.backend.dtos.request.longnt;
 
 import dev.chinhcd.backend.enums.ArticlesType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class UpdateArticleRequest {
-    private String title;
-    private String content;
-    private String summaryContent;
-    private String imageUrl;
-    private ArticlesType articlesType;
+public record UpdateArticleRequest(
+        Long id,
+        String title,
+        String content,
+        String summaryContent,
+        String imageUrl,
+        ArticlesType articlesType,
+        MultipartFile imageFile
+) {
 }

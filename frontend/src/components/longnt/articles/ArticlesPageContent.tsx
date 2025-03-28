@@ -42,6 +42,7 @@ const ArticlesPageContent: React.FC = () => {
     const fetchArticles = async () => {
       try {
         const data = await getArticles(type, page, pageSize);
+        console.log("articles:", data.articles);
         setArticles(data.articles || []);
         setTotalPages(data.totalPages);
       } catch (err: any) {
@@ -84,22 +85,25 @@ const ArticlesPageContent: React.FC = () => {
           href={`/articles/${highlightArticle.id}`}
           className="block"
         >
-          <div className="relative mx-auto h-auto mt-10 w-[1050px]">
-            <div className="relative w-full h-60 md:h-80">
+          <div className="relative mx-auto h-auto mt-16 mb-4 w-[1050px]">
+            <div className="relative w-full h-[500px] md:h-[550px]">
               <Image
-                src={highlightArticle.imageUrl || ""}
-                alt={highlightArticle.title || ""}
-                layout="fill"
+                src={highlightArticle.imageUrl}
+                alt={highlightArticle.title || "Article Image"}
+                fill={true}
                 objectFit="cover"
                 priority
-                className="opacity-80 rounded-lg"
+                sizes="(max-width: 1200px) 100vw, 1050px"
+                className="opacity-99 rounded-lg"
               />
             </div>
-            <div className="absolute bottom-0 left-0 w-full h-[20%] bg-black bg-opacity-30 text-white p-3">
-              <h1 className="text-xl md:text-4xl font-bold">
-                {highlightArticle.title}
-              </h1>
-            </div>
+            <div className="absolute inset-0 bg-black bg-opacity-5 rounded-lg flex items-end">
+                <div className="inline-flex w-full min-h-[60px] text-white p-10">
+                  <h1 className=" text-xl md:text-2xl font-bold">
+                    {highlightArticle.title}
+                  </h1>
+                </div>
+              </div>
           </div>
         </Link>
       )}
