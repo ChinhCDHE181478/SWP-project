@@ -5,11 +5,11 @@ const CreateAccountContent = () => {
     <div className="flex flex-col gap-5">
       <div className="text-[25px] font-bold">Hướng dẫn tạo tài khoản</div>
       <div>
-        Để tham gia cuộc thi Tiếng Anh trên EduTest, các bạn cần đăng ký tài
+        Để tham gia cuộc thi Tiếng Anh trên English Test, các bạn cần đăng ký tài
         khoản học sinh theo hướng dẫn như sau:
         <div>
           <span className="font-bold">Bước 1: </span> Trên trang chủ của
-          EduTest, bạn click vào <span className="font-bold"> Đăng ký </span>{" "}
+          English Test, bạn click vào <span className="font-bold"> Đăng ký </span>{" "}
           như ở hình dưới đây:
         </div>
       </div>
@@ -23,7 +23,7 @@ const CreateAccountContent = () => {
       </div>
       <div>
         <span className="font-bold">Bước 2: </span>Màn hình sẽ chuyển về trang
-        đăng ký của EduTest như bên dưới, học sinh điền đầy đủ thông tin tài
+        đăng ký của English Test như bên dưới, học sinh điền đầy đủ thông tin tài
         khoản như hệ thống yêu cầu:
       </div>
       <div>

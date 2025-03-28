@@ -3,6 +3,7 @@ package dev.chinhcd.backend.controllers;
 import dev.chinhcd.backend.dtos.request.NewSupportAnswer;
 import dev.chinhcd.backend.dtos.request.SupportRequestRequest;
 import dev.chinhcd.backend.dtos.response.longnt.PaginateSupportResponse;
+import dev.chinhcd.backend.dtos.response.longnt.PaginateSupportUser;
 import dev.chinhcd.backend.services.ISupportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -57,13 +58,24 @@ public class SupportController {
         Boolean result = supportService.updateSupportAnswerAndStatus(id, newAnswer.newAnswer());
         if (result) {
             Map<String, String> response = new HashMap<>();
-            response.put("newAnswer", newAnswer.newAnswer());  // Trả về câu trả lời mới
+            response.put("newAnswer", newAnswer.newAnswer());
             return ResponseEntity.ok(response);
         } else {
             Map<String, String> response = new HashMap<>();
             response.put("error", "Yêu cầu hỗ trợ không tồn tại!");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+    }
+
+    @PreAuthorize("hasAnyAuthority('STUDENT')")
+    @GetMapping("/user/requests")
+    public ResponseEntity<PaginateSupportUser> getSupportRequestsByUser(
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int pageSize
+    ) {
+        PaginateSupportUser response = supportService.getSupportRequestsByUserId(userId, page, pageSize);
+        return ResponseEntity.ok(response);
     }
 }
 

@@ -20,7 +20,8 @@ const guestPath = [
   "/articles/number",
   "/payment-status",
   "/get-ranking",
-  "/schedule"
+  "/schedule",
+  "/support/exam-support"
 ];
 
 // Các route chỉ dành cho khách (người chưa đăng nhập)
@@ -57,6 +58,8 @@ const rolePaths: Record<string, string[]> = {
     "/test",
     "/payment-status",
     "/get-ranking",
+    "/support/exam-support",
+    "/support/support-tracking"
   ],
   ADMIN: [
     "/management/account-management",
@@ -104,15 +107,11 @@ const allPath = [
   ]),
 ];
 
-const normalizeArticlePath = (pathname: string): string => {
+const normalizePath = (pathname: string): string => {
   // Kiểm tra nếu pathname có dạng "/articles/{id}" với {id} là số tự nhiên
-  if (/^\/articles\/\d+$/.test(pathname)) {
+  if (pathname.startsWith("/articles/")) {
     return "/articles/number";
   }
-  return pathname; // Giữ nguyên nếu không phải "/articles/{id}"
-};
-
-const normalizeTestPath = (pathname: string): string => {
   if (pathname.startsWith("/test")) {
     return "/test";
   }
@@ -122,8 +121,7 @@ const normalizeTestPath = (pathname: string): string => {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  let currentPath = normalizeArticlePath(pathname);
-  currentPath = normalizeTestPath(pathname);
+  const currentPath = normalizePath(pathname);
 
   if (currentPath.startsWith("/_next/")) {
     return NextResponse.next();

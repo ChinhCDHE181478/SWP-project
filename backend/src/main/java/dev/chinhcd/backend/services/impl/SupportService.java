@@ -2,6 +2,8 @@ package dev.chinhcd.backend.services.impl;
 
 import dev.chinhcd.backend.dtos.request.SupportRequestRequest;
 import dev.chinhcd.backend.dtos.response.longnt.PaginateSupportResponse;
+import dev.chinhcd.backend.dtos.response.longnt.PaginateSupportUser;
+import dev.chinhcd.backend.dtos.response.longnt.SupportRequestDTO;
 import dev.chinhcd.backend.models.SupportRequest;
 import dev.chinhcd.backend.models.User;
 import dev.chinhcd.backend.repository.ISupportRequestRepository;
@@ -10,11 +12,14 @@ import dev.chinhcd.backend.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,6 +78,36 @@ public class SupportService implements ISupportService {
                 resultPage.getTotalElements(),
                 page,
                 pageSize
+        );
+    }
+
+    @Override
+    public PaginateSupportUser getSupportRequestsByUserId(Long userId, int page, int pageSize) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("Invalid userId: " + userId);
+        }
+        PageRequest pageRequest = PageRequest.of(page - 1, pageSize, Sort.by("dateCreated").descending());
+        Page<SupportRequest> supportRequestPage = supportRequestRepository.findByUserId(userId, pageRequest);
+
+        List<SupportRequestDTO> supportRequestDTOs = supportRequestPage.getContent().stream()
+                .map(sr -> new SupportRequestDTO(
+                        sr.getId(),
+                        sr.getDetail(),
+                        sr.getIssueCategory(),
+                        sr.getSupportAnswer(),
+                        sr.getDateCreated() != null
+                                ? sr.getDateCreated().toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                                : null,
+                        sr.getStatus()
+                ))
+                .collect(Collectors.toList());
+
+        return new PaginateSupportUser(
+                supportRequestDTOs,
+                supportRequestPage.getTotalPages(),
+                (int) supportRequestPage.getTotalElements(),
+                supportRequestPage.getNumber() + 1,
+                supportRequestPage.getSize()
         );
     }
 }

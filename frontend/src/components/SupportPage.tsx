@@ -95,7 +95,7 @@ const SupportPage = () => {
                 Giải đáp câu hỏi về chương trình học - thi
               </div>
               <div className="flex justify-center">
-                <Link href={"/support"}>
+                <Link href={"/support/exam-support"}>
                   <button className="bg-orange-500 shadow-lg rounded-lg p-2 font-bold border border-white text-white hover:bg-white hover:text-black hover:scale-205 transition-all duration-300 ease-in-out">
                     Xem ngay
                   </button>
@@ -130,7 +130,7 @@ const SupportPage = () => {
                 Theo dõi phiếu yêu cầu bạn đã gửi
               </div>
               <div className="flex justify-center">
-                <Link href={"/support"}>
+                <Link href={"/support/support-tracking"}>
                   <button className="bg-orange-500 shadow-lg rounded-lg p-2 font-bold text-white border border-white hover:bg-white hover:text-black hover:scale-205 transition-all duration-300 ease-in-out">
                     Xem ngay
                   </button>

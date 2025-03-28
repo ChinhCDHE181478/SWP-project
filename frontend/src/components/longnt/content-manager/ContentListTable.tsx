@@ -86,12 +86,11 @@ const ContentListTable = () => {
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-
     params.set("page", "1");
     if (filterType) params.set("type", filterType);
     if (filterDate) params.set("startDate", filterDate);
-
     router.push(`?${params.toString()}`, { scroll: false });
+    fetchArticles();
   };
 
   return (
