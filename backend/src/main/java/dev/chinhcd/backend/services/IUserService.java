@@ -55,4 +55,6 @@ public interface IUserService {
     void saveUser(User user);
 
     AchievementResponse getAchievement();
+
+    void checkPackageExpired(User user);
 }

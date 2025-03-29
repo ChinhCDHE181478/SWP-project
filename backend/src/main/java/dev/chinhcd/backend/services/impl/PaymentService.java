@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -69,6 +71,8 @@ public class PaymentService implements IPaymentService {
 
         User user = userService.getUserById(payment.getUser().getId());
         user.setAccountType(payment.getAccountType());
+        LocalDate nextYear = LocalDate.now().plusYears(1);
+        user.setExpiredDatePackage(Date.valueOf(nextYear));
         userService.saveUser(user);
 
         payment.setVnp_BankTranNo(request.vnp_BankTranNo());

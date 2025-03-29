@@ -31,8 +31,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -328,6 +330,19 @@ public class UserService implements IUserService {
         Long totalMock = userMockExamService.getTotalExamTime(user.getId(), user.getGrade());
         Long totalPractice = userPracticeService.getTotalPracticeTime(user.getId(), user.getGrade());
         return new AchievementResponse(examList, mockExamList, practiceList, totalExam, totalMock, totalPractice);
+    }
+
+    @Override
+    public void checkPackageExpired(User user) {
+        LocalDate today = LocalDate.now();
+
+        if (user.getExpiredDatePackage() != null &&
+                !user.getAccountType().equals(AccountType.FREE_COURSE) &&
+                user.getExpiredDatePackage().toLocalDate().isBefore(today)) {
+
+            user.setAccountType(AccountType.FREE_COURSE);
+            userRepository.save(user);
+        }
     }
 
     public UserResponse mapResponse(User user) {

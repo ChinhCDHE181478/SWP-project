@@ -38,7 +38,7 @@ public class AuthService implements IAuthService {
     public LoginResponse authenticate(LoginRequest request) {
         var user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
-
+        userService.checkPackageExpired(user);
         boolean isNewUser = user.getName() == null || user.getName().isBlank();
 
         boolean isAuthenticated = passwordEncoder.matches(request.password(), user.getPassword());
@@ -59,6 +59,7 @@ public class AuthService implements IAuthService {
         var username = refreshTokenService.extractUserName(request.refreshToken());
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
+        userService.checkPackageExpired(user);
         String accessToken = jwtService.generateAccessToken(user);
         return new RefreshTokenResponse(accessToken, request.refreshToken());
     }
@@ -69,6 +70,7 @@ public class AuthService implements IAuthService {
             String username = jwtService.extractUserName(token);
             var user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new ServiceException(ErrorCode.USER_NOT_FOUND));
+            userService.checkPackageExpired(user);
             return jwtService.isValidAcessToken(token, user);
         } catch (Exception e) {
             return false;
